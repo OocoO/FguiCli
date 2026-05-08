@@ -1,0 +1,61 @@
+# Unity generated
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/UserSettings/
+
+# Visual Studio / MonoDevelop generated
+/*.csproj
+/*.unityproj
+/*.sln
+/*.suo
+/*.tmp
+/*.user
+/*.userprefs
+/*.pidb
+/*.booproj
+/*.svd
+/*.pdb
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Rider
+/.idea/
+/*.sln.iml
+
+# VS Code
+/.vscode/
+
+# Unity3D Generated File On Crash Reports
+sysinfo.txt
+
+# Builds
+/*.apk
+/*.aab
+/*.unitypackage
+
+# Asset meta data should be ignored to avoid merge conflicts for binary assets
+# (keep meta for assets in repo), but ignore packages where generated
+Packages/manifest.json
+
+# User-specific files
+/MemoryCaptures/
+
+# Uncomment this line if you wish to ignore the whole Assets/ folder (not recommended)
+#/Assets/
+
+# Git LFS pointer files — if you use Git LFS, track large binary types instead of committing them
+#*.psd
+#*.png
+#*.jpg
+#*.tga
+#*.fbx
+
+# Unity cache server
+/Library/Cache/
+
