@@ -1,0 +1,34 @@
+h8iw0.xml|866|<component size="1920,1080">
+  <displayList>
+    <image id="n4_h8iw" name="Bg" src="h8iw1" xy="960,540" pivot="0.5,0.5" anchor="true" size="1000,700">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </image>
+    <component id="n0_h8iw" name="ConfirmBtn" src="h8iw16" pkg="htck2ycn" xy="1086,765"/>
+    <component id="n1_h8iw" name="CancelBtn" src="h8iw17" pkg="htck2ycn" xy="687,763"/>
+    <richtext id="n2_h8iw" name="ContentText" xy="551,332" size="819,370" fontSize="32" color="#ffffff" autoSize="none" text="对话框"/>
+    <component id="n3_h8iw" name="CloseBtn" src="frlzo" pkg="htck2ycn" xy="1376,152"/>
+    <text id="n6_h8iw" name="TitleText" xy="960,250" pivot="0.5,0.5" anchor="true" size="500,96" fontSize="48" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="标题"/>
+  </displayList>
+</component>h8iw2.xml|1100|<component size="1920,1080">
+  <displayList>
+    <image id="n4_h8iw" name="Bg" src="h8iw1" xy="960,540" pivot="0.5,0.5" anchor="true" size="1000,700">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </image>
+    <component id="n0_h8iw" name="ConfirmBtn" src="h8iw16" pkg="htck2ycn" xy="1086,765"/>
+    <component id="n1_h8iw" name="CancelBtn" src="h8iw17" pkg="htck2ycn" xy="687,763"/>
+    <richtext id="n2_h8iw" name="ContentText" xy="551,332" size="819,236" fontSize="32" color="#ffffff" autoSize="none" text="对话框"/>
+    <component id="n3_h8iw" name="CloseBtn" src="frlzo" pkg="htck2ycn" xy="1376,152"/>
+    <text id="n6_h8iw" name="TitleText" xy="958,250" pivot="0.5,0.5" anchor="true" size="500,96" fontSize="48" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="标题"/>
+    <list id="n7_h8iw" name="ItemList" xy="967,682" pivot="0.5,0.5" anchor="true" size="1279,256" scale="0.5,0.5" layout="row" overflow="scroll" defaultItem="ui://htck2ycnuiyex" align="center">
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>package.xml|470|<packageDescription id="ny4b7xsx" name="Dialog">
+  <resources>
+    <image id="h8iw1" name="ImageDialogBg" path="/Image/" size="64,64" scale="9grid" scale9grid="16,16,32,32"/>
+    <component id="h8iw0" name="ConfirmDialogPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="h8iw2" name="CostItemDialogPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <atlas id="atlas0" size="64,64" file="atlas0.png"/>
+  </resources>
+</packageDescription>

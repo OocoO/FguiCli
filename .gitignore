@@ -59,3 +59,4 @@ Packages/manifest.json
 # Unity cache server
 /Library/Cache/
 
+tools/fgui_render_client/FguiRenderServer

@@ -1,0 +1,1133 @@
+bwtt6b.xml|3887|<component size="1920,1080">
+  <controller name="Max" pages="0,not,1,max" selected="0"/>
+  <displayList>
+    <graph id="n6_bwtt" name="PanelClickBg" xy="0,0" size="1920,1080" type="rect" fillColor="#80000000">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <loader id="n25_uil9" name="PanelBg" xy="960,545" pivot="0.5,0.5" anchor="true" size="1030,690" url="ui://htck2ycnj9f41j" fill="scaleFree">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </loader>
+    <graph id="n7_bwtt" name="Line1" xy="960,300" pivot="0.5,0.5" anchor="true" size="960,1" type="rect" lineSize="0">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <graph id="n16_bwtt" name="Line2" xy="960,580" pivot="0.5,0.5" anchor="true" size="1,540" type="rect" lineSize="0">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <text id="n2_bwtt" name="LabelTitle" xy="960,257" pivot="0.5,0.5" anchor="true" size="168,54" fontSize="40" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="公会捐献">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n4_bwtt" name="TextTimes" xy="1172,243" size="263,34" fontSize="24" color="#ffffff" autoSize="none" strokeColor="#000000" text="今日捐献次数:1/10">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <loader id="n8_bwtt" name="IconTech" xy="644,358" size="128,128" group="n14_bwtt" fill="scale"/>
+    <text id="n9_bwtt" name="TextName" xy="706,527" pivot="0.5,0.5" anchor="true" size="197,44" group="n14_bwtt" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="母舰规模"/>
+    <text id="n10_bwtt" name="TextLevel" xy="669,554" size="76,29" group="n14_bwtt" fontSize="20" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="等级0&#xA;"/>
+    <text id="n11_bwtt" name="LabelNext" xy="523,592" size="102,29" group="n14_bwtt" fontSize="20" color="#ffffff" align="center" strokeColor="#000000" text="下级解锁：">
+      <gearDisplay controller="Max" pages="0"/>
+    </text>
+    <text id="n12_bwtt" name="TextContent" xy="706,650" pivot="0.5,0.5" anchor="true" size="363,37" group="n14_bwtt" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000"/>
+    <text id="n13_bwtt" name="LabelProgress" xy="649,703" size="113,34" group="n14_bwtt" fontSize="24" color="#ffffff" autoSize="none" strokeColor="#000000" text="当期进度">
+      <gearDisplay controller="Max" pages="0"/>
+    </text>
+    <component id="n20_uil9" name="BarExp" src="w27o5l" xy="535,769" size="360,35" group="n14_bwtt">
+      <gearDisplay controller="Max" pages="0"/>
+      <ProgressBar value="100" max="100"/>
+    </component>
+    <image id="n22_uil9" name="n22" src="bwtt6f" xy="502,758" size="40,55" group="n14_bwtt">
+      <gearDisplay controller="Max" pages="0"/>
+    </image>
+    <text id="n24_uil9" name="LabelMax" xy="588,716" size="226,53" group="n14_bwtt" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="达到最大等级">
+      <gearDisplay controller="Max" pages="1"/>
+    </text>
+    <group id="n14_bwtt" name="NodeTech" xy="502,358" size="393,455" advanced="true">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </group>
+    <component id="n17_uil9" name="Donate1" src="bwtt6e" xy="955,306">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n18_uil9" name="Donate2" src="bwtt6e" xy="955,487">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n19_uil9" name="Donate3" src="bwtt6e" xy="955,670">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+  </displayList>
+</component>bwtt6c.xml|1540|<component size="1920,1080">
+  <displayList>
+    <component id="n13_zu5k" name="n13" src="zu5k5i" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+    <component id="n0_bwtt" name="n0" src="kt413k" pkg="htck2ycn" xy="0,100" size="1920,980">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n12_zu5k" name="ResBar" src="g5vp5g" pkg="htck2ycn" xy="960,0" controller="Number,2">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n1_bwtt" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <property target="title.title" propertyId="0" value="公会核心"/>
+    </component>
+    <image id="n7_pe6y" name="Line1" src="bwtt6t" xy="402,209" pivot="0.5,0.5" size="48,180" rotation="90">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </image>
+    <component id="n6_pe6y" name="TechMain" src="bwtt6m" xy="237,232">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <list id="n5_bwtt" name="TechList" xy="516,169" size="1331,860" layout="row" overflow="scroll" scroll="horizontal" defaultItem="ui://zw50omb7bwtt6l">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <component id="n4_bwtt" name="BtnRanking" src="bwtt6d" xy="78,885">
+      <Button title="每周捐献榜"/>
+    </component>
+  </displayList>
+</component>bwtt6d.xml|497|<component size="98,103" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_bwtt" name="n0" src="w27o5o" xy="0,0">
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n1_bwtt" name="title" xy="50,134" pivot="0.5,0.5" anchor="true" size="167,44" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="每周捐献榜"/>
+  </displayList>
+  <Button/>
+</component>bwtt6e.xml|795|<component size="500,180">
+  <displayList>
+    <component id="n3_bwtt" name="ComContribution" src="wcfr4c" pkg="htck2ycn" xy="99,83" scale="0.4,0.4"/>
+    <component id="n4_bwtt" name="ComToken" src="wcfr4c" pkg="htck2ycn" xy="190,84" scale="0.4,0.4"/>
+    <component id="n6_bwtt" name="BtnDonate" src="kt413b" pkg="htck2ycn" xy="309,55" size="159,76">
+      <Button title=" "/>
+    </component>
+    <image id="n7_bwtt" name="n7" src="bwtt6f" xy="30,13" size="40,55"/>
+    <text id="n8_bwtt" name="TextProgressAdd" xy="91,19" size="210,44" fontSize="28" color="#ffffff" vAlign="middle" autoSize="none" text="升级进度+80"/>
+    <component id="n9_uil9" name="ComCost" src="wcfr4j" pkg="htck2ycn" xy="346,71" touchable="false">
+      <Label title=" 500"/>
+    </component>
+  </displayList>
+</component>bwtt6j.xml|3415|<component size="1920,1080">
+  <controller name="Max" pages="0,,1," selected="0"/>
+  <displayList>
+    <component id="n16_zu5k" name="n16" src="zu5k5i" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+    <component id="n1_bwtt" name="n1" src="kt413k" pkg="htck2ycn" xy="0,100" size="1920,980">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n15_zu5k" name="ResBar" src="g5vp5g" pkg="htck2ycn" xy="1920,0" pivot="1,0" anchor="true" controller="Number,0">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n0_bwtt" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <property target="title.title" propertyId="0" value="公会契约"/>
+    </component>
+    <list id="n2_bwtt" name="TechList" xy="85,152" size="1100,826" overflow="scroll" defaultItem="ui://zw50omb7bwtt77">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </list>
+    <graph id="n3_bwtt" name="n3" xy="1231,150" size="628,828" type="rect" lineSize="2" fillColor="#1affffff" corner="30">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <loader id="n4_bwtt" name="IconTech" xy="1540,283" pivot="0.5,0.5" anchor="true" size="150,150" fill="scale">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </loader>
+    <text id="n5_bwtt" name="TextTechName" xy="1540,386" pivot="0.5,0.5" anchor="true" size="391,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#4c4000" strokeSize="2" text="每日捐献">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n6_bwtt" name="TextTechLevel" xy="1540,434" pivot="0.5,0.5" anchor="true" size="95,29" fontSize="20" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#4c4000" text="等级0">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n7_bwtt" name="LabelNext" xy="1250,481" size="141,29" fontSize="20" color="#ffffff" align="center" autoSize="none" strokeColor="#4c4000" text="下级解锁：">
+      <gearDisplay controller="Max" pages="0"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n8_bwtt" name="TextContent" xy="1280,532" size="525,44" fontSize="32" color="#ffffff" align="center" autoSize="height" strokeColor="#4c4000" strokeSize="2" text="贡献转化 0%-&gt;5%">
+      <relation target="" sidePair="center-center"/>
+    </text>
+    <component id="n9_bwtt" name="ComCost" src="wcfr4j" pkg="htck2ycn" xy="1507,728">
+      <gearDisplay controller="Max" pages="0"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Label title="1000"/>
+    </component>
+    <component id="n10_bwtt" name="BtnLevelUp" src="kt4138" pkg="htck2ycn" xy="1395,785" size="330,92">
+      <gearDisplay controller="Max" pages="0"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Button title="升级"/>
+    </component>
+    <text id="n11_t20t" name="n11" xy="1347,753" size="366,64" fontSize="40" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" strokeSize="2" text="达到最大等级">
+      <gearDisplay controller="Max" pages="1"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+  </displayList>
+</component>bwtt6k.xml|1943|<component size="1920,1080">
+  <controller name="Page" pages="0,,1," selected="0"/>
+  <displayList>
+    <component id="n15_zu5k" name="n15" src="zu5k5i" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+    <component id="n0_bwtt" name="PanelBg" src="kt413k" pkg="htck2ycn" xy="0,100" size="1920,980">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n14_zu5k" name="ResBar" src="g5vp5g" pkg="htck2ycn" xy="960,0" controller="Number,0">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n1_bwtt" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <property target="title.title" propertyId="0" value="公会福利"/>
+    </component>
+    <list id="n6_bwtt" name="TabList" xy="31,148" size="327,527" layout="flow_vt" overflow="hidden" defaultItem="ui://htck2ycnwcfr49" selectionController="Page">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <item title="贡献宝箱"/>
+      <item title="公会宝箱"/>
+    </list>
+    <component id="n8_bwtt" name="ContributionRewards" src="bwtt6v" xy="400,160" size="1400,800">
+      <gearDisplay controller="Page" pages="0"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n9_bwtt" name="GuildRewards" src="bwtt6w" xy="400,160">
+      <gearDisplay controller="Page" pages="1"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <text id="n11_bwtt" name="TextCountDown" xy="862,986" size="438,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="5天20小时后重置">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <component id="n12_t20t" name="BtnRanking" src="bwtt6d" xy="80,886">
+      <Button title="每周贡献榜"/>
+    </component>
+  </displayList>
+</component>bwtt6l.xml|1901|<component size="260,800">
+  <controller name="SubTech" pages="3,0,0,1,1,2,2,3" selected="3"/>
+  <controller name="Unlock" pages="0,,1," selected="1"/>
+  <displayList>
+    <image id="n6_bwtt" name="Line1" src="bwtt6t" xy="130,130" pivot="0.5,0.5" anchor="true" size="48,262" rotation="90"/>
+    <component id="n18_pe6y" name="ComTech" src="bwtt6m" xy="130,130" pivot="0.5,0.5" anchor="true" size="128,128"/>
+    <image id="n14_bwtt" name="Line23" src="bwtt6t" xy="106,582" size="48,108">
+      <gearDisplay controller="SubTech" pages="2"/>
+    </image>
+    <image id="n15_bwtt" name="Line22" src="bwtt6t" xy="106,425" size="48,92">
+      <gearDisplay controller="SubTech" pages="1,2"/>
+    </image>
+    <image id="n5_bwtt" name="Line21" src="bwtt6t" xy="107,194" size="48,130">
+      <gearDisplay controller="SubTech" pages="0,1,2"/>
+    </image>
+    <component id="n4_bwtt" name="ComTech3" src="bwtt6m" xy="130,722" pivot="0.5,0.5" anchor="true" size="128,128">
+      <gearDisplay controller="SubTech" pages="2"/>
+    </component>
+    <component id="n7_bwtt" name="ComTech2" src="bwtt6m" xy="130,554" pivot="0.5,0.5" anchor="true" size="128,128">
+      <gearDisplay controller="SubTech" pages="1,2"/>
+    </component>
+    <component id="n8_bwtt" name="ComTech1" src="bwtt6m" xy="130,386" pivot="0.5,0.5" anchor="true" size="128,128">
+      <gearDisplay controller="SubTech" pages="0,1,2"/>
+    </component>
+    <graph id="n16_bwtt" name="ImageUnlock" xy="0,0" size="260,800" type="rect" fillColor="#80000000">
+      <gearDisplay controller="Unlock" pages="0"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <text id="n17_bwtt" name="TextUnlock" xy="27,285" size="207,198" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000">
+      <gearDisplay controller="Unlock" pages="0"/>
+    </text>
+  </displayList>
+</component>bwtt6m.xml|534|<component size="128,128">
+  <displayList>
+    <loader id="n0_bwtt" name="LoaderTech" xy="64,64" pivot="0.5,0.5" anchor="true" size="128,128" fill="scale"/>
+    <graph id="n4_bwtt" name="ProgressBg" xy="64,110" pivot="0.5,0.5" anchor="true" size="84,36" type="rect" fillColor="#ff30b2f2"/>
+    <text id="n1_bwtt" name="TextProgress" xy="64,110" pivot="0.5,0.5" anchor="true" size="64,34" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="1/5&#xA;"/>
+  </displayList>
+</component>bwtt6v.xml|1105|<component size="1400,800">
+  <displayList>
+    <text id="n1_bwtt" name="LabelRecord" xy="89,378" size="156,44" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="贡献记录"/>
+    <graph id="n9_bwtt" name="n9" xy="58,350" size="1322,440" type="rect" lineSize="2" fillColor="#1affffff" corner="20,20"/>
+    <list id="n10_uil9" name="BoxList" xy="205,108" size="1125,182" layout="row" overflow="scroll" scroll="horizontal" scrollBarFlags="128" colGap="-60" defaultItem="ui://zw50omb7bwtt73" vAlign="middle" renderOrder="descent"/>
+    <image id="n8_bwtt" name="n8" src="bwtt6f" xy="118,117"/>
+    <list id="n0_bwtt" name="RecordList" xy="91,447" size="1260,337" overflow="scroll" defaultItem="ui://zw50omb7bwtt75"/>
+    <text id="n6_bwtt" name="TextContribution" xy="117,207" size="107,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#804f2d" strokeSize="2" text="9999"/>
+    <text id="n7_bwtt" name="n7" xy="100,257" size="138,44" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="本周贡献"/>
+  </displayList>
+</component>bwtt6w.xml|505|<component size="1400,800">
+  <displayList>
+    <list id="n0_bwtt" name="BoxList" xy="0,0" size="1400,800" layout="row" overflow="scroll" scroll="horizontal" defaultItem="ui://zw50omb7bwtt76">
+      <relation target="" sidePair="width-width,height-height"/>
+      <item controllers="Box,2,Unlock,1"/>
+      <item controllers="Box,3,Unlock,1"/>
+      <item controllers="Box,4,Unlock,1"/>
+      <item controllers="Box,5,Unlock,1"/>
+      <item controllers="Box,6"/>
+    </list>
+  </displayList>
+</component>bwtt73.xml|2148|<component size="340,200">
+  <controller name="Status" pages="0,已领取,1,未领取,2,未达成,3,未解锁" selected="0"/>
+  <controller name="Box" pages="0,,1,,2,,3,,4," selected="0">
+    <action type="change_page" fromPage="" toPage="" objectId="n17_t20t" controller="Box" targetPage="~1"/>
+  </controller>
+  <displayList>
+    <image id="n9_bwtt" name="n9" src="bwtt6r" xy="0,110" size="50,250" rotation="270">
+      <gearDisplay controller="Status" pages="0,1"/>
+    </image>
+    <image id="n7_bwtt" name="n7" src="bwtt6p" xy="0,110" size="50,250" rotation="270">
+      <gearDisplay controller="Status" pages="2,3"/>
+      <gearLook controller="Status" pages="3" values="1,270,1,0" default="1,270,0,0"/>
+    </image>
+    <component id="n17_t20t" name="BoxIcon" src="t20t7h" xy="209,12" grayed="true">
+      <gearLook controller="Status" pages="0" values="1,0,1,1" default="1,0,0,1"/>
+    </component>
+    <image id="n12_bwtt" name="n12" src="kuxu5u" xy="289,22" size="50,42">
+      <gearDisplay controller="Status" pages="0"/>
+    </image>
+    <text id="n13_bwtt" name="n13" xy="246,70" size="86,29" grayed="true" fontSize="20" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#cc5500" text="点击领取">
+      <gearDisplay controller="Status" pages="1"/>
+    </text>
+    <graph id="n14_bwtt" name="n14" xy="223,125" size="118,46" type="rect" fillColor="#ff804f2d" corner="10">
+      <gearLook controller="Status" pages="3" values="1,0,1,1" default="1,0,0,1"/>
+    </graph>
+    <image id="n8_bwtt" name="n8" src="bwtt6f" xy="228,124" size="32,43">
+      <gearLook controller="Status" pages="3" values="1,0,1,0" default="1,0,0,0"/>
+    </image>
+    <text id="n10_bwtt" name="TextCount" xy="266,134" size="66,29" fontSize="20" color="#ffffff" autoSize="none" strokeColor="#000000" text="8000">
+      <gearLook controller="Status" pages="3" values="1,0,1,0" default="1,0,0,0"/>
+    </text>
+    <text id="n16_uil9" name="n16" xy="220,48" size="130,71" fontSize="24" color="#ffffff" align="center" autoSize="none" strokeColor="#bf1d1d" text="贡献宝箱&#xA;解锁奖励">
+      <gearDisplay controller="Status" pages="3"/>
+    </text>
+  </displayList>
+</component>bwtt75.xml|749|<component size="1200,40">
+  <displayList>
+    <text id="n0_bwtt" name="TextTime" xy="5,3" size="120,34" fontSize="24" color="#ffffff" vAlign="middle" autoSize="none" strokeColor="#000000" text="59分钟前"/>
+    <text id="n1_bwtt" name="TextRecord" xy="140,3" size="132,34" group="n4_bwtt" fontSize="24" color="#ffffff" strokeColor="#000000" text="Record模板"/>
+    <image id="n2_bwtt" name="n2" src="bwtt6f" xy="282,0" size="29,40" group="n4_bwtt"/>
+    <text id="n3_bwtt" name="TextCount" xy="321,3" size="46,34" group="n4_bwtt" fontSize="24" color="#ffffff" strokeColor="#4c4000" text="999"/>
+    <group id="n4_bwtt" name="Record" xy="140,0" size="227,40" advanced="true" layout="hz" colGap="10" excludeInvisibles="true"/>
+  </displayList>
+</component>bwtt76.xml|2271|<component size="400,800">
+  <controller name="Box" pages="2,,3,,4,,5,,6," selected="0">
+    <action type="change_page" fromPage="" toPage="" objectId="n15_g5vp" controller="Box" targetPage="~1"/>
+  </controller>
+  <controller name="Unlock" pages="0,,1," selected="1"/>
+  <displayList>
+    <graph id="n10_bwtt" name="Bg" xy="20,138" size="360,619" type="polygon" lineSize="0" fillColor="#ff1f8c15" points="0,0,360,0,360,500,180,619.6003,0,500">
+      <gearDisplay controller="Unlock" pages="1"/>
+      <gearColor controller="Box" pages="3,4,5,6" values="#30b2f2|#8c26bf|#cc5500|#661a00" default="#1f8c15"/>
+    </graph>
+    <graph id="n11_bwtt" name="BgGray" xy="20,138" size="360,619" type="polygon" lineSize="0" fillColor="#ff666666" points="0,0,360,0,360,500,180,619.6003,0,500">
+      <gearDisplay controller="Unlock" pages="0"/>
+    </graph>
+    <component id="n15_g5vp" name="BoxIcon" src="t20t7h" xy="200,150" pivot="0.5,0.5" anchor="true" size="256,256">
+      <gearLook controller="Unlock" pages="0" values="1,0,1,1" default="1,0,0,1"/>
+    </component>
+    <text id="n8_bwtt" name="TextContent" xy="200,271" pivot="0.5,0" anchor="true" size="240,86" group="n12_bwtt" fontSize="32" color="#ffffff" align="center" autoSize="height" strokeColor="#000000" text="多人采集采集资源数量达"/>
+    <text id="n9_bwtt" name="LabelProgress" xy="100,501" size="200,44" group="n12_bwtt" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="当前进度"/>
+    <component id="n0_bwtt" name="BarProgress" src="w27o5l" xy="200,587" pivot="0.5,0.5" anchor="true" size="320,34" group="n12_bwtt">
+      <ProgressBar value="50" max="100"/>
+    </component>
+    <group id="n12_bwtt" name="NodeInfo" xy="40,271" size="320,333" advanced="true">
+      <gearDisplay controller="Unlock" pages="1"/>
+    </group>
+    <image id="n13_bwtt" name="n13" src="us1r52" pkg="htck2ycn" xy="160,321" size="80,80">
+      <gearDisplay controller="Unlock" pages="0"/>
+    </image>
+    <text id="n14_bwtt" name="TextUnlock" xy="200,429" pivot="0.5,0" anchor="true" size="275,44" fontSize="32" color="#ffffff" align="center" autoSize="height" strokeColor="#000000" text="XXXX解锁">
+      <gearDisplay controller="Unlock" pages="0"/>
+    </text>
+  </displayList>
+</component>bwtt77.xml|1091|<component size="1100,160">
+  <controller name="Unlock" pages="0,,1," selected="0"/>
+  <displayList>
+    <graph id="n0_bwtt" name="Bg" xy="0,0" size="1100,160" type="rect" lineSize="2" fillColor="#80ffffff" corner="30"/>
+    <text id="n1_bwtt" name="TextLevel" xy="50,50" size="60,60" fontSize="40" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" strokeSize="2" text="1"/>
+    <list id="n8_bwtt" name="TechList" xy="210,16" size="865,134" layout="row" overflow="scroll" scroll="horizontal" scrollBarFlags="128" colGap="80" defaultItem="ui://zw50omb7bwtt78" vAlign="middle"/>
+    <graph id="n2_bwtt" name="Unlock" xy="2,1" size="1100,160" type="rect" lineSize="2" fillColor="#80666666" corner="30">
+      <gearDisplay controller="Unlock" pages="0"/>
+    </graph>
+    <text id="n3_bwtt" name="TextUnlock" xy="550,80" pivot="0.5,0.5" anchor="true" size="663,49" fontSize="36" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="母舰规模lv2解锁升级">
+      <gearDisplay controller="Unlock" pages="0"/>
+    </text>
+  </displayList>
+</component>bwtt78.xml|887|<component size="128,128" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <graph id="n6_bwtt" name="Select" xy="64,64" pivot="0.5,0.5" anchor="true" size="132,132" type="eclipse" lineSize="0" fillColor="#fff27f0c">
+      <gearDisplay controller="button" pages="1,3"/>
+    </graph>
+    <loader id="n3_bwtt" name="LoaderTech" xy="64,64" pivot="0.5,0.5" anchor="true" size="128,128" fill="scale"/>
+    <graph id="n4_bwtt" name="ProgressBg" xy="64,110" pivot="0.5,0.5" anchor="true" size="84,36" type="rect" lineSize="0" fillColor="#ffd90024"/>
+    <text id="n5_bwtt" name="TextProgress" xy="64,110" pivot="0.5,0.5" anchor="true" size="72,34" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="1/5&#xA;"/>
+  </displayList>
+  <Button mode="Check"/>
+</component>bwtt79.xml|1252|<component size="1920,1080">
+  <displayList>
+    <component id="n8_zu5k" name="n8" src="zu5k5i" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+    <component id="n0_bwtt" name="n0" src="kt413k" pkg="htck2ycn" xy="0,100" size="1920,980">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n9_zu5k" name="ResBar" src="g5vp5g" pkg="htck2ycn" xy="960,0" controller="Number,0">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n1_bwtt" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <property target="title.title" propertyId="0" value="公会商店"/>
+    </component>
+    <text id="n5_bwtt" name="TextResetTime" xy="960,1017" pivot="0.5,0.5" anchor="true" size="424,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="5天后重置">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <component id="n7_j6cz" name="GuildShop" src="j6cz7j" xy="960,150" pivot="0.5,0" anchor="true" size="1800,820">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+  </displayList>
+</component>bwtt7a.xml|1274|<component size="200,120" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <graph id="n0_bwtt" name="n0" xy="0,0" size="200,60" touchable="false" type="rect" fillColor="#ff30b2f2" corner="10">
+      <gearDisplay controller="button" pages="0,2"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <graph id="n2_bwtt" name="n2" xy="0,0" size="200,60" touchable="false" type="rect" fillColor="#ff8c26bf" corner="10">
+      <gearDisplay controller="button" pages="1,3"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <graph id="n3_bwtt" name="n3" xy="0,120" pivot="0,1" anchor="true" size="200,40" touchable="false" type="rect" fillColor="#ff000000">
+      <relation target="" sidePair="bottom-bottom"/>
+    </graph>
+    <text id="n4_bwtt" name="TextContent" xy="100,100" pivot="0.5,0.5" anchor="true" size="200,34" fontSize="24" color="#1f8c15" align="center" vAlign="middle" autoSize="none" text="待领取"/>
+    <text id="n5_bwtt" name="title" xy="100,30" pivot="0.5,0.5" anchor="true" size="168,44" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="公会"/>
+  </displayList>
+  <Button/>
+</component>bwtt7b.xml|1238|<component size="700,320">
+  <displayList>
+    <graph id="n0_bwtt" name="Bg" xy="0,0" size="700,320" type="rect" fillColor="#fff27f0c" corner="20">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <graph id="n5_bwtt" name="CostBg" xy="0,250" size="700,70" type="rect" lineSize="0" fillColor="#80000000" corner="0,0,20,20"/>
+    <loader id="n1_bwtt" name="LoaderIcon" xy="0,-80" size="400,400"/>
+    <text id="n2_bwtt" name="LabelContent" xy="400,14" size="280,39" fontSize="28" color="#ffffff" align="right" vAlign="middle" autoSize="none" strokeColor="#000000" text="公会专属巨神兵"/>
+    <component id="n9_t20t" name="ComCost" src="t20t5c" pkg="htck2ycn" xy="506,264"/>
+    <text id="n3_bwtt" name="TextName" xy="400,64" size="280,54" fontSize="40" color="#ffffff" align="right" vAlign="middle" autoSize="none" strokeColor="#000000" text="九头蛇.碎片"/>
+    <text id="n7_bwtt" name="TextLimit" xy="597,128" size="82,29" fontSize="20" color="#ffffff" align="right" vAlign="middle" strokeColor="#000000" text="限购 1/1"/>
+    <component id="n8_bwtt" name="ComItem" src="wcfr4c" pkg="htck2ycn" xy="506,163" scale="0.5,0.5"/>
+    <component id="n10_ks6g" name="Sale" src="bwtt7f" xy="-1,1"/>
+  </displayList>
+</component>bwtt7c.xml|995|<component size="320,320">
+  <displayList>
+    <graph id="n0_bwtt" name="Bg" xy="0,0" size="320,320" type="rect" fillColor="#ff8c26bf" corner="20">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <graph id="n1_bwtt" name="CostBg" xy="0,250" size="320,70" type="rect" lineSize="0" fillColor="#80000000" corner="0,0,20,20"/>
+    <text id="n4_bwtt" name="TextName" xy="160,35" pivot="0.5,0.5" anchor="true" size="280,54" fontSize="32" color="#ffffff" align="right" vAlign="middle" autoSize="none" strokeColor="#000000" text="九头蛇.碎片"/>
+    <component id="n9_t20t" name="ComCost" src="t20t5c" pkg="htck2ycn" xy="120,262"/>
+    <text id="n6_bwtt" name="TextLimit" xy="21,204" size="82,29" fontSize="20" color="#ffffff" vAlign="middle" strokeColor="#000000" text="限购 1/1"/>
+    <component id="n7_bwtt" name="ComItem" src="wcfr4c" pkg="htck2ycn" xy="100,75" scale="0.8,0.8"/>
+    <component id="n8_bwtt" name="Sale" src="bwtt7f" xy="0,0"/>
+  </displayList>
+</component>bwtt7d.xml|1960|<component size="260,260">
+  <controller name="Rare" pages="0,,1," selected="0"/>
+  <controller name="Locked" pages="0,,1," selected="0"/>
+  <displayList>
+    <graph id="n0_bwtt" name="Bg" xy="0,0" size="260,260" type="rect" fillColor="#ff29800d" corner="10">
+      <gearColor controller="Rare" pages="0" values="#29800d" default="#1255b2"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <graph id="n1_bwtt" name="CostBg" xy="0,190" size="260,70" type="rect" lineSize="0" fillColor="#80000000" corner="0,0,10,10"/>
+    <text id="n2_bwtt" name="TextName" xy="251,16" pivot="1,0" anchor="true" size="245,44" fontSize="32" color="#ffffff" align="right" vAlign="middle" autoSize="none" strokeColor="#000000" text="九头蛇.碎片"/>
+    <component id="n9_t20t" name="ComCost" src="t20t5c" pkg="htck2ycn" xy="90,205"/>
+    <component id="n5_bwtt" name="ComItem" src="wcfr4c" pkg="htck2ycn" xy="70,54" scale="0.8,0.8"/>
+    <text id="n4_bwtt" name="TextLimit" xy="16,146" size="82,29" fontSize="20" color="#ffffff" vAlign="middle" strokeColor="#000000" text="限购 1/1"/>
+    <component id="n8_bwtt" name="Sale" src="bwtt7f" xy="1,0"/>
+    <graph id="n13_j6cz" name="LockedBg" xy="0,0" size="260,260" type="rect" fillColor="#ff999999" corner="10">
+      <gearDisplay controller="Locked" pages="1"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <image id="n10_j6cz" name="n10" src="us1r52" pkg="htck2ycn" xy="130,100" pivot="0.5,0.5" anchor="true" size="80,80">
+      <gearDisplay controller="Locked" pages="1"/>
+    </image>
+    <text id="n11_j6cz" name="TextUnlocked" xy="130,180" pivot="0.5,0.5" anchor="true" size="211,86" fontSize="32" color="#ffffff" align="center" autoSize="height" strokeColor="#730013" strokeSize="2" text="XXXXLv3解锁商品">
+      <gearDisplay controller="Locked" pages="1"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+  </displayList>
+</component>bwtt7e.xml|4690|<component size="1920,1080">
+  <controller name="ShowDetail" pages="0,,1," selected="0"/>
+  <displayList>
+    <graph id="n0_bwtt" name="PanelClickBg" xy="0,0" size="1920,1080" type="rect" fillColor="#80000000">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <image id="n13_bwtt" name="PanelBg" src="kt413g" pkg="htck2ycn" xy="960,540" pivot="0.5,0.5" anchor="true" size="600,800">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </image>
+    <graph id="n2_bwtt" name="Bg" xy="960,310" pivot="0.5,0.5" anchor="true" size="544,280" type="rect" fillColor="#ff1255b2" corner="20,20">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <component id="n8_bwtt" name="Sale" src="bwtt7f" xy="689,170">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <text id="n23_ks6g" name="LabelStock" xy="1117,178" size="96,29" fontSize="20" color="#ffffff" autoSize="none" strokeColor="#000000" text="当前库存:">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <image id="n24_ks6g" name="IconStock" src="ivc01" pkg="htck2ycn" xy="1117,211" size="32,32">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </image>
+    <text id="n25_ks6g" name="TextStock" xy="1153,213" size="58,29" fontSize="20" color="#ffffff" autoSize="none" strokeColor="#000000">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n4_bwtt" name="TextName" xy="960,379" pivot="0.5,0.5" anchor="true" size="280,54" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="九头蛇.碎片">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n6_bwtt" name="TextLimit" xy="961,427" pivot="0.5,0.5" anchor="true" size="82,29" fontSize="20" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="限购 1/1">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <component id="n7_bwtt" name="ComItem" src="wcfr4c" pkg="htck2ycn" xy="956,274" pivot="0.5,0.5" anchor="true">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <text id="n9_bwtt" name="TextContext" xy="960,480" pivot="0.5,0" anchor="true" size="460,76" fontSize="28" color="#ffffff" autoSize="height" strokeColor="#000000" text="商会联盟出品的优质盲盒112312312312312312313">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <component id="n22_ks6g" name="BtnShowDetail" src="kt413b" pkg="htck2ycn" xy="1020,600" size="180,50">
+      <gearDisplay controller="ShowDetail" pages="0"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Button title="查看详情" controller="ShowDetail" page="1"/>
+    </component>
+    <component id="n20_ks6g" name="BtnHideDetail" src="kt413c" pkg="htck2ycn" xy="1020,600" size="180,50">
+      <gearDisplay controller="ShowDetail" pages="1"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Button title="关闭详情" controller="ShowDetail" page="0"/>
+    </component>
+    <component id="n10_bwtt" name="Slider" src="wcfr41" pkg="htck2ycn" xy="755,677" scale="0.8,0.8" controller="ShowText,1">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n18_ks6g" name="ComCost" src="t20t5c" pkg="htck2ycn" xy="920,753">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n12_bwtt" name="BtnBuy" src="kt4138" pkg="htck2ycn" xy="870,812">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Button title="购买"/>
+    </component>
+    <image id="n14_bwtt" name="DetailBg" src="kt413h" pkg="htck2ycn" xy="1249,525" size="549,400" group="n17_bwtt">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </image>
+    <list id="n15_bwtt" name="ItemList" xy="1272,618" size="501,261" group="n17_bwtt" layout="flow_hz" overflow="scroll" lineGap="5" colGap="5" defaultItem="ui://htck2ycnwcfr4c">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <text id="n16_bwtt" name="LabelDetail" xy="1390,557" size="232,44" group="n17_bwtt" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="道具详情">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <group id="n17_bwtt" name="DetailNode" xy="1249,525" size="549,400" advanced="true">
+      <gearDisplay controller="ShowDetail" pages="1"/>
+    </group>
+  </displayList>
+</component>bwtt7f.xml|662|<component size="60,60">
+  <controller name="SaleRate" pages="0,,1,,2," selected="2"/>
+  <displayList>
+    <graph id="n0_bwtt" name="SaleBg" xy="0,0" size="60,60" type="polygon" fillColor="#ffbf1d1d" points="0,20,20,0,60,0,0,60">
+      <gearDisplay controller="SaleRate" pages="1,2"/>
+      <gearColor controller="SaleRate" pages="2" values="#bf1d1d" default="#29800d"/>
+    </graph>
+    <text id="n1_bwtt" name="TextSale" xy="20,20" pivot="0.5,0.5" anchor="true" size="81,29" rotation="315" fontSize="20" color="#ffffff" align="center" autoSize="none" text="-10%">
+      <gearDisplay controller="SaleRate" pages="1,2"/>
+    </text>
+  </displayList>
+</component>flzz5w.xml|479|<component size="360,360">
+  <displayList>
+    <component id="n0_flzz" name="PanelBg" src="kt413n" pkg="htck2ycn" xy="0,0" size="360,360"/>
+    <list id="n1_flzz" name="IconList" xy="25,24" size="313,309" layout="flow_hz" overflow="scroll" lineGap="5" colGap="5" defaultItem="ui://zw50omb7kuxu5t">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>flzz5x.xml|534|<component size="400,460">
+  <displayList>
+    <component id="n0_flzz" name="PanelBg" src="kt413n" pkg="htck2ycn" xy="0,0" size="400,460"/>
+    <list id="n1_flzz" name="LabelList" xy="29,30" size="345,382" layout="flow_hz" selectionMode="multipleSingleClick" overflow="scroll" lineGap="10" colGap="10" lineItemCount="2" defaultItem="ui://zw50omb7kuxu5s" align="center">
+      <item title="休闲玩家" name="休闲玩家"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>flzz5z.xml|1258|<component size="730,130" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n3_flzz" name="BgSelect" src="w27o5j" xy="0,0" size="730,130" color="#ff1a1a">
+      <gearDisplay controller="button" pages="1,3"/>
+    </image>
+    <graph id="n4_flzz" name="Bg" xy="5,5" size="720,120" type="rect" fillColor="#ff30b2f2" corner="20"/>
+    <loader id="n5_flzz" name="IconHead" xy="36,13" size="64,64" url="ui://zw50omb7w27o5m" fill="scale"/>
+    <text id="n6_flzz" name="TextRole" xy="26,85" size="92,29" fontSize="20" color="#ffffff" align="center" vAlign="middle" autoSize="none"/>
+    <text id="n7_flzz" name="TextName" xy="133,15" size="236,44" fontSize="32" color="#ffffff" autoSize="none" text=" 玩家名字"/>
+    <text id="n8_flzz" name="TextLevel" xy="134,71" size="162,44" fontSize="32" color="#ffffff" autoSize="none" text="Lv.100"/>
+    <text id="n9_flzz" name="TextStatus" xy="423,42" size="272,44" fontSize="24" color="#ffffff" align="right" vAlign="middle" autoSize="none"/>
+    <text id="n10_mbhn" name="LabelSelf" xy="66,7" size="59,34" fontSize="24" color="#1f8c15" autoSize="none" strokeColor="#000000" text="自己"/>
+  </displayList>
+  <Button mode="Radio"/>
+</component>flzz61.xml|583|<component size="340,400">
+  <displayList>
+    <component id="n0_flzz" name="PanelBg" src="kt413n" pkg="htck2ycn" xy="0,0" size="339,385">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+    <list id="n1_flzz" name="OperateList" xy="53,46" size="240,292" layout="flow_hz" overflow="hidden" lineGap="15" lineItemCount="1" defaultItem="ui://zw50omb7w27o5r" align="center" vAlign="middle">
+      <relation target="" sidePair="width-width,height-height"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>flzz63.xml|296|<component size="108,33" extention="Button">
+  <Button/>
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver"/>
+  <displayList>
+    <image id="n0_flzz" src="flzz62" name="n0" xy="0,0">
+      <relation target="" sidePair="width,height"/>
+    </image>
+  </displayList>
+</component>flzz65.xml|935|<component size="1920,1080">
+  <displayList>
+    <graph id="n5_flzz" name="PanelClick" xy="0,0" size="1920,1080" type="rect" fillColor="#80000000">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <component id="n0_flzz" name="PanelBg" src="kt413n" pkg="htck2ycn" xy="203,511" size="460,500"/>
+    <graph id="n4_flzz" name="n4" xy="433,520" pivot="0.5,0.5" anchor="true" size="180,40" type="rect" fillColor="#ff162e40"/>
+    <text id="n3_flzz" name="n3" xy="433,520" pivot="0.5,0.5" anchor="true" size="155,34" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="申请列表"/>
+    <list id="n1_flzz" name="ApplicantsList" xy="237,551" size="400,400" overflow="scroll" lineGap="5" defaultItem="ui://zw50omb7flzz66" align="center">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>flzz66.xml|718|<component size="400,80">
+  <displayList>
+    <graph id="n5_flzz" name="n5" xy="0,30" size="400,50" type="rect" fillColor="#ffe5bf73"/>
+    <component id="n1_flzz" name="BtnRefuse" src="flzz6a" xy="301,32"/>
+    <component id="n2_flzz" name="BtnAgree" src="flzz69" xy="346,29"/>
+    <text id="n3_flzz" name="TextName" xy="11,41" size="149,29" fontSize="20" color="#ffffff" autoSize="none" strokeColor="#000000"/>
+    <text id="n4_flzz" name="n4" xy="162,41" size="127,29" fontSize="20" color="#ffffff" autoSize="none" strokeColor="#000000" text="申请加入公会"/>
+    <text id="n6_flzz" name="TextTime" xy="10,0" size="147,29" fontSize="20" color="#ffffff" autoSize="none" strokeColor="#000000"/>
+  </displayList>
+</component>flzz69.xml|295|<component size="43,46" extention="Button">
+  <Button/>
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver"/>
+  <displayList>
+    <image id="n0_flzz" src="flzz67" name="n0" xy="0,0">
+      <relation target="" sidePair="width,height"/>
+    </image>
+  </displayList>
+</component>flzz6a.xml|369|<component size="46,46" pivot="0.5,0.5" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_flzz" name="n0" src="flzz68" xy="23,23" pivot="0.5,0.5" anchor="true">
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+  </displayList>
+  <Button/>
+</component>j2y70.xml|3553|<component size="1920,1080">
+  <controller name="func" pages="0,create,1,change" selected="0"/>
+  <displayList>
+    <graph id="n32_flzz" name="Bg" xy="0,0" size="1920,1080" type="rect" fillColor="#80000000">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <component id="n0_j2y7" name="Panel" src="kt413l" pkg="htck2ycn" xy="960,540" pivot="0.5,0.5" anchor="true" size="616,678">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <loader id="n6_p2ya" name="IconGuild" xy="712,245" size="128,128" fill="scale">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </loader>
+    <text id="n2_j2y7" name="InputName" xy="1010,281" pivot="0.5,0.5" anchor="true" size="272,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="" input="true" prompt="输入公会名称" maxLength="6">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n29_fxlq" name="n29" xy="866,322" size="144,44" fontSize="32" color="#ffffff" autoSize="none" text="审核方式:">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <component id="n28_fxlq" name="ComApprovalMethod" src="m98k5a" pkg="htck2ycn" xy="1029,322">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <ComboBox visibleItemCount="2">
+        <item title="自动审核" value="0"/>
+        <item title="手动审核" value="1"/>
+      </ComboBox>
+    </component>
+    <text id="n10_w27o" name="n10" xy="755,466" size="163,82" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="公会标签：">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <list id="n16_w27o" name="LabelList" xy="1050,516" pivot="0.5,0.5" anchor="true" size="255,163" layout="flow_hz" overflow="scroll" lineGap="10" lineItemCount="1" defaultItem="ui://zw50omb7w27o5b" align="center">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <component id="n7_w27o" name="ComCost" src="wcfr4j" pkg="htck2ycn" xy="884,674" size="144,40">
+      <gearDisplay controller="func" pages="0"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Label title="1000/99999" icon="ui://htck2ycnogp7w"/>
+    </component>
+    <component id="n5_j2y7" name="BtnCreate" src="kt4138" pkg="htck2ycn" xy="960,785" pivot="0.5,0.5" anchor="true" size="371,92">
+      <gearDisplay controller="func" pages="0"/>
+      <gearLook controller="func" pages="1" values="1,0,0,0" default="1,0,0,1"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Button title="创建公会"/>
+    </component>
+    <component id="n33_flzz" name="BtnChangeConfirm" src="kt4138" pkg="htck2ycn" xy="960,785" pivot="0.5,0.5" anchor="true" size="371,92" touchable="false">
+      <gearDisplay controller="func" pages="1"/>
+      <gearLook controller="func" pages="0" values="1,0,0,0" default="1,0,0,1"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Button title="确认修改"/>
+    </component>
+    <component id="n30_flzz" name="IconSelect" src="flzz5w" xy="315,286">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n31_flzz" name="LabelSelect" src="flzz5x" xy="1245,282">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+  </displayList>
+</component>j2y71.xml|3724|<component size="1920,1080">
+  <displayList>
+    <component id="n19_zu5k" name="n19" src="zu5k5i" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+    <component id="n4_p2ya" name="PanelBg" src="kt413k" pkg="htck2ycn" xy="0,100" size="1920,980">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <graph id="n12_w27o" name="n12" xy="191,192" size="1612,63" type="rect" fillColor="#ff662a00">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <text id="n6_p2ya" name="n6" xy="307,203" size="257,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="公会名">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n7_p2ya" name="n7" xy="849,205" size="120,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="等级">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n8_p2ya" name="n8" xy="1024,202" size="120,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="成员">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n9_p2ya" name="n9" xy="1239,202" size="240,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="审核方式">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <list id="n1_j2y7" name="GuildList" xy="993,593" pivot="0.5,0.5" anchor="true" size="1608,610" overflow="scroll" lineGap="20" defaultItem="ui://zw50omb7j2y72">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <component id="n5_p2ya" name="ComTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <property target="title.title" propertyId="0" value="公会申请"/>
+    </component>
+    <graph id="n14_w27o" name="n14" xy="180,930" size="567,100" type="rect" lineSize="2" lineColor="#ff162e40" fillColor="#ff806540" corner="20">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <text id="n10_p2ya" name="InputSearch" xy="196,955" size="413,53" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="" input="true" prompt="请输入ID或公会名称查询">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <component id="n11_p2ya" name="BtnSearch" src="p2ya5" xy="613,962">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n16_w27o" name="BtnRefresh" src="kt413c" pkg="htck2ycn" xy="666,947" size="65,76">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Button title="刷新"/>
+    </component>
+    <component id="n15_w27o" name="BtnCreateGuild" src="kt4134" pkg="htck2ycn" xy="1512,916" size="280,140">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Button title="创建公会"/>
+    </component>
+    <component id="n17_q845" name="BtnResumeGuild" src="kt4134" pkg="htck2ycn" xy="1513,921" size="280,140">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Button title="恢复公会"/>
+    </component>
+    <text id="n18_q845" name="TextCountdown" xy="1523,1020" size="261,44" fontSize="32" color="#ff1a1a" align="center" vAlign="middle" autoSize="none" text="6天23时59分">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+  </displayList>
+</component>j2y72.xml|1514|<component size="1600,120">
+  <displayList>
+    <graph id="n5_j2y7" name="Bg" xy="0,0" size="1600,120" type="rect" fillColor="#ff806540" corner="20"/>
+    <loader id="n0_j2y7" name="IconFlag" xy="0,-4" size="128,128" fill="scale"/>
+    <text id="n1_j2y7" name="TextName" xy="139,5" size="259,54" fontSize="32" color="#ffffff" vAlign="middle" autoSize="none"/>
+    <text id="n3_j2y7" name="TextMember" xy="904,60" pivot="0.5,0.5" anchor="true" size="149,45" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" text="15/30"/>
+    <text id="n6_p2ya" name="TextLevel" xy="721,60" pivot="0.5,0.5" anchor="true" size="151,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" text="2"/>
+    <text id="n7_p2ya" name="TextApproval" xy="1055,37" size="193,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" text="自动审核"/>
+    <list id="n8_p2ya" name="LabelList" xy="135,68" size="501,43" layout="row" overflow="hidden" colGap="10" defaultItem="ui://zw50omb7w27o5b">
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <component id="n11_p2ya" name="BtnApplied" src="kt4137" pkg="htck2ycn" xy="1387,16">
+      <Button title="申请中"/>
+    </component>
+    <component id="n9_p2ya" name="BtnApply" src="kt4138" pkg="htck2ycn" xy="1386,15">
+      <Button title="申请"/>
+    </component>
+    <component id="n2_j2y7" name="BtnJoin" src="kt4138" pkg="htck2ycn" xy="1387,16">
+      <Button title="加入"/>
+    </component>
+  </displayList>
+</component>j2y73.xml|4365|<component size="1920,1080">
+  <controller name="RoleController" pages="0,会长,1,官员,2,普通成员" selected="0"/>
+  <controller name="EditNotice" pages="0,show,1,edit" selected="0"/>
+  <displayList>
+    <graph id="n56_j6cz" name="n56" xy="0,0" size="1920,1080" type="rect" fillColor="#00000000">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <component id="n35_flzz" name="PanelBg" src="kt413k" pkg="htck2ycn" xy="20,76" size="1400,971"/>
+    <component id="n36_flzz" name="BtnClose" src="kt413m" pkg="htck2ycn" xy="1353,30"/>
+    <image id="n38_flzz" name="NodeInfoBg" src="frlzm" pkg="htck2ycn" xy="53,119" size="559,293"/>
+    <image id="n40_flzz" name="LevelBg" src="flzz5y" xy="525,138" size="78,92"/>
+    <text id="n41_flzz" name="LabelLevel" xy="533,147" size="63,29" fontSize="20" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="level"/>
+    <text id="n42_flzz" name="TextLevel" xy="531,177" size="66,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="9"/>
+    <loader id="n31_flzz" name="IconGuild" xy="87,149" size="128,128" fill="scale"/>
+    <text id="n17_w27o" name="TextPresidentName" xy="247,249" size="324,44" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="会长：会长名字七个字"/>
+    <text id="n39_flzz" name="TextName" xy="248,143" size="256,44" fontSize="32" color="#ffffff" autoSize="none" text=""/>
+    <component id="n51_flzz" name="BtnEditInfo" src="flzz63" xy="473,348" size="108,33">
+      <gearDisplay controller="RoleController" pages="0"/>
+    </component>
+    <image id="n48_flzz" name="NodeABg" src="frlzm" pkg="htck2ycn" xy="59,430" size="550,553"/>
+    <text id="n23_w27o" name="LabelAnnouncement" xy="248,461" size="187,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="公会公告"/>
+    <text id="n33_flzz" name="TextAnnouncement" xy="80,520" size="500,436" fontSize="32" color="#ffffff" autoSize="none" text="">
+      <gearDisplay controller="EditNotice" pages="0"/>
+    </text>
+    <component id="n52_flzz" name="BtnEditAnnouncement" src="flzz63" xy="454,906">
+      <gearDisplay controller="RoleController" pages="0"/>
+      <gearDisplay2 controller="EditNotice" pages="0" condition="0"/>
+    </component>
+    <text id="n55_q845" name="InputAnnouncement" xy="80,520" size="500,436" fontSize="32" color="#ffffff" autoSize="none" text="" input="true">
+      <gearDisplay controller="EditNotice" pages="1"/>
+    </text>
+    <component id="n54_q845" name="BtnConfirmAnnouncement" src="kt4138" pkg="htck2ycn" xy="399,884">
+      <gearDisplay controller="EditNotice" pages="1"/>
+      <Button title="确认修改"/>
+    </component>
+    <image id="n34_flzz" name="ListBg" src="frlzm" pkg="htck2ycn" xy="626,128" size="753,883"/>
+    <image id="n44_flzz" name="n44" src="w27o5m" xy="1197,134" size="48,48"/>
+    <text id="n18_w27o" name="TextMembersCount" xy="1253,136" size="110,44" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="99/99"/>
+    <list id="n3_j2y7" name="MemberList" xy="632,181" size="740,689" layout="flow_hz" overflow="scroll" margin="5,5,5,5" lineGap="20" defaultItem="ui://zw50omb7flzz5z" align="center">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <graph id="n12_w27o" name="n12" xy="824,101" size="370,64" type="rect" fillColor="#ff162e40" corner="20"/>
+    <text id="n13_w27o" name="n13" xy="940,109" size="130,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="成员列表"/>
+    <component id="n22_w27o" name="BtnApplyList" src="w27o5q" xy="680,904">
+      <gearDisplay controller="RoleController" pages="0,1"/>
+    </component>
+    <component id="n32_flzz" name="BtnGQuit" src="kt4137" pkg="htck2ycn" xy="1127,910" size="229,92">
+      <gearDisplay controller="RoleController" pages="1,2"/>
+      <Button title="退出公会"/>
+    </component>
+    <component id="n53_flzz" name="BtnDisbandment" src="kt4137" pkg="htck2ycn" xy="1126,910" size="229,92">
+      <gearDisplay controller="RoleController" pages="0"/>
+      <Button title="解散公会"/>
+    </component>
+    <component id="n50_flzz" name="GuildOperate" src="flzz61" xy="1366,432" size="340,400"/>
+  </displayList>
+</component>j6cz7j.xml|607|<component size="1800,820" overflow="scroll">
+  <displayList>
+    <component id="n0_j6cz" name="SSRItem" src="bwtt7b" xy="20,13"/>
+    <list id="n1_j6cz" name="SRItemList" xy="764,12" size="1025,320" layout="flow_hz" overflow="hidden" colGap="30" defaultItem="ui://zw50omb7bwtt7c" vAlign="middle">
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <list id="n2_j6cz" name="RItemList" xy="900,367" pivot="0.5,0" anchor="true" size="1800,852" layout="flow_hz" overflow="hidden" lineGap="30" colGap="40" lineItemCount="6" defaultItem="ui://zw50omb7bwtt7d" align="center"/>
+  </displayList>
+</component>kuxu5s.xml|744|<component size="160,40" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <graph id="n3_kuxu" name="n0" xy="0,0" size="160,40" type="rect" lineColor="#ff1255b2" fillColor="#ff30b2f2" corner="10">
+      <gearDisplay controller="button" pages="0,2"/>
+    </graph>
+    <graph id="n5_kuxu" name="n1" xy="0,0" size="160,40" type="rect" lineColor="#ff1255b2" fillColor="#ffcc66ff" corner="10">
+      <gearDisplay controller="button" pages="1,3"/>
+    </graph>
+    <text id="n4_kuxu" name="Title" xy="0,0" size="160,40" fontSize="28" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000"/>
+  </displayList>
+  <Button mode="Check"/>
+</component>kuxu5t.xml|415|<component size="100,100" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <loader id="n3_kuxu" name="Icon" xy="0,0" size="100,100" fill="scale"/>
+    <image id="n4_kuxu" name="n4" src="kuxu5u" xy="67,-6" size="42,35">
+      <gearDisplay controller="button" pages="1,3"/>
+    </image>
+  </displayList>
+  <Button mode="Radio"/>
+</component>kuxu5v.xml|2414|<component size="1920,1080">
+  <displayList>
+    <component id="n0_j2y7" name="Panel" src="kt413l" pkg="htck2ycn" xy="960,599" pivot="0.5,0.5" anchor="true" size="616,628">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <loader id="n6_p2ya" name="IconGuild" xy="732,332" size="128,128" fill="scale">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </loader>
+    <text id="n10_w27o" name="n10" xy="775,553" size="163,82" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="公会标签：">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <list id="n16_w27o" name="LabelList" xy="1070,603" pivot="0.5,0.5" anchor="true" size="255,165" layout="flow_hz" overflow="scroll" lineGap="10" lineItemCount="1" defaultItem="ui://zw50omb7w27o5b" align="center">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <text id="n29_fxlq" name="n29" xy="886,409" size="144,44" fontSize="32" color="#ffffff" autoSize="none" text="审核方式:">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n30_kuxu" name="TextName" xy="918,348" size="225,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="公会名字">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n31_kuxu" name="TextApproval" xy="1047,409" size="141,44" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n32_kuxu" name="n32" xy="793,733" size="342,44" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="是否确定创建公会？">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <component id="n33_kuxu" name="BtnConfirm" src="kt4138" pkg="htck2ycn" xy="1029,800" size="171,80">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Button title="确定"/>
+    </component>
+    <component id="n34_kuxu" name="BtnCancel" src="kt4137" pkg="htck2ycn" xy="743,799" size="171,80">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <Button title="取消"/>
+    </component>
+  </displayList>
+</component>mbhn7m.xml|470|<component size="100,98" pivot="0.5,0.5" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n1_mbhn" name="n1" src="mbhn7n" xy="0,0"/>
+    <text id="n2_mbhn" name="title" xy="40,1" size="59,54" fontSize="40" color="#bf1d1d" align="right" autoSize="none" strokeColor="#ffffff" strokeSize="2" text="99"/>
+  </displayList>
+  <Button downEffect="scale" downEffectValue="0.8"/>
+</component>p2ya5.xml|523|<component size="40,40" extention="Button">
+  <Button/>
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver"/>
+  <displayList>
+    <image id="n0_p2ya" src="p2ya5a" name="n0" xy="0,0">
+      <gearDisplay controller="button" pages="0,2"/>
+      <relation target="" sidePair="width,height"/>
+    </image>
+    <image id="n1_p2ya" src="p2ya5a" name="n1" xy="0,0">
+      <gearDisplay controller="button" pages="1,3"/>
+      <relation target="" sidePair="width,height"/>
+    </image>
+  </displayList>
+</component>package.xml|6247|<packageDescription id="zw50omb7" name="Guild">
+  <resources>
+    <component id="bwtt6d" name="ButtonDonationRankingList" path="/Button/" size="98,103"/>
+    <component id="bwtt6e" name="GuildDonationItem" path="/Component/" size="500,180"/>
+    <component id="bwtt6l" name="GuildTechListItem" path="/Component/" size="260,800"/>
+    <component id="bwtt6m" name="GuildTechItem" path="/Component/" size="128,128"/>
+    <component id="bwtt6v" name="GuildContributionRewards" path="/Component/" size="1400,800"/>
+    <component id="bwtt6w" name="GuildRewards" path="/Component/" size="1400,800"/>
+    <component id="bwtt73" name="ContributionBox" path="/Component/" size="340,200"/>
+    <component id="bwtt75" name="ContributionRecord" path="/Component/" size="1200,40"/>
+    <component id="bwtt76" name="GuildBox" path="/Component/" size="400,800"/>
+    <component id="bwtt77" name="PersonalTechListItem" path="/Component/" size="1100,160"/>
+    <component id="bwtt78" name="PersonalTechItem" path="/Component/" size="128,128"/>
+    <component id="bwtt7a" name="ButtonGuildFunc" path="/Button/" size="200,120"/>
+    <component id="bwtt7b" name="ShopSSRItem" path="/Component/" size="700,320"/>
+    <component id="bwtt7c" name="ShopSRItem" path="/Component/" size="320,320"/>
+    <component id="bwtt7d" name="ShopRItem" path="/Component/" size="260,260"/>
+    <component id="bwtt7f" name="GuildShopSale" path="/Component/" size="60,60"/>
+    <component id="flzz5w" name="GuildIconSelect" path="/Component/" size="360,360"/>
+    <component id="flzz5x" name="GuildLabelSelect" path="/Component/" size="400,460"/>
+    <component id="flzz5z" name="GuildMemberItem" path="/Button/" size="730,130"/>
+    <component id="flzz61" name="GuildOperate" path="/Component/" size="340,400"/>
+    <component id="flzz63" name="ButtonEdit" path="/Button/" size="108,33"/>
+    <component id="flzz66" name="GuildApplicantsItem" path="/Component/" size="400,80"/>
+    <component id="flzz69" name="ButtonGou" path="/Button/" size="43,46"/>
+    <component id="flzz6a" name="ButtonCha" path="/Button/" size="46,46"/>
+    <component id="j2y72" name="GuildListItem" path="/Component/" size="1600,120"/>
+    <component id="j6cz7j" name="GuildShopComponent" path="/Component/" size="1800,820"/>
+    <component id="kuxu5s" name="ButtonGuildLabel" path="/Button/" size="160,40"/>
+    <component id="kuxu5t" name="ButtonGuildIcon" path="/Button/" size="100,100"/>
+    <component id="mbhn7m" name="ButtonChat" path="/Button/" size="100,98"/>
+    <component id="p2ya5" name="ButtonSearch" path="/Button/" size="40,40"/>
+    <component id="pe6y7g" name="GuildMainBg" path="/Component/" size="2560,1080"/>
+    <component id="t20t7h" name="BoxIcon" path="/Component/" size="150,150"/>
+    <component id="w27o5b" name="GuildLabel" path="/Component/" size="160,40"/>
+    <component id="w27o5l" name="GuildExpBar" path="/Component/" size="360,34"/>
+    <component id="w27o5q" name="ButtonApplyList" path="/Button/" size="98,103"/>
+    <component id="w27o5r" name="GuildOperateItem" path="/Component/" size="240,60"/>
+    <image id="bwtt6f" name="IconBook" path="/Image/" size="102,140"/>
+    <image id="bwtt6p" name="BoxLine1" path="/Image/" size="36,40" scale="9grid" scale9grid="16,10,4,20"/>
+    <image id="bwtt6r" name="BoxLine2" path="/Image/" size="36,40" scale="9grid" scale9grid="16,10,4,20"/>
+    <image id="bwtt6t" name="TeckLine" path="/Image/" size="36,40" scale="9grid" scale9grid="16,10,4,20"/>
+    <image id="bwtt6y" name="Box1" path="/Image/" size="256,256"/>
+    <image id="bwtt6z" name="Box2" path="/Image/" size="256,256"/>
+    <image id="bwtt70" name="Box3" path="/Image/" size="256,256"/>
+    <image id="bwtt71" name="Box4" path="/Image/" size="256,256"/>
+    <image id="bwtt72" name="Box5" path="/Image/" size="256,256"/>
+    <image id="flzz62" name="IconEdit" path="/Image/" size="108,33"/>
+    <image id="flzz64" name="IconSceneBg" path="/Image/" size="2754,1536"/>
+    <image id="flzz67" name="IconGou" path="/Image/" size="43,46"/>
+    <image id="flzz68" name="IconCha" path="/Image/" size="43,43"/>
+    <image id="kuxu5u" name="IconGreenConfirm" path="/Image/" size="83,70"/>
+    <image id="mbhn7n" name="icon_main_talk" path="/Image/" size="100,98"/>
+    <image id="p2ya5a" name="icon_点击查看" path="/Image/" size="40,40"/>
+    <image id="w27o5j" name="BarBgGreen" path="/Image/" size="24,34" scale="9grid" scale9grid="6,8,12,16"/>
+    <image id="w27o5k" name="BarFortGreen" path="/Image/" size="10,31" scale="9grid" scale9grid="2,7,4,14"/>
+    <image id="w27o5m" name="IconHead" path="/Image/" size="96,100"/>
+    <image id="w27o5o" name="IconNotice" path="/Image/" size="98,103"/>
+    <component id="bwtt6b" name="GuildDonatePanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="bwtt6c" name="GuildTechMainPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="bwtt6j" name="PersonalTechPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="bwtt6k" name="GuildRewardsPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="bwtt79" name="GuildShopPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="bwtt7e" name="GuildShopBuyPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="flzz65" name="GuildApplicantsListPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="j2y70" name="GuildCreatePanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="j2y71" name="GuildListPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="j2y73" name="GuildInfoPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="kuxu5v" name="GuildCreateConfirmPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="t20t7i" name="GuildContributionBoxDetailPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="w27o5d" name="GuildMainPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <image id="flzz5y" name="IconLevelBg" path="/Image/" size="171,92" exported="true"/>
+    <atlas id="atlas0" size="1024,1024" file="atlas0.png"/>
+    <atlas id="atlas_flzz64" size="4096,2048" file="atlas_flzz64.png"/>
+  </resources>
+</packageDescription>pe6y7g.xml|690|<component size="2560,1080" overflow="scroll" scroll="horizontal" scrollBarFlags="128">
+  <displayList>
+    <image id="n8_ugsh" name="n8" src="flzz64" xy="0,0" size="2560,1080"/>
+    <component id="n1_pe6y" name="BtnRewards" src="bwtt7a" xy="1532,368">
+      <Button title="公会福利"/>
+    </component>
+    <component id="n2_pe6y" name="BtnGuildTech" src="bwtt7a" xy="1627,615">
+      <Button title="公会核心"/>
+    </component>
+    <component id="n3_pe6y" name="BtnShop" src="bwtt7a" xy="757,580">
+      <Button title="公会商店"/>
+    </component>
+    <component id="n6_t20t" name="BtnPersonalTech" src="bwtt7a" xy="968,381">
+      <Button title="公会契约"/>
+    </component>
+  </displayList>
+</component>t20t7h.xml|1125|<component size="150,150">
+  <controller name="Box" pages="0,,1,,2,,3,,4," selected="0"/>
+  <displayList>
+    <image id="n0_t20t" name="n0" src="bwtt6y" xy="0,0" size="150,150">
+      <gearDisplay controller="Box" pages="0"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n1_t20t" name="n1" src="bwtt6z" xy="0,0" size="150,150">
+      <gearDisplay controller="Box" pages="1"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n2_t20t" name="n2" src="bwtt70" xy="0,0" size="150,150">
+      <gearDisplay controller="Box" pages="2"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n3_t20t" name="n3" src="bwtt71" xy="0,0" size="150,150">
+      <gearDisplay controller="Box" pages="3"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n4_t20t" name="n4" src="bwtt72" xy="0,0" size="150,150">
+      <gearDisplay controller="Box" pages="4"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+  </displayList>
+</component>t20t7i.xml|2319|<component size="1920,1080">
+  <controller name="Box" pages="0,,1,,2,,3,,4," selected="0">
+    <action type="change_page" fromPage="" toPage="" objectId="n7_t20t" controller="Box" targetPage="~1"/>
+  </controller>
+  <displayList>
+    <graph id="n0_t20t" name="PanelClickBg" xy="0,0" size="1920,1080" type="rect" fillColor="#80000000">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <image id="n1_t20t" name="PanelBg" src="kt413g" pkg="htck2ycn" xy="960,540" pivot="0.5,0.5" anchor="true" size="600,800">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </image>
+    <graph id="n2_t20t" name="Bg" xy="960,310" pivot="0.5,0.5" anchor="true" size="544,280" type="rect" fillColor="#ff8fcc52" corner="20,20">
+      <gearColor controller="Box" pages="0,2,3,4" values="#8fcc52|#cc66ff|#f27f0c|#ff1a2d" default="#1255b2"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <component id="n7_t20t" name="BoxIcon" src="t20t7h" xy="960,273" pivot="0.5,0.5" anchor="true">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <text id="n3_t20t" name="TextName" xy="960,361" pivot="0.5,0.5" anchor="true" size="280,54" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="每周贡献宝箱">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n4_t20t" name="TextLevel" xy="960,422" pivot="0.5,0.5" anchor="true" size="65,34" fontSize="24" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="等级2">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n5_t20t" name="LabelDetail" xy="960,484" pivot="0.5,0.5" anchor="true" size="270,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" text="道具详情">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <list id="n8_t20t" name="ItemList" xy="960,692" pivot="0.5,0.5" anchor="true" size="507,346" layout="flow_hz" overflow="scroll" lineGap="10" colGap="10" defaultItem="ui://htck2ycnwcfr4c">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>w27o5b.xml|370|<component size="160,40">
+  <displayList>
+    <graph id="n2_w27o" name="n2" xy="0,0" size="160,40" type="rect" lineColor="#ff1255b2" fillColor="#ff30b2f2" corner="10"/>
+    <text id="n0_w27o" name="Title" xy="0,0" size="160,40" fontSize="28" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="公会标签"/>
+  </displayList>
+</component>w27o5d.xml|1384|<component size="1920,1080">
+  <displayList>
+    <component id="n26_ugsh" name="GuildMainBg" src="pe6y7g" xy="0,0" size="1920,1080">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+    <component id="n25_zu5k" name="ResBar" src="g5vp5g" pkg="htck2ycn" xy="960,0" controller="Number,0">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n1_w27o" name="ComTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <property target="title.title" propertyId="0" value="公会"/>
+    </component>
+    <loader id="n24_j6cz" name="PanelInfo" xy="50,111" size="572,187" group="n12_w27o" url="ui://htck2ycnkt413h" fill="scaleFree"/>
+    <loader id="n13_flzz" name="IconGuild" xy="85,145" size="128,128" group="n12_w27o" fill="scale"/>
+    <text id="n6_w27o" name="TextLevel" xy="237,208" size="180,46" group="n12_w27o" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="Lv.99"/>
+    <text id="n7_w27o" name="TextName" xy="235,151" size="230,44" group="n12_w27o" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="公会名字七个字"/>
+    <group id="n12_w27o" name="NodeInfo" xy="50,111" size="572,187" advanced="true">
+      <relation target="" sidePair="left-left,top-top"/>
+    </group>
+    <component id="n27_mbhn" name="BtnChat" src="mbhn7m" xy="62,945"/>
+  </displayList>
+</component>w27o5l.xml|646|<component size="360,34" extention="ProgressBar">
+  <displayList>
+    <image id="n0_w27o" name="n0" src="w27o5j" xy="0,0" size="360,34">
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n1_w27o" name="bar" src="w27o5k" xy="4,2" size="352,31"/>
+    <text id="n2_uil9" name="title" xy="180,17" pivot="0.5,0.5" anchor="true" size="320,34" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="1/10&#xA;">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+  </displayList>
+  <ProgressBar titleType="valueAndmax"/>
+</component>w27o5q.xml|296|<component size="98,103" extention="Button">
+  <Button/>
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver"/>
+  <displayList>
+    <image id="n0_w27o" src="w27o5o" name="n0" xy="0,0">
+      <relation target="" sidePair="width,height"/>
+    </image>
+  </displayList>
+</component>w27o5r.xml|358|<component size="240,60">
+  <displayList>
+    <graph id="n2_w27o" name="n2" xy="0,0" size="240,60" type="rect" lineColor="#ff1255b2" fillColor="#ff8fcc52" corner="10"/>
+    <text id="n0_w27o" name="Title" xy="0,0" size="240,60" fontSize="40" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000"/>
+  </displayList>
+</component>

@@ -1,0 +1,27 @@
+mjkl2.xml|289|<component size="1920,1080">
+  <displayList>
+    <graph id="n2_vb0c" name="Cover" xy="0,0" size="1920,1080" visible="false" alpha="0" type="rect" lineSize="0" fillColor="#ff333333">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+  </displayList>
+</component>package.xml|276|<packageDescription id="nhaflg39" name="Mask">
+  <resources>
+    <component id="mjkl2" name="CoverPanel" path="/" size="1920,1080" exported="true"/>
+    <component id="roni0" name="EdgeMaskPanel" path="/" size="1920,1080" exported="true"/>
+  </resources>
+</packageDescription>roni0.xml|872|<component size="1920,1080" opaque="false">
+  <displayList>
+    <graph id="n9_qfz8" name="maskLeft" xy="-625,0" pivot="1,0.5" size="632,1080" type="rect" fillColor="#ff000000">
+      <relation target="" sidePair="height-height,right-left"/>
+    </graph>
+    <graph id="n11_qfz8" name="maskRight" xy="1920,0" pivot="1,0.5" size="600,1080" type="rect" fillColor="#ff000000">
+      <relation target="" sidePair="height-height,left-right"/>
+    </graph>
+    <graph id="n10_qfz8" name="maskTop" xy="0,-1080" pivot="0.5,1" size="1920,1080" type="rect" fillColor="#ff000000">
+      <relation target="" sidePair="width-width,bottom-middle"/>
+    </graph>
+    <graph id="n12_qfz8" name="maskBottom" xy="0,1080" pivot="0.5,0" size="1920,1080" type="rect" fillColor="#ff000000">
+      <relation target="" sidePair="width-width,top-middle"/>
+    </graph>
+  </displayList>
+</component>

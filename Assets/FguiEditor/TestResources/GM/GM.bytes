@@ -1,0 +1,87 @@
+fk57j.xml|757|<component size="270,118" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_fk57" name="n0" src="fk57i" xy="0,0">
+      <gearDisplay controller="button" pages="0,2"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n1_fk57" name="n1" src="fk57e" xy="0,0">
+      <gearDisplay controller="button" pages="1,3"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n2_fk57" name="TextName" xy="135,44" pivot="0.5,0.5" anchor="true" size="240,64" fontSize="48" color="#ffffff" align="center" vAlign="middle" autoSize="none" text=""/>
+  </displayList>
+  <Button mode="Radio"/>
+</component>fk57m.xml|815|<component size="320,100" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_fk57" name="n0" src="fk57l" xy="10,0" size="300,100">
+      <gearDisplay controller="button" pages="0,2"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n1_fk57" name="n1" src="fk57k" xy="10,0" size="300,100">
+      <gearDisplay controller="button" pages="1,3"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n2_fk57" name="TextName" xy="160,50" pivot="0.5,0.5" anchor="true" size="300,60" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="增加物品"/>
+  </displayList>
+  <Button mode="Radio"/>
+</component>package.xml|1295|<packageDescription id="5ibv8q10" name="GM">
+  <resources>
+    <component id="fk57j" name="GMModuleItem" path="/Button/" size="270,118"/>
+    <component id="fk57m" name="GMCommandItem" path="/Button/" size="320,100"/>
+    <component id="ra2hc" name="ButtonClose" path="/Button/" size="171,92"/>
+    <component id="ra2hd" name="ButtonSend" path="/Button/" size="171,92"/>
+    <image id="fk57e" name="moduleSelect" path="/Image/" size="270,118"/>
+    <image id="fk57i" name="moduleBg" path="/Image/" size="270,118"/>
+    <image id="fk57k" name="commandSelect" path="/Image/" size="206,107" scale="9grid" scale9grid="51,26,102,52"/>
+    <image id="fk57l" name="commandBg" path="/Image/" size="206,107" scale="9grid" scale9grid="51,26,102,52"/>
+    <image id="ra2h0" name="PanelBg" path="/Image/" size="255,253" scale="9grid" scale9grid="200,40,15,13"/>
+    <image id="ra2h1" name="NodeBg" path="/Image/" size="64,64" scale="9grid" scale9grid="16,16,32,32"/>
+    <image id="ra2h8" name="button_green_small" path="/Image/" size="171,92"/>
+    <image id="ra2h9" name="button_red_small" path="/Image/" size="171,92"/>
+    <component id="ra2ha" name="GMPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <atlas id="atlas0" size="512,512" file="atlas0.png"/>
+  </resources>
+</packageDescription>ra2ha.xml|1682|<component size="1920,1080">
+  <displayList>
+    <graph id="n3_ra2h" name="BGPanel" xy="0,0" size="1920,1080" type="rect"/>
+    <image id="n0_ra2h" name="BG" src="ra2h0" xy="0,0" size="1920,1080"/>
+    <list id="n1_ra2h" name="ModuleList" xy="50,100" size="270,900" overflow="scroll" defaultItem="ui://5ibv8q10fk57j">
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <list id="n2_ra2h" name="CommandList" xy="325,100" size="320,900" overflow="scroll" defaultItem="ui://5ibv8q10fk57m">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <image id="n4_ra2h" name="CommandBg" src="ra2h1" xy="662,100" size="1200,900"/>
+    <component id="n5_ra2h" name="BtnClose" src="ra2hc" xy="1732,14"/>
+    <text id="n6_ra2h" name="TextTitle" xy="964,153" size="578,84" fontSize="64" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="命令"/>
+    <text id="n7_ra2h" name="InputText1" xy="1087,341" size="338,64" fontSize="48" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="" input="true" prompt="参数1"/>
+    <text id="n8_ra2h" name="InputText2" xy="1083,453" size="338,64" fontSize="48" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="" input="true" prompt="参数2"/>
+    <component id="n9_ra2h" name="BtnSend" src="ra2hd" xy="1554,387"/>
+    <text id="n10_ra2h" name="TextCommand" xy="803,608" size="947,107" fontSize="32" color="#00ff00" autoSize="none" strokeColor="#000000" text=""/>
+    <text id="n11_ra2h" name="TextResult" xy="805,747" size="947,214" fontSize="32" color="#ff0000" autoSize="none" strokeColor="#000000" text=""/>
+  </displayList>
+</component>ra2hc.xml|563|<component size="171,92" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_ra2h" name="n0" src="ra2h9" xy="0,0">
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n1_ra2h" name="title" xy="85,39" pivot="0.5,0.5" anchor="true" size="160,57" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="关闭"/>
+  </displayList>
+  <Button downEffect="dark" downEffectValue="0.8"/>
+</component>ra2hd.xml|439|<component size="171,92" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n2_ra2h" name="n0" src="ra2h8" xy="2,1"/>
+    <text id="n1_ra2h" name="title" xy="1,10" size="172,64" fontSize="48" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="发送"/>
+  </displayList>
+  <Button downEffect="dark" downEffectValue="0.8"/>
+</component>

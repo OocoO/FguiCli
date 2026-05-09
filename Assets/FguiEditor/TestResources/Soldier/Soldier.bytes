@@ -1,0 +1,785 @@
+aq3a1c.xml|577|<component size="70,100" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_aq3a" name="n0" src="aq3a19" xy="0,0" size="70,70">
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n1_aq3a" name="title" xy="0,65" size="70,34" fontSize="24" color="#4d2408" align="center" vAlign="middle" autoSize="none" singleLine="true" text="故事">
+      <relation target="" sidePair="width-width,height-height"/>
+    </text>
+  </displayList>
+  <Button/>
+</component>aq3a1i.xml|499|<component size="70,100" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n2_aq3a" name="n2" src="aq3av" xy="0,0" size="70,70"/>
+    <text id="n1_aq3a" name="title" xy="0,66" size="70,34" fontSize="24" color="#662a00" align="center" vAlign="middle" autoSize="none" singleLine="true" text="重置">
+      <relation target="" sidePair="width-width,height-height"/>
+    </text>
+  </displayList>
+  <Button/>
+</component>aq3a1j.xml|844|<component size="70,100" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_aq3a" name="n0" src="aq3a1b" xy="0,0" size="70,70">
+      <gearDisplay controller="button" pages="0,2"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n1_aq3a" name="n1" src="aq3a18" xy="0,0" size="70,70">
+      <gearDisplay controller="button" pages="1,3"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n2_aq3a" name="title" xy="0,66" size="70,34" fontSize="24" color="#4d2408" align="center" vAlign="middle" autoSize="none" singleLine="true" text="展示">
+      <relation target="" sidePair="width-width,height-height"/>
+    </text>
+  </displayList>
+  <Button mode="Check"/>
+</component>aq3a1k.xml|813|<component size="364,112">
+  <controller name="Avatar" pages="0,Soldier,1,Other" selected="1"/>
+  <displayList>
+    <component id="n0_aq3a" name="BtnShow" src="aq3a1j" xy="23,12">
+      <gearDisplay controller="Avatar" pages=""/>
+      <Button checked="true" controller="Avatar" page="1"/>
+    </component>
+    <component id="n2_aq3a" name="BtnBarracks" src="aq3a1n" xy="287,21">
+      <gearDisplay controller="Avatar" pages="1"/>
+    </component>
+    <component id="n3_aq3a" name="BtnPlatform" src="aq3a1l" xy="123,21" size="70,80">
+      <gearDisplay controller="Avatar" pages="1"/>
+      <Button checked="true"/>
+    </component>
+    <component id="n4_aq3a" name="BtnTower" src="aq3a1m" xy="205,21" size="70,80">
+      <gearDisplay controller="Avatar" pages="1"/>
+    </component>
+  </displayList>
+</component>aq3a1l.xml|590|<component size="70,80" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_aq3a" name="n0" src="aq3a17" xy="1,-6" size="70,70">
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n1_aq3a" name="title" xy="0,50" size="70,34" fontSize="24" color="#662a00" align="center" vAlign="middle" autoSize="none" singleLine="true" text="平台">
+      <relation target="" sidePair="width-width,height-height"/>
+    </text>
+  </displayList>
+  <Button mode="Radio"/>
+</component>aq3a1m.xml|515|<component size="70,80" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n2_aq3a" name="n2" src="aq3a13" xy="1,-6" size="70,70"/>
+    <text id="n1_aq3a" name="title" xy="-4,50" size="77,34" fontSize="24" color="#662a00" align="center" vAlign="middle" autoSize="none" singleLine="true" text="防御塔">
+      <relation target="" sidePair="width-width,height-height"/>
+    </text>
+  </displayList>
+  <Button mode="Radio"/>
+</component>aq3a1n.xml|513|<component size="70,80" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n2_aq3a" name="n2" src="aq3a12" xy="0,-5" size="70,70"/>
+    <text id="n1_aq3a" name="title" xy="0,50" size="70,34" fontSize="24" color="#662a00" align="center" vAlign="middle" autoSize="none" singleLine="true" text="兵营">
+      <relation target="" sidePair="width-width,height-height"/>
+    </text>
+  </displayList>
+  <Button mode="Radio"/>
+</component>aq3a1q.xml|557|<component size="80,60" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_aq3a" name="n0" src="aq3a1p" xy="0,0" size="80,60">
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n1_aq3a" name="title" xy="0,0" size="80,60" fontSize="32" align="center" vAlign="middle" autoSize="none" singleLine="true" text="">
+      <relation target="" sidePair="width-width,height-height"/>
+    </text>
+  </displayList>
+  <Button/>
+</component>aq3a1r.xml|1213|<component size="210,100">
+  <controller name="Attr" pages="0,Atk,1,Def,2,Hp" selected="0"/>
+  <displayList>
+    <graph id="n0_aq3a" name="n0" xy="0,0" size="210,100" type="rect" fillColor="#ffd90024">
+      <gearDisplay controller="Attr" pages="0"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <graph id="n1_aq3a" name="n1" xy="0,0" size="210,100" type="rect" fillColor="#ff30b2f2">
+      <gearDisplay controller="Attr" pages="1"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <graph id="n2_aq3a" name="n2" xy="0,0" size="210,100" type="rect" fillColor="#ff8fcc52">
+      <gearDisplay controller="Attr" pages="2"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <loader id="n4_aq3a" name="AttrIcon" xy="3,4" size="53,52" url="ui://htck2ycnaq3a54" fill="scaleFree"/>
+    <text id="n5_aq3a" name="TextNum" xy="57,1" size="145,50" fontSize="32" color="#ffffff" vAlign="middle" autoSize="none" strokeColor="#000000" text="999999"/>
+    <text id="n6_aq3a" name="TextAdd" xy="59,51" size="117,39" fontSize="28" color="#aef224" autoSize="none" strokeColor="#000000" text="+999"/>
+  </displayList>
+</component>aq3a1s.xml|844|<component size="140,32" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <image id="n0_aq3a" name="n0" src="aq3au" xy="96,0" size="43,32">
+      <gearDisplay controller="button" pages="0,2"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n1_aq3a" name="n1" src="aq3at" xy="96,0" size="43,32">
+      <gearDisplay controller="button" pages="1,3"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n2_aq3a" name="title" xy="2,3" size="87,29" fontSize="20" color="#4d2408" align="right" vAlign="middle" autoSize="none" singleLine="true" text="详细数据">
+      <relation target="" sidePair="width-width,height-height"/>
+    </text>
+  </displayList>
+  <Button mode="Check"/>
+</component>aq3a1t.xml|849|<component size="472,60">
+  <displayList>
+    <graph id="n0_aq3a" name="Bg" xy="0,0" size="472,60" type="rect" fillColor="#ffbf1d1d" corner="2">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <loader id="n1_aq3a" name="IconAttr" xy="39,11" size="42,40" url="ui://htck2ycnaq3a54"/>
+    <text id="n2_aq3a" name="TextTitle" xy="85,15" size="103,34" fontSize="24" color="#ffffff" autoSize="none" strokeColor="#000000" text="攻击力"/>
+    <text id="n3_aq3a" name="TextNum" xy="214,13" size="116,34" fontSize="24" color="#ffffff" autoSize="none" strokeColor="#000000" text="888888"/>
+    <text id="n4_aq3a" name="TextAdd" xy="391,14" size="77,34" fontSize="24" color="#8fcc52" autoSize="none" strokeColor="#000000" text="+99"/>
+    <image id="n6_aq3a" name="IconAdd" src="aq3a1v" xy="355,11"/>
+  </displayList>
+</component>aq3a1w.xml|1559|<component size="508,318">
+  <controller name="LevelUp" pages="0,LevelUp,1,Upgrade" selected="0"/>
+  <displayList>
+    <component id="n0_aq3a" name="ComCost1" src="wcfr4j" pkg="htck2ycn" xy="119,21" size="142,47">
+      <gearXY controller="LevelUp" pages="0,1" values="119,21|120,92"/>
+      <Label title="9999"/>
+    </component>
+    <component id="n1_aq3a" name="ComCost2" src="wcfr4j" pkg="htck2ycn" xy="278,20" size="141,55">
+      <gearXY controller="LevelUp" pages="0,1" values="278,20|280,92"/>
+    </component>
+    <component id="n2_aq3a" name="BtnLevelUp" src="kt4138" pkg="htck2ycn" xy="228,200" pivot="0.5,0.5" anchor="true">
+      <gearDisplay controller="LevelUp" pages="0"/>
+      <Button title="升1级"/>
+    </component>
+    <component id="n3_aq3a" name="LevelSlider" src="wcfr41" pkg="htck2ycn" xy="51,72" scale="0.78,0.78" controller="ShowText,1">
+      <gearDisplay controller="LevelUp" pages="0"/>
+    </component>
+    <component id="n4_aq3a" name="BtnUpgrade" src="kt4134" pkg="htck2ycn" xy="228,198" pivot="0.5,0.5" anchor="true" size="280,120">
+      <gearDisplay controller="LevelUp" pages="1"/>
+      <Button title="进阶"/>
+    </component>
+    <component id="n14_j2y7" name="UnlockItem1" src="j2y71z" xy="12,10" group="n13_aq3a" scale="0.62,0.62"/>
+    <component id="n15_j2y7" name="UnlockItem2" src="j2y71z" xy="228,10" group="n13_aq3a" scale="0.62,0.62"/>
+    <group id="n13_aq3a" name="UnlockNode" xy="12,10" size="390,50" advanced="true">
+      <gearDisplay controller="LevelUp" pages="1"/>
+    </group>
+  </displayList>
+</component>aq3a1x.xml|2321|<component size="1800,940">
+  <controller name="StarState" pages="0,CanUp,1,Max" selected="0"/>
+  <displayList>
+    <component id="n0_aq3a" name="PanelBg" src="kt413k" pkg="htck2ycn" xy="0,0" size="1800,940">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <graph id="n2_aq3a" name="AbilityBg" xy="95,787" size="430,40" type="rect" lineSize="0" fillColor="#ffd7b69b" corner="20"/>
+    <list id="n1_aq3a" name="AbilityList" xy="128,677" size="384,133" layout="row" overflow="hidden" colGap="10" defaultItem="ui://3qbfu3hkxpzup" vAlign="middle">
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <loader id="n3_aq3a" name="SoldierIcon" xy="317,115" size="525,619"/>
+    <component id="n4_aq3a" name="ComStar" src="wcfr4x" pkg="htck2ycn" xy="1317,96" size="92,39"/>
+    <component id="n5_aq3a" name="BtnReturn" src="wcfr44" pkg="htck2ycn" xy="1659,9"/>
+    <graph id="n6_aq3a" name="Line" xy="1000,160" size="750,2" type="rect" lineSize="0" fillColor="#ff4d2408"/>
+    <component id="n7_aq3a" name="SoldierCurr" src="wcfr51" pkg="htck2ycn" xy="1078,215"/>
+    <component id="n8_aq3a" name="SoldierUp" src="wcfr51" pkg="htck2ycn" xy="1472,213"/>
+    <component id="n9_aq3a" name="ComCostPiece" src="wcfr4j" pkg="htck2ycn" xy="1243,680">
+      <gearDisplay controller="StarState" pages="0"/>
+    </component>
+    <component id="n10_aq3a" name="ComCostRes" src="wcfr4j" pkg="htck2ycn" xy="1339,680">
+      <gearDisplay controller="StarState" pages="0"/>
+    </component>
+    <component id="n11_aq3a" name="BtnStarUp" src="kt4134" pkg="htck2ycn" xy="1331,771" pivot="0.5,0.5" anchor="true" size="280,80">
+      <gearDisplay controller="StarState" pages="0"/>
+      <Button title="升星"/>
+    </component>
+    <text id="n14_aq3a" name="TextMax" xy="1191,731" size="280,80" fontSize="56" color="#fffff2c8" align="center" autoSize="none" strokeColor="#ff4d2408" text="满星">
+      <gearDisplay controller="StarState" pages="1"/>
+    </text>
+    <image id="n12_aq3a" name="n12" src="aq3a1y" xy="1322,278"/>
+    <list id="n13_j2y7" name="UnlockList" xy="1005,478" size="700,160" layout="flow_hz" overflow="hidden" lineGap="30" colGap="50" lineItemCount="2" defaultItem="ui://3qbfu3hkj2y71z">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>eqspa.xml|897|<component size="1920,1080">
+  <displayList>
+    <component id="n0_eqsp" name="PanelBg" src="wcfr4g" pkg="htck2ycn" xy="0,0" size="1920,1080">
+      <relation target="" sidePair="width-width,height-height"/>
+    </component>
+    <component id="n2_eqsp" name="Bg" src="kt413l" pkg="htck2ycn" xy="68,37" size="1784,994" controller="ShowClose,1">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <list id="n4_eqsp" name="EquipmentList" xy="128,93" size="1663,897" layout="flow_hz" overflow="scroll" lineGap="25" colGap="40" defaultItem="ui://3qbfu3hkh2na22">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <item controllers="isUnequip,1"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>fs222a.xml|1100|<component size="150,150">
+  <controller name="Unlock" pages="0,Lock,1,Unlock" selected="1"/>
+  <displayList>
+    <component id="n0_urqt" name="ComAmplifier" src="ussj5j" pkg="htck2ycn" xy="75,75" pivot="0.5,0.5" anchor="true" scale="0.5,0.5">
+      <gearDisplay controller="Unlock" pages=""/>
+      <gearLook controller="Unlock" pages="0,1" values="1,0,1,1|1,0,0,1"/>
+    </component>
+    <text id="n1_urqt" name="LabelLock" xy="59,104" size="81,34" group="n7_aq3a" fontSize="24" color="#ff1a1a" vAlign="middle" autoSize="none" strokeColor="#401313" text="可解锁"/>
+    <image id="n4_aq3a" name="LockBg" src="aq3as" xy="3,96" group="n7_aq3a"/>
+    <text id="n5_aq3a" name="TextStar" xy="11,96" size="40,44" group="n7_aq3a" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="5"/>
+    <image id="n10_aq3a" name="LockIcon" src="us1r52" pkg="htck2ycn" xy="58,45" group="n7_aq3a"/>
+    <group id="n7_aq3a" name="Lock" xy="3,45" size="136,104" advanced="true">
+      <gearDisplay controller="Unlock" pages="0"/>
+    </group>
+  </displayList>
+</component>fs222b.xml|1121|<component size="150,150">
+  <controller name="Unlock" pages="0,Lock,1,Unlock" selected="0"/>
+  <displayList>
+    <component id="n0_urqt" name="ComAttachmentModule" src="fs225k" pkg="htck2ycn" xy="75,75" pivot="0.5,0.5" anchor="true" scale="0.5,0.5" grayed="true">
+      <gearDisplay controller="Unlock" pages=""/>
+      <gearLook controller="Unlock" pages="0,1" values="1,0,1,1|1,0,0,1"/>
+    </component>
+    <text id="n1_urqt" name="LabelLock" xy="59,104" size="81,34" group="n7_aq3a" fontSize="24" color="#ff1a1a" vAlign="middle" autoSize="none" strokeColor="#401313" text="可解锁"/>
+    <image id="n4_aq3a" name="LockBg" src="aq3as" xy="3,96" group="n7_aq3a"/>
+    <text id="n5_aq3a" name="TextStar" xy="11,96" size="40,44" group="n7_aq3a" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="5"/>
+    <image id="n10_aq3a" name="LockIcon" src="us1r52" pkg="htck2ycn" xy="58,45" group="n7_aq3a"/>
+    <group id="n7_aq3a" name="Lock" xy="3,45" size="136,104" advanced="true">
+      <gearDisplay controller="Unlock" pages="0"/>
+    </group>
+  </displayList>
+</component>fs222c.xml|2452|<component size="1800,940">
+  <controller name="StarState" pages="0,CanUp,1,Max" selected="0"/>
+  <displayList>
+    <component id="n0_aq3a" name="PanelBg" src="kt413k" pkg="htck2ycn" xy="0,0" size="1800,940">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <loader id="n3_aq3a" name="SoldierIcon" xy="475,117" size="525,619" group="n16_fs22"/>
+    <component id="n4_aq3a" name="ComStar" src="wcfr4x" pkg="htck2ycn" xy="1317,96" size="92,39" group="n16_fs22"/>
+    <component id="n5_aq3a" name="BtnReturn" src="wcfr44" pkg="htck2ycn" xy="1659,9" group="n16_fs22"/>
+    <graph id="n6_aq3a" name="Line" xy="1000,160" size="750,2" group="n16_fs22" type="rect" lineSize="0" fillColor="#ff4d2408"/>
+    <component id="n7_aq3a" name="SoldierCurr" src="wcfr51" pkg="htck2ycn" xy="1078,215" group="n16_fs22"/>
+    <component id="n8_aq3a" name="SoldierUp" src="wcfr51" pkg="htck2ycn" xy="1472,213" group="n16_fs22"/>
+    <component id="n9_aq3a" name="ComCostPiece" src="wcfr4j" pkg="htck2ycn" xy="1291,674" group="n16_fs22">
+      <gearDisplay controller="StarState" pages="0"/>
+    </component>
+    <component id="n11_aq3a" name="BtnStarUp" src="kt4134" pkg="htck2ycn" xy="1331,771" pivot="0.5,0.5" anchor="true" size="280,80" group="n16_fs22">
+      <gearDisplay controller="StarState" pages="0"/>
+      <Button title="升星"/>
+    </component>
+    <text id="n14_aq3a" name="TextMax" xy="1191,731" size="280,80" group="n16_fs22" fontSize="56" color="#fff2c8" align="center" autoSize="none" strokeColor="#4d2408" text="满星">
+      <gearDisplay controller="StarState" pages="1"/>
+    </text>
+    <image id="n12_aq3a" name="n12" src="aq3a1y" xy="1322,278" group="n16_fs22"/>
+    <list id="n13_j2y7" name="UnlockList" xy="1005,478" size="700,160" group="n16_fs22" layout="flow_hz" overflow="hidden" lineGap="30" colGap="50" lineItemCount="2" defaultItem="ui://3qbfu3hkj2y71z">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <list id="n15_fs22" name="AmplifierList" xy="84,176" size="370,510" group="n16_fs22" layout="flow_hz" overflow="hidden" lineGap="20" colGap="20" defaultItem="ui://3qbfu3hkfs222a" align="center">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <group id="n16_fs22" name="n16" xy="84,9" size="1703,802" advanced="true">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </group>
+  </displayList>
+</component>h2na22.xml|427|<component size="240,288">
+  <controller name="isUnequip" pages="0,,1," selected="0"/>
+  <displayList>
+    <component id="n0_h2na" name="equipment" src="wcfr4i" pkg="htck2ycn" xy="0,0">
+      <gearDisplay controller="isUnequip" pages="0"/>
+    </component>
+    <image id="n1_h2na" name="n1" src="h2na21" xy="15,28" size="215,240">
+      <gearDisplay controller="isUnequip" pages="1"/>
+    </image>
+  </displayList>
+</component>j2y71z.xml|598|<component size="320,60">
+  <displayList>
+    <graph id="n0_aq3a" name="Bg" xy="0,0" size="320,60" type="rect" fillColor="#ff30b2f2" corner="2"/>
+    <image id="n7_j2y7" name="IconUnlock" src="aq3a55" pkg="htck2ycn" xy="0,0" size="60,60"/>
+    <text id="n2_aq3a" name="TextTitle" xy="60,13" size="201,34" fontSize="24" color="#ffffff" vAlign="middle" autoSize="none" strokeColor="#000000" text="军团技能等级上限"/>
+    <text id="n4_aq3a" name="TextContent" xy="263,13" size="49,34" fontSize="24" color="#ffffff" align="right" autoSize="none" strokeColor="#000000" text="999"/>
+  </displayList>
+</component>kynq0.xml|1054|<component size="1920,1080">
+  <displayList>
+    <image id="n1_opt" name="PanelBg" src="lavx5e" pkg="htck2ycn" xy="-320,0">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </image>
+    <component id="n2_opt" name="PanelCore" src="kt413k" pkg="htck2ycn" xy="49,45" size="1830,987">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n3_opt" name="ComTitle" src="wcfr46" pkg="htck2ycn" xy="89,44">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n4_opt" name="ResBar" src="g5vp5g" pkg="htck2ycn" xy="1920,0" pivot="1,0" anchor="true" controller="Number,2">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <list id="n5_opt" name="SoldierList" xy="85,154" size="1750,789" layout="flow_hz" selectionMode="none" overflow="scroll" lineGap="30" colGap="50" defaultItem="ui://htck2ycnwcfr51">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </list>
+  </displayList>
+</component>lavx23.xml|3050|<component size="490,470">
+  <controller name="IsShowDetail" pages="0,false,1,true" selected="1"/>
+  <displayList>
+    <component id="n33_ua4o" name="RaceType" src="wcfr4t" pkg="htck2ycn" xy="36,0" size="92,40" scale="0.8,0.8"/>
+    <component id="n34_ua4o" name="CombatRole" src="wcfr4u" pkg="htck2ycn" xy="325,0" size="92,40" scale="0.8,0.8"/>
+    <component id="n35_ua4o" name="UnitSize" src="wcfr4v" pkg="htck2ycn" xy="175,0" size="92,40" scale="0.8,0.8"/>
+    <text id="n36_ua4o" name="TextName" xy="7,68" size="420,54" group="n37_ua4o" fontSize="32" color="#4d2408" align="center" vAlign="middle" autoSize="none" bold="true" strokeColor="#fff1cd" strokeSize="2"/>
+    <component id="n58_ua4o" name="startLevel" src="wcfr4x" pkg="htck2ycn" xy="142,124" size="211,40" group="n37_ua4o"/>
+    <component id="n59_ua4o" name="btnLevelStar" src="aq3a1q" xy="363,124" size="56,46" group="n37_ua4o"/>
+    <group id="n37_ua4o" name="InfoNode" xy="7,68" size="420,102" advanced="true">
+      <gearDisplay controller="IsShowDetail" pages="0"/>
+    </group>
+    <text id="n39_ua4o" name="TextLevel" xy="13,76" size="96,40" group="n46_ua4o" fontSize="28" color="#4d2408" align="center" autoSize="none" bold="true" text="等级99"/>
+    <text id="n40_ua4o" name="TextLevelAdd" xy="109,81" size="54,30" group="n46_ua4o" fontSize="22" color="#72b12e" vAlign="middle" autoSize="none" bold="true" text="+99"/>
+    <text id="n42_ua4o" name="TextTier" xy="199,78" size="60,34" group="n46_ua4o" fontSize="24" color="#4d2408" autoSize="none" bold="true" text="9阶"/>
+    <text id="n43_ua4o" name="TextTierAdd" xy="257,79" size="50,34" group="n46_ua4o" fontSize="24" color="#72b12e" vAlign="middle" autoSize="none" bold="true" text="+1"/>
+    <component id="n44_ua4o" name="BtnAttrDetail" src="aq3a1s" xy="311,83" group="n46_ua4o"/>
+    <graph id="n45_ua4o" name="Line" xy="5,129" size="420,2" group="n46_ua4o" type="rect" lineSize="0" fillColor="#8c4d2408"/>
+    <group id="n46_ua4o" name="LevelNode" xy="5,76" size="446,55" advanced="true">
+      <gearXY controller="IsShowDetail" pages="0" values="5,276" default="5,76"/>
+    </group>
+    <list id="n50_ua4o" name="AttrList" xy="6,132" size="465,323" overflow="scroll" lineGap="10" defaultItem="ui://3qbfu3hkaq3a1t">
+      <gearDisplay controller="IsShowDetail" pages="1"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <component id="n47_ua4o" name="AttrAtk" src="aq3a1r" xy="0,340" size="205,129" group="n61_ua4o" scale="0.68,0.68" controller="Attr,0"/>
+    <component id="n48_ua4o" name="AttrDef" src="aq3a1r" xy="145,339" size="205,131" group="n61_ua4o" scale="0.68,0.68" controller="Attr,1"/>
+    <component id="n49_ua4o" name="AttrHP" src="aq3a1r" xy="292,339" size="198,126" group="n61_ua4o" scale="0.68,0.68" controller="Attr,2"/>
+    <group id="n61_ua4o" name="BasicInfos" xy="0,339" size="490,131" advanced="true">
+      <gearDisplay controller="IsShowDetail" pages="0"/>
+    </group>
+  </displayList>
+</component>nic02f.xml|1091|<component size="240,278">
+  <controller name="isSelect" pages="0,,1," selected="0"/>
+  <controller name="isLocked" pages="0,,1," selected="0"/>
+  <displayList>
+    <graph id="fs010" name="FormIconSelectedBg" xy="0,0" size="240,278" type="rect" lineSize="4" lineColor="#ff4cff4c" fillColor="#00000000" corner="12">
+      <gearDisplay controller="isSelect" pages="1"/>
+    </graph>
+    <loader id="fs011" name="FormIcon0" xy="16,16" size="208,214" fill="scaleFree"/>
+    <text id="fs012" name="FormIconLabel0" xy="0,246" size="240,28" fontSize="20" color="#fff4d4" align="center" vAlign="middle" autoSize="none" bold="true" text="陆地形态"/>
+    <graph id="fs013" name="FormLockOverlay0" xy="16,16" size="208,214" visible="false" type="rect" lineSize="0" fillColor="#88000000" corner="12">
+      <gearDisplay controller="isLocked" pages="1"/>
+    </graph>
+    <graph id="fs014" name="FormLockIcon0" xy="106,109" size="28,28" visible="false" type="rect" lineSize="0" fillColor="#ffff4444" corner="14">
+      <gearDisplay controller="isLocked" pages="1"/>
+    </graph>
+  </displayList>
+</component>ooq72e.xml|256|<component size="80,80" extention="Button">
+  <displayList>
+    <graph id="n1_ooq7" name="bg" xy="0,0" size="80,80" type="rect"/>
+    <component id="n0_ooq7" name="itemInfo" src="wcfr4k" pkg="htck2ycn" xy="20,11"/>
+  </displayList>
+  <Button/>
+</component>package.xml|4066|<packageDescription id="3qbfu3hk" name="Soldier">
+  <resources>
+    <component id="aq3a1c" name="Button_Story" path="/Button/" size="70,100"/>
+    <component id="aq3a1i" name="Button_Reset" path="/Button/" size="70,100"/>
+    <component id="aq3a1j" name="Button_Show" path="/Button/" size="70,100"/>
+    <component id="aq3a1k" name="SoldierTrainingAvatar" path="/Component/" size="364,112"/>
+    <component id="aq3a1l" name="Button_Platform" path="/Button/" size="70,80"/>
+    <component id="aq3a1m" name="Button_Tower" path="/Button/" size="70,80"/>
+    <component id="aq3a1n" name="Button_Barracks" path="/Button/" size="70,80"/>
+    <component id="aq3a1q" name="Button_StarUp" path="/Button/" size="80,60"/>
+    <component id="aq3a1r" name="SoldierTrainingBasicAttribute" path="/Component/" size="210,100"/>
+    <component id="aq3a1s" name="Button_AttrDetail" path="/Button/" size="140,32"/>
+    <component id="aq3a1t" name="SoldierTrainingAttributeItem" path="/Component/" size="472,60"/>
+    <component id="aq3a1w" name="SoldierTrainingLevelUp" path="/Component/" size="508,318"/>
+    <component id="fs222a" name="SoldierTrainingAmplifierItem" path="/Component/" size="150,150"/>
+    <component id="fs222b" name="SoldierTrainingAttachModuleItem" path="/Component/" size="150,150"/>
+    <component id="h2na22" name="SelectEquipBtn" path="/Component/" size="240,288"/>
+    <component id="j2y71z" name="SoldierTrainingUnlockItem" path="/Component/" size="320,60"/>
+    <component id="lavx23" name="ComSoldierInfo" path="/Component/" size="490,470"/>
+    <component id="nic02f" name="GiantSoliderModeBtn" path="/Component/" size="240,278"/>
+    <component id="ooq72e" name="Button_SelectExpBook" path="/Button/" size="80,80"/>
+    <component id="qbqu2d" name="GiantSoldierInfo" path="/Component/" size="490,470"/>
+    <component id="ra2hn" name="GiantSoldierAbilityItem" path="/Component/" size="650,128"/>
+    <component id="scr326" name="GiantTraningAvatar" path="/Component/" size="93,112"/>
+    <component id="urqtq" name="SoldierTrainingEquipSlotItem" path="/Component/" size="150,150"/>
+    <component id="xpzup" name="SoldierTrainingAbilityItem" path="/Component/" size="120,120"/>
+    <image id="aq3a12" name="兵营" path="/Image/" size="80,107"/>
+    <image id="aq3a13" name="防御塔" path="/Image/" size="80,107"/>
+    <image id="aq3a17" name="平台" path="/Image/" size="102,140"/>
+    <image id="aq3a18" name="形象" path="/Image/" size="102,140"/>
+    <image id="aq3a19" name="故事" path="/Image/" size="102,140"/>
+    <image id="aq3a1b" name="展示" path="/Image/" size="102,140"/>
+    <image id="aq3a1p" name="升星" path="/Image/" size="70,71"/>
+    <image id="aq3a1v" name="属性提升" path="/Image/" size="30,38"/>
+    <image id="aq3a1y" name="升星右箭头" path="/Image/" size="76,65"/>
+    <image id="aq3as" name="星级解锁" path="/Image/" size="51,53"/>
+    <image id="aq3at" name="button_arrow point_down" path="/Image/" size="56,41"/>
+    <image id="aq3au" name="button_arrow point_up" path="/Image/" size="56,41"/>
+    <image id="aq3av" name="重置" path="/Image/" size="102,140"/>
+    <image id="h2na21" name="按钮-撤下展示勋章" path="/Image/" size="47,49"/>
+    <component id="aq3a1x" name="SoldierTrainingStarUp" path="/Component/" size="1800,940" exported="true"/>
+    <component id="eqspa" name="EquipmentSelectPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="fs222c" name="GiantSoldierStarUp" path="/Component/" size="1800,940" exported="true"/>
+    <component id="kynq0" name="SoldierListPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="ra2hj" name="GiantSoldierListItem" path="/Component/" size="174,227" exported="true"/>
+    <component id="ra2hm" name="GiantSoldierAbility" path="/Component/" size="740,880" exported="true"/>
+    <component id="scr325" name="GiantSoldierTrainPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="xpzuo" name="SoldierTrainingPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <atlas id="atlas0" size="512,256" file="atlas0.png"/>
+  </resources>
+</packageDescription>qbqu2d.xml|1385|<component size="490,470">
+  <controller name="IsShowDetail" pages="0,false,1,true" selected="1"/>
+  <displayList>
+    <component id="n62_qbqu" name="n62" src="wcfr4y" pkg="htck2ycn" xy="0,0" size="503,474"/>
+    <text id="n39_ua4o" name="TextLevel" xy="23,16" size="96,40" group="n46_ua4o" fontSize="28" color="#4d2408" align="center" autoSize="none" bold="true" text="等级99"/>
+    <text id="n40_ua4o" name="TextLevelAdd" xy="119,21" size="54,30" group="n46_ua4o" fontSize="22" color="#72b12e" vAlign="middle" autoSize="none" bold="true" text="+99"/>
+    <text id="n42_ua4o" name="TextTier" xy="209,18" size="60,34" group="n46_ua4o" fontSize="24" color="#4d2408" autoSize="none" bold="true" text="9阶"/>
+    <text id="n43_ua4o" name="TextTierAdd" xy="267,19" size="50,34" group="n46_ua4o" fontSize="24" color="#72b12e" vAlign="middle" autoSize="none" bold="true" text="+1"/>
+    <graph id="n45_ua4o" name="Line" xy="15,69" size="420,2" group="n46_ua4o" type="rect" lineSize="0" fillColor="#8c4d2408"/>
+    <group id="n46_ua4o" name="LevelNode" xy="15,16" size="420,55" advanced="true"/>
+    <list id="n50_ua4o" name="AttrList" xy="16,82" size="466,376" overflow="scroll" lineGap="10" defaultItem="ui://3qbfu3hkaq3a1t">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>ra2hj.xml|697|<component size="174,227">
+  <displayList>
+    <loader id="n0_kynq" name="SoldierBg" xy="0,0" size="168,209" url="ui://htck2ycnbvhl1w" fill="scaleFree" autoSize="true">
+      <relation target="" sidePair="width-width,height-height"/>
+    </loader>
+    <loader id="n1_kynq" name="SoldierIcon" xy="85,87" pivot="0.5,0.5" anchor="true" size="138,140" fill="scaleFree">
+      <relation target="" sidePair=""/>
+    </loader>
+    <text id="n2_bvhl" name="TextLevel" xy="45,7" size="117,44" fontSize="32" color="#ffffff" align="right" autoSize="none" strokeColor="#000000" text="LV.99"/>
+    <component id="n6_bvhl" name="StarIcon" src="wcfr4x" pkg="htck2ycn" xy="-43,156"/>
+  </displayList>
+</component>ra2hm.xml|388|<component size="740,880">
+  <displayList>
+    <graph id="n1_t3f8" name="Bg" xy="0,0" size="740,880" type="rect" lineColor="#ff333333" fillColor="#b2333333" corner="20"/>
+    <list id="n8_ra2h" name="AbilityList" xy="44,61" size="650,780" overflow="scroll" defaultItem="ui://3qbfu3hkra2hn">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>ra2hn.xml|722|<component size="650,128">
+  <displayList>
+    <text id="n0_ra2h" name="TextName" xy="119,64" pivot="0.5,0.5" anchor="true" size="199,100" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="近战普攻"/>
+    <text id="n1_ra2h" name="TextLevel" xy="291,64" pivot="0.5,0.5" anchor="true" size="109,45" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="Lv.99"/>
+    <component id="n2_ra2h" name="BtnLevelUp" src="h8iw16" pkg="htck2ycn" xy="463,22">
+      <Button title="升级"/>
+    </component>
+    <component id="n3_ra2h" name="CostItem" src="uiyex" pkg="htck2ycn" xy="406,64" pivot="0.5,0.5" anchor="true" scale="0.4,0.4"/>
+  </displayList>
+</component>scr325.xml|14346|<component size="1920,1080">
+  <controller name="ShowType" pages="3,插画,4,世界相机" selected="0"/>
+  <controller name="LevelUpPopup" pages="0,Hidden,1,Visible" selected="1"/>
+  <controller name="isShowDetail" pages="0,,1," selected="0"/>
+  <controller name="ModeSwitchPopup" pages="0,Hidden,1,Visible" selected="0"/>
+  <controller name="modeUseState" pages="0,,1,,2," selected="1"/>
+  <displayList>
+    <image id="n32_ysc8" name="PanelBg" src="lavx5e" pkg="htck2ycn" xy="-320,0">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </image>
+    <component id="n62_lavx" name="n62" src="kt413k" pkg="htck2ycn" xy="49,45" size="1830,987">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n3_xpzu" name="ComTitle" src="wcfr46" pkg="htck2ycn" xy="43,31">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <property target="title.title" propertyId="0" value="巨神兵-养成"/>
+    </component>
+    <component id="n68_zu5k" name="ResBar" src="g5vp5g" pkg="htck2ycn" xy="1920,0" pivot="1,0" anchor="true" controller="Number,2">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <graph id="n21_scr3" name="InfoSecBg" xy="1131,195" size="684,176" group="n77_ussj" type="rect" lineSize="2" lineColor="#ff553322" fillColor="#1a000000" corner="12"/>
+    <text id="n73_scr3" name="TextName" xy="1143,269" size="672,54" group="n76_scr3" fontSize="32" color="#4d2408" align="center" vAlign="middle" autoSize="none" bold="true" strokeColor="#fff1cd" strokeSize="2"/>
+    <component id="n74_scr3" name="startLevel" src="wcfr4x" pkg="htck2ycn" xy="1278,325" size="211,40" group="n76_scr3"/>
+    <component id="n75_scr3" name="btnLevelStar" src="aq3a1q" xy="1499,325" size="56,46" group="n76_scr3"/>
+    <component id="n70_scr3" name="RaceType" src="wcfr4t" pkg="htck2ycn" xy="1143,207" size="92,40" group="n76_scr3" scale="0.8,0.8"/>
+    <component id="n71_scr3" name="CombatRole" src="wcfr4u" pkg="htck2ycn" xy="1461,207" size="92,40" group="n76_scr3" scale="0.8,0.8"/>
+    <component id="n72_scr3" name="UnitSize" src="wcfr4v" pkg="htck2ycn" xy="1311,207" size="92,40" group="n76_scr3" scale="0.8,0.8"/>
+    <group id="n76_scr3" name="InfoNode" xy="1143,207" size="672,164" advanced="true">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </group>
+    <graph id="n5_scr3" name="AmplifierSecBg" xy="105,333" size="394,582" group="n77_ussj" type="rect" lineSize="2" lineColor="#ff553322" fillColor="#1a000000" corner="12"/>
+    <text id="n1_scr3" name="LblAmplifier" xy="117,345" size="220,42" group="n77_ussj" fontSize="28" color="#fff4d4" vAlign="middle" autoSize="none" bold="true" strokeColor="#4d2408" strokeSize="2" text="增幅器插件"/>
+    <list id="n2_scr3" name="AmplifierList" xy="117,393" size="370,510" group="n77_ussj" layout="flow_hz" overflow="hidden" lineGap="20" colGap="20" defaultItem="ui://3qbfu3hkfs222a" align="center">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <component id="n57_ua4o" name="StoryBtn" src="aq3a1c" xy="111,156" group="n77_ussj"/>
+    <component id="n56_ua4o" name="ResetBtn" src="aq3a1i" xy="218,156" group="n77_ussj"/>
+    <component id="n28_aq3a" name="ComAvatar" src="scr326" xy="290,144" group="n77_ussj"/>
+    <component id="n3_scr3" name="BtnMode" src="kt413c" pkg="htck2ycn" xy="341,250" group="n77_ussj">
+      <Button title="切换形态"/>
+    </component>
+    <component id="n101_nic0" name="ModeDetail" src="kt413c" pkg="htck2ycn" xy="341,325" group="n77_ussj">
+      <Button title="形态详情"/>
+    </component>
+    <text id="n4_scr3" name="TxtFormName" xy="114,267" size="220,60" group="n77_ussj" fontSize="30" color="#fff4d4" align="center" vAlign="middle" autoSize="none" bold="true" strokeColor="#4d2408" strokeSize="2" text="陆地形态"/>
+    <loader id="n52_ua4o" name="SoldierIcon" xy="503,77" size="631,826" group="n77_ussj" fill="scaleFree">
+      <gearDisplay controller="ShowType" pages="3"/>
+    </loader>
+    <loader id="n53_ua4o" name="WorldView" xy="503,68" size="620,860" group="n77_ussj">
+      <gearDisplay controller="ShowType" pages="4"/>
+    </loader>
+    <graph id="n14_scr3" name="SkillSecBg" xy="1131,404" size="684,217" group="n77_ussj" type="rect" lineSize="2" lineColor="#ff553322" fillColor="#1a000000" corner="12"/>
+    <text id="n11_scr3" name="LblSkills" xy="1143,416" size="150,42" group="n77_ussj" fontSize="28" color="#fff4d4" vAlign="middle" autoSize="none" bold="true" strokeColor="#4d2408" strokeSize="2" text="技能"/>
+    <list id="n13_scr3" name="AbilityIconList" xy="1143,464" size="660,145" group="n77_ussj" layout="row" overflow="scroll" scroll="horizontal" colGap="10" defaultItem="ui://3qbfu3hkxpzup" vAlign="middle">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <graph id="n18_scr3" name="AttachedModuleSecBg" xy="1131,638" size="684,235" group="n77_ussj" type="rect" lineSize="2" lineColor="#ff553322" fillColor="#1a000000" corner="12"/>
+    <text id="n15_scr3" name="LblAttachedModule" xy="1143,650" size="220,42" group="n77_ussj" fontSize="28" color="#fff4d4" vAlign="middle" autoSize="none" bold="true" strokeColor="#4d2408" strokeSize="2" text="外挂组件"/>
+    <list id="n16_scr3" name="AttachedModuleList" xy="1143,698" size="660,148" group="n77_ussj" layout="row" overflow="hidden" colGap="20" defaultItem="ui://3qbfu3hkfs222b" align="center" vAlign="middle">
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <group id="n77_ussj" name="n77" xy="111,68" size="1692,860" advanced="true">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </group>
+    <graph id="n78_scr3" name="LevelPopupMask" xy="0,0" size="1920,1080" type="rect" lineSize="0" fillColor="#4c000000">
+      <gearDisplay controller="LevelUpPopup" pages="1"/>
+      <relation target="" sidePair="width-width,height-height,center-center,middle-middle"/>
+    </graph>
+    <graph id="n79_scr3" name="LevelPopupBg" xy="330,638" size="1260,234" group="n96_8i8r" type="rect" lineSize="2" lineColor="#ff8b5d2c" fillColor="#ff21160a" corner="24"/>
+    <text id="n80_scr3" name="TxtPopupTitle" xy="378,667" size="180,40" group="n96_8i8r" fontSize="30" color="#ff9b4c" vAlign="middle" autoSize="none" bold="true" strokeColor="#4d2408" strokeSize="2" text="升级预览"/>
+    <component id="n81_scr3" name="BtnPopupDetail" src="aq3a1s" xy="1295,663" group="n96_8i8r"/>
+    <graph id="n82_scr3" name="PopupAtkCard" xy="378,711" size="220,72" group="n96_8i8r" type="rect" lineSize="0" fillColor="#ffbd4b2f" corner="8"/>
+    <text id="n83_scr3" name="TxtPopupAtkTitle" xy="395,723" size="52,22" group="n96_8i8r" fontSize="20" color="#fff4d4" vAlign="middle" autoSize="none" bold="true" text="攻击"/>
+    <text id="n84_scr3" name="TxtPopupAtkValue" xy="392,749" size="100,28" group="n96_8i8r" fontSize="28" color="#ffffff" vAlign="middle" autoSize="none" bold="true" text="0"/>
+    <text id="n85_scr3" name="TxtPopupAtkDelta" xy="495,749" size="90,28" group="n96_8i8r" fontSize="24" color="#8cff6a" align="right" vAlign="middle" autoSize="none" bold="true" text="+0"/>
+    <graph id="n86_scr3" name="PopupDefCard" xy="620,711" size="220,72" group="n96_8i8r" type="rect" lineSize="0" fillColor="#ff366eb6" corner="8"/>
+    <text id="n87_scr3" name="TxtPopupDefTitle" xy="637,723" size="52,22" group="n96_8i8r" fontSize="20" color="#fff4d4" vAlign="middle" autoSize="none" bold="true" text="防御"/>
+    <text id="n88_scr3" name="TxtPopupDefValue" xy="634,749" size="100,28" group="n96_8i8r" fontSize="28" color="#ffffff" vAlign="middle" autoSize="none" bold="true" text="0"/>
+    <text id="n89_scr3" name="TxtPopupDefDelta" xy="737,749" size="90,28" group="n96_8i8r" fontSize="24" color="#8cff6a" align="right" vAlign="middle" autoSize="none" bold="true" text="+0"/>
+    <graph id="n90_scr3" name="PopupHpCard" xy="862,711" size="220,72" group="n96_8i8r" type="rect" lineSize="0" fillColor="#ff68a83c" corner="8"/>
+    <text id="n91_scr3" name="TxtPopupHpTitle" xy="879,723" size="52,22" group="n96_8i8r" fontSize="20" color="#fff4d4" vAlign="middle" autoSize="none" bold="true" text="生命"/>
+    <text id="n92_scr3" name="TxtPopupHpValue" xy="876,749" size="100,28" group="n96_8i8r" fontSize="28" color="#ffffff" vAlign="middle" autoSize="none" bold="true" text="0"/>
+    <text id="n93_scr3" name="TxtPopupHpDelta" xy="979,749" size="90,28" group="n96_8i8r" fontSize="24" color="#8cff6a" align="right" vAlign="middle" autoSize="none" bold="true" text="+0"/>
+    <list id="n94_scr3" name="PopupCostList" xy="1112,705" size="276,88" group="n96_8i8r" layout="flow_hz" overflow="hidden" lineGap="8" colGap="6" defaultItem="ui://3qbfu3hkooq72e" align="center" vAlign="middle">
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <component id="n95_scr3" name="BtnPopupLevelUp" src="h8iw16" pkg="htck2ycn" xy="1402,701" size="150,92" group="n96_8i8r">
+      <Button title="升级"/>
+    </component>
+    <list id="n100_qbqu" name="UnlockList" xy="387,792" size="705,76" group="n96_8i8r" layout="flow_hz" overflow="hidden" lineGap="30" colGap="50" lineItemCount="2" defaultItem="ui://3qbfu3hkj2y71z">
+      <item/>
+      <item/>
+    </list>
+    <group id="n96_8i8r" name="LevelUpGroup" xy="330,638" size="1260,234" advanced="true">
+      <gearDisplay controller="LevelUpPopup" pages="1"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </group>
+    <graph id="n6_scr3" name="LevelCircleBg" xy="80,914" size="100,100" group="n98_qbqu" type="rect" lineSize="0" fillColor="#ff4d2408" corner="50"/>
+    <loader id="n69_scr3" name="LevelBtn" xy="79,909" size="1748,111" group="n98_qbqu"/>
+    <text id="n7_scr3" name="TxtLevel" xy="80,914" size="100,100" group="n98_qbqu" fontSize="28" color="#ffffff" align="center" vAlign="middle" autoSize="none" bold="true" strokeColor="#000000" text="Lv 1"/>
+    <graph id="n8_scr3" name="ExpBarBg" xy="192,944" size="1590,36" group="n98_qbqu" type="rect" lineSize="0" fillColor="#ff331500" corner="18"/>
+    <graph id="n9_scr3" name="ExpBarFill" xy="192,944" size="749,36" group="n98_qbqu" type="rect" lineSize="0" fillColor="#ffff8800" corner="18"/>
+    <text id="n10_scr3" name="TxtExp" xy="880,931" size="160,58" group="n98_qbqu" fontSize="26" color="#fff4d4" vAlign="middle" autoSize="none" bold="true" strokeColor="#4d2408" strokeSize="2" text="480/10000"/>
+    <group id="n98_qbqu" name="expGroup" xy="79,909" size="1748,111" advanced="true">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </group>
+    <component id="n99_qbqu" name="detailPanel" src="qbqu2d" xy="1304,193" size="512,482">
+      <gearDisplay controller="isShowDetail" pages="1"/>
+    </component>
+    <graph id="fs001" name="ModeSwitchMask" xy="0,-1" size="1920,1080" type="rect" lineSize="0" fillColor="#4c000000">
+      <gearDisplay controller="ModeSwitchPopup" pages="1"/>
+      <relation target="" sidePair="width-width,height-height,center-center,middle-middle"/>
+    </graph>
+    <graph id="fs002" name="FormSwitchBg" xy="240,643" size="1440,433" group="fsgrp" type="rect" lineSize="2" lineColor="#ff8b5d2c" fillColor="#ff21160a" corner="24"/>
+    <text id="fs003" name="FormSwitchTitle" xy="280,675" size="200,36" group="fsgrp" fontSize="30" color="#ff9b4c" vAlign="middle" autoSize="none" bold="true" strokeColor="#4d2408" strokeSize="2" text="选择形态"/>
+    <list id="n102_nic0" name="ModeList" xy="277,724" size="535,300" group="fsgrp" layout="row" overflow="scroll" colGap="31" defaultItem="ui://3qbfu3hknic02f">
+      <item/>
+      <item/>
+    </list>
+    <graph id="fs050" name="InfoDividerV" xy="830,725" size="2,286" group="fsgrp" type="rect" lineSize="0" fillColor="#ff553322"/>
+    <loader id="fs030" name="FormHeaderDragon" xy="860,713" size="80,80" group="fsgrp" fill="scaleFree"/>
+    <graph id="fs031" name="FormHeaderBanner" xy="950,738" size="400,54" group="fsgrp" type="rect" lineSize="0" corner="10"/>
+    <text id="fs032" name="FormHeaderTitle" xy="960,745" size="380,40" group="fsgrp" fontSize="30" color="#4d2408" vAlign="middle" autoSize="none" bold="true" text="近战形态"/>
+    <graph id="fs040" name="FormDescBar" xy="860,805" size="550,32" group="fsgrp" type="rect" lineSize="0" fillColor="#00000000" corner="6"/>
+    <loader id="fs041" name="FormDescIcon" xy="866,810" size="22,22" group="fsgrp" fill="scaleFree"/>
+    <text id="fs042" name="FormDescText" xy="896,805" size="504,32" group="fsgrp" fontSize="18" color="#999999" vAlign="middle" autoSize="none" text="潜入敌阵或敌后为部队扫清道路"/>
+    <text id="fs051" name="LblComponentSlot" xy="860,859" size="120,28" group="fsgrp" fontSize="22" color="#ff9b4c" vAlign="middle" autoSize="none" bold="true" text="组件槽位"/>
+    <graph id="fs052" name="ComponentSlotCard" xy="860,899" size="56,70" group="fsgrp" type="rect" lineSize="2" lineColor="#ffccaa00" fillColor="#ffffcc00" corner="6"/>
+    <text id="fs053" name="ComponentSlotCount" xy="928,916" size="60,36" group="fsgrp" fontSize="26" color="#ffffff" vAlign="middle" autoSize="none" bold="true" text="x2"/>
+    <text id="fs060" name="LblSkillPreview" xy="1040,859" size="120,28" group="fsgrp" fontSize="22" color="#ff9b4c" vAlign="middle" autoSize="none" bold="true" text="技能预览"/>
+    <list id="n103_nic0" name="ModeAbilityList" xy="1041,899" size="495,143" group="fsgrp" layout="row" overflow="scroll" scroll="horizontal" defaultItem="ui://3qbfu3hkxpzup">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <component id="fs070" name="BtnFormAction" src="kt413b" pkg="htck2ycn" xy="1528,983" group="fsgrp">
+      <gearDisplay controller="modeUseState" pages="0"/>
+      <Button title="激活"/>
+    </component>
+    <component id="n104_nic0" name="UseModeBtn" src="kt413c" pkg="htck2ycn" xy="1528,983" group="fsgrp">
+      <gearDisplay controller="modeUseState" pages="1"/>
+      <Button title="使用"/>
+    </component>
+    <component id="n105_nic0" name="UsingModeBtn" src="kt413b" pkg="htck2ycn" xy="1528,983" group="fsgrp" touchable="false" grayed="true">
+      <gearDisplay controller="modeUseState" pages="2"/>
+      <Button title="使用中"/>
+    </component>
+    <group id="fsgrp" name="ModeSwitchGroup" xy="240,643" size="1440,433" advanced="true">
+      <gearDisplay controller="ModeSwitchPopup" pages="1"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </group>
+  </displayList>
+</component>scr326.xml|534|<component size="93,112">
+  <controller name="Avatar" pages="0,Soldier,1,Other" selected="0"/>
+  <displayList>
+    <component id="n0_aq3a" name="BtnShow" src="aq3a1j" xy="23,12">
+      <gearDisplay controller="Avatar" pages="0"/>
+      <Button controller="Avatar" page="1"/>
+    </component>
+    <component id="n3_aq3a" name="BtnPlatform" src="aq3a1l" xy="21,14" size="70,80">
+      <gearDisplay controller="Avatar" pages="1"/>
+      <Button checked="true" controller="Avatar" page="0"/>
+    </component>
+  </displayList>
+</component>urqtq.xml|1110|<component size="150,150">
+  <controller name="Unlock" pages="0,Lock,1,Unlock" selected="0"/>
+  <displayList>
+    <component id="n0_urqt" name="ComEquip" src="wcfr4i" pkg="htck2ycn" xy="75,75" pivot="0.5,0.5" anchor="true" scale="0.5,0.5" grayed="true">
+      <gearDisplay controller="Unlock" pages=""/>
+      <gearLook controller="Unlock" pages="0,1" values="1,0,1,1|1,0,0,1"/>
+    </component>
+    <text id="n1_urqt" name="LabelLock" xy="59,104" size="81,34" group="n7_aq3a" fontSize="24" color="#ff1a1a" vAlign="middle" autoSize="none" strokeColor="#401313" text="可解锁"/>
+    <image id="n4_aq3a" name="LockBg" src="aq3as" xy="3,96" group="n7_aq3a"/>
+    <text id="n5_aq3a" name="TextStar" xy="11,96" size="40,44" group="n7_aq3a" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="5"/>
+    <image id="n10_aq3a" name="LockIcon" src="us1r52" pkg="htck2ycn" xy="58,45" group="n7_aq3a"/>
+    <group id="n7_aq3a" name="Lock" xy="3,45" size="136,104" advanced="true">
+      <gearDisplay controller="Unlock" pages="0"/>
+    </group>
+  </displayList>
+</component>xpzuo.xml|4859|<component size="1920,1080">
+  <controller name="ShowType" pages="3,插画,4,世界相机" selected="0"/>
+  <controller name="IsShowDetail" pages="0,false,1,true" selected="0"/>
+  <displayList>
+    <image id="n32_ysc8" name="PanelBg" src="lavx5e" pkg="htck2ycn" xy="-320,0">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </image>
+    <component id="n62_lavx" name="n62" src="kt413k" pkg="htck2ycn" xy="49,45" size="1830,987">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <graph id="n99_eqbg" name="EquipAreaBg" xy="178,232" size="490,618" type="rect" lineColor="#33c8a070" fillColor="#18c8a070" corner="16">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <graph id="n98_infobg" name="InfoAreaBg" xy="1255,198" size="524,820" type="rect" lineColor="#33c8a070" fillColor="#18c8a070" corner="16">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <graph id="n97_pwb" name="PowerCardBg" xy="760,835" size="440,116" type="rect" lineColor="#44c8a070" fillColor="#22c8a070" corner="12">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <component id="n3_xpzu" name="ComTitle" src="wcfr46" pkg="htck2ycn" xy="43,31">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <property target="title.title" propertyId="0" value="士兵-养成"/>
+    </component>
+    <component id="n68_zu5k" name="ResBar" src="g5vp5g" pkg="htck2ycn" xy="1920,0" pivot="1,0" anchor="true" controller="Number,2">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n28_aq3a" name="ComAvatar" src="aq3a1k" xy="429,129">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <list id="n22_aq3a" name="EquipSlotList" xy="205,256" size="444,577" layout="flow_hz" overflow="hidden" lineGap="22" colGap="24" defaultItem="ui://3qbfu3hkurqtq" align="center" vAlign="middle">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <component id="n57_ua4o" name="StoryBtn" src="aq3a1c" xy="240,141">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n56_ua4o" name="ResetBtn" src="aq3a1i" xy="347,140">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <loader id="n52_ua4o" name="SoldierIcon" xy="662,235" size="530,615" fill="scaleFree">
+      <gearDisplay controller="ShowType" pages="3"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </loader>
+    <loader id="n53_ua4o" name="WorldView" xy="678,254" size="470,592">
+      <gearDisplay controller="ShowType" pages="4"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </loader>
+    <component id="n33_ua4o" name="SoldierInfoCom" src="lavx23" xy="1278,215">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n24_aq3a" name="BtnStory" src="aq3a1c" xy="1263,156" alpha="0">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n26_aq3a" name="BtnReset" src="aq3a1i" xy="1381,156" alpha="0">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n30_aq3a" name="ComLevelUp" src="aq3a1w" xy="1286,690" size="465,325" controller="LevelUp,0">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <text id="ndm1_aq3a" name="n43" xy="795,848" size="207,41" fontSize="28" color="#4d2408" vAlign="middle" autoSize="none" bold="true" strokeColor="#fff4d4" strokeSize="2" text="军团战力">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="ndm3_aq3a" name="TxtPower" xy="795,884" size="380,62" fontSize="46" color="#c85a1a" vAlign="middle" autoSize="none" bold="true" strokeColor="#fff8e8" strokeSize="3" text="99999999+99">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <graph id="n14_urqt" name="AbilityBg" xy="137,929" size="430,40" visible="false" type="rect" lineSize="0" fillColor="#ffd7b69b" corner="20">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <list id="n12_xpzu" name="AbilityList" xy="242,843" size="384,144" layout="row" overflow="hidden" colGap="10" defaultItem="ui://3qbfu3hkxpzup" vAlign="middle">
+      <relation target="" sidePair="center-center,middle-middle"/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <loader id="n31_aq3a" name="LoaderStarUp" xy="60,128" size="1800,940" visible="false" touchable="false">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </loader>
+  </displayList>
+</component>xpzup.xml|577|<component size="120,120">
+  <controller name="LevelUpUnlock" pages="0,Lock,1,Unlock" selected="0"/>
+  <displayList>
+    <component id="n0_xpzu" name="ComAbility" src="wcfr4p" pkg="htck2ycn" xy="59,60" pivot="0.5,0.5" anchor="true"/>
+    <image id="n2_aq3a" name="IconLock" src="us1r52" pkg="htck2ycn" xy="6,105" size="20,20">
+      <gearDisplay controller="LevelUpUnlock" pages="0"/>
+    </image>
+    <text id="n3_aq3a" name="n3" xy="0,0" size="26,34" visible="false" fontSize="24" color="#1f8c15" autoSize="none" strokeColor="#000000" text="新"/>
+  </displayList>
+</component>

@@ -1,0 +1,73 @@
+bwtt6g.xml|2983|<component size="1920,1080">
+  <controller name="NoData" pages="0,正常,1,无数据" selected="0"/>
+  <displayList>
+    <graph id="n0_bwtt" name="PanelClickBg" xy="0,0" size="1920,1080" type="rect" fillColor="#80000000">
+      <relation target="" sidePair="width-width,height-height"/>
+    </graph>
+    <loader id="n13_uil9" name="PanelBg" xy="960,540" pivot="0.5,0.5" anchor="true" size="800,920" url="ui://htck2ycnj9f41j" fill="scaleFree">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </loader>
+    <text id="n2_bwtt" name="TextTitle" xy="960,144" pivot="0.5,0.5" anchor="true" size="219,44" fontSize="32" color="#ffffff" align="center" autoSize="none" text="每周捐献榜">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <text id="n3_bwtt" name="LabelResetTime" xy="961,181" pivot="0.5,0.5" anchor="true" size="477,26" fontSize="18" color="#ffffff" align="center" vAlign="middle" autoSize="none" text="排行榜数据每30分钟更新一次">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <graph id="n4_bwtt" name="Line1" xy="960,200" pivot="0.5,0.5" anchor="true" size="720,1" type="rect" lineSize="0">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </graph>
+    <text id="n8_bwtt" name="TextResetTime" xy="960,943" pivot="0.5,0.5" anchor="true" size="369,26" fontSize="18" color="#ffffff" align="center" vAlign="middle" autoSize="none" text="5天20小时后重置">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+    <component id="n5_bwtt" name="Rank1" src="bwtt6h" xy="960,330" pivot="0.5,0.5" anchor="true" group="n11_bwtt">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n6_bwtt" name="Rank2" src="bwtt6h" xy="645,280" group="n11_bwtt">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n7_bwtt" name="Rank3" src="bwtt6h" xy="1084,280" group="n11_bwtt">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <list id="n9_bwtt" name="RankingList" xy="691,532" size="540,285" group="n11_bwtt" overflow="scroll" defaultItem="ui://llgpdelbbwtt6i">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </list>
+    <component id="n10_bwtt" name="Self" src="bwtt6i" xy="960,893" pivot="0.5,0.5" anchor="true" group="n11_bwtt">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <group id="n11_bwtt" name="NodeRank" xy="645,210" size="639,718" advanced="true">
+      <gearDisplay controller="NoData" pages="0"/>
+    </group>
+    <text id="n12_bwtt" name="LabelNoData" xy="960,540" pivot="0.5,0.5" anchor="true" size="270,51" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="无排行榜数据">
+      <gearDisplay controller="NoData" pages="1"/>
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+  </displayList>
+</component>bwtt6h.xml|1081|<component size="200,240">
+  <controller name="Rank" pages="0,1,1,2,3,3" selected="0"/>
+  <displayList>
+    <loader id="n1_bwtt" name="LoaderHead" xy="100,80" pivot="0.5,0.5" anchor="true" size="100,100" url="ui://llgpdelbbwtt0" fill="scale"/>
+    <text id="n3_bwtt" name="TextRank" xy="100,128" pivot="0.5,0.5" anchor="true" size="88,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="1st">
+      <gearText controller="Rank" pages="1,3" values="2nd|3rd" default="1st"/>
+    </text>
+    <text id="n4_bwtt" name="TextName" xy="100,160" pivot="0.5,0.5" anchor="true" size="169,29" fontSize="20" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="玩家名字七个字"/>
+    <text id="n6_bwtt" name="TextData" xy="69,197" size="98,29" fontSize="20" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="999999"/>
+    <loader id="n7_bwtt" name="IconRank" xy="43,210" pivot="0.5,0.5" anchor="true" size="48,48" url="ui://llgpdelbbwtt1" fill="scale"/>
+  </displayList>
+</component>bwtt6i.xml|868|<component size="540,70">
+  <displayList>
+    <loader id="n1_bwtt" name="LoaderHead" xy="118,32" pivot="0.5,0.5" anchor="true" size="64,64" fill="scale"/>
+    <text id="n2_bwtt" name="TextRank" xy="14,11" size="56,44" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="1"/>
+    <text id="n3_bwtt" name="TextName" xy="260,37" pivot="0.5,0.5" anchor="true" size="173,29" fontSize="20" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="玩家名字七个字"/>
+    <text id="n5_bwtt" name="TextData" xy="421,22" size="98,29" fontSize="20" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="999999"/>
+    <loader id="n6_bwtt" name="IconRank" xy="390,35" pivot="0.5,0.5" anchor="true" size="48,48" url="ui://zw50omb7bwtt6f" fill="scale"/>
+  </displayList>
+</component>package.xml|559|<packageDescription id="llgpdelb" name="Ranking">
+  <resources>
+    <component id="bwtt6h" name="RankingTopItem" path="/Component/" size="200,240"/>
+    <component id="bwtt6i" name="RankingItem" path="/Component/" size="540,70"/>
+    <image id="bwtt0" name="IconHead" path="/Image/" size="96,100"/>
+    <image id="bwtt1" name="IconBook" path="/Image/" size="102,140"/>
+    <component id="bwtt6g" name="RankingPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <atlas id="atlas0" size="256,128" file="atlas0.png"/>
+  </resources>
+</packageDescription>

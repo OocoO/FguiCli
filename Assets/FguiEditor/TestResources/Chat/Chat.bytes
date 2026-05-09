@@ -1,0 +1,48 @@
+bwtt1.xml|1141|<component size="800,200">
+  <displayList>
+    <loader id="n1_bwtt" name="LoaderHead" xy="0,0" size="64,64" url="ui://zk78l56lbwtt2" fill="scale">
+      <relation target="" sidePair="left-left,top-top"/>
+    </loader>
+    <text id="n3_bwtt" name="TextName" xy="72,0" size="146,29" fontSize="20" color="#ffffff" vAlign="middle" autoSize="none" strokeColor="#000000" text="玩家名字七个字">
+      <relation target="" sidePair="left-left,top-top"/>
+    </text>
+    <graph id="n4_bwtt" name="ImageChatBg" xy="64,38" size="700,155" group="n5_bwtt" type="rect" fillColor="#ff162e40" corner="10"/>
+    <richtext id="n0_bwtt" name="TextContent" xy="74,50" size="672,134" group="n5_bwtt" fontSize="24" color="#ffffff" autoSize="none" text="啊多发点是否"/>
+    <group id="n5_bwtt" name="Chat" xy="64,38" size="700,155" advanced="true">
+      <relation target="" sidePair="width-width,height-height"/>
+    </group>
+    <text id="n6_bwtt" name="TextTime" xy="640,0" size="120,29" fontSize="20" color="#ffffff" align="right" autoSize="none" strokeColor="#000000" text="1分钟前">
+      <relation target="" sidePair="right-right"/>
+    </text>
+  </displayList>
+</component>j2y70.xml|1125|<component size="1920,1080">
+  <displayList>
+    <component id="n0_bwtt" name="PanelBg" src="kt413l" pkg="htck2ycn" xy="944,78" size="960,1000">
+      <relation target="" sidePair="right-right"/>
+    </component>
+    <graph id="n2_bwtt" name="SendBg" xy="1047,900" size="800,120" type="rect" fillColor="#ff162e40">
+      <relation target="" sidePair="right-right"/>
+    </graph>
+    <text id="n4_bwtt" name="InputMessage" xy="1070,926" size="550,78" fontSize="32" color="#ffffff" vAlign="middle" autoSize="none" strokeColor="#000000" text="" input="true" prompt="请输入文字（40字）" maxLength="40">
+      <relation target="" sidePair="right-right"/>
+    </text>
+    <component id="n5_bwtt" name="BtnSend" src="kt4138" pkg="htck2ycn" xy="1660,916">
+      <relation target="" sidePair="right-right"/>
+      <Button title="发送"/>
+    </component>
+    <list id="n6_bwtt" name="ChatList" xy="1053,155" size="787,733" overflow="scroll" defaultItem="ui://zk78l56lbwtt1" renderOrder="descent">
+      <relation target="" sidePair="right-right"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+  </displayList>
+</component>package.xml|398|<packageDescription id="zk78l56l" name="Chat">
+  <resources>
+    <component id="bwtt1" name="ChatItem" path="/Component/" size="800,200"/>
+    <image id="bwtt2" name="IconHead" path="/Image/" size="96,100"/>
+    <component id="j2y70" name="ChatMainPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <atlas id="atlas0" size="128,128" file="atlas0.png"/>
+  </resources>
+</packageDescription>

@@ -1,0 +1,993 @@
+aece0.xml|3025|<component size="1920,1080">
+  <displayList>
+    <graph id="n9_tyb2" name="ClickGraph" xy="0,2" pivot="0.5,0.5" size="1920,1080" alpha="0" type="rect" lineSize="0">
+      <relation target="" sidePair="width-width,height-height,center-center,middle-middle"/>
+    </graph>
+    <component id="n17_jrff" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="left-left,top-top"/>
+      <property target="title.title" propertyId="0" value="旗舰"/>
+    </component>
+    <component id="n11_j5n4" name="GMBtn" src="kt413b" pkg="htck2ycn" xy="553,985" pivot="0.5,0.5" group="n19_jrff">
+      <relation target="" sidePair="right-right,bottom-bottom"/>
+      <Button title="GM"/>
+    </component>
+    <component id="n12_j5n4" name="StorehouseBtn" src="kt413b" pkg="htck2ycn" xy="723,985" pivot="0.5,0.5" group="n19_jrff">
+      <relation target="" sidePair="right-right,bottom-bottom"/>
+      <Button title="仓库"/>
+    </component>
+    <component id="n13_j5n4" name="SoldierBtn" src="kt413b" pkg="htck2ycn" xy="893,985" pivot="0.5,0.5" group="n19_jrff">
+      <relation target="" sidePair="right-right,bottom-bottom"/>
+      <Button title="士兵"/>
+    </component>
+    <component id="n14_j5n4" name="EquipmentBtn" src="kt413b" pkg="htck2ycn" xy="1063,985" pivot="0.5,0.5" group="n19_jrff">
+      <relation target="" sidePair="right-right,bottom-bottom"/>
+      <Button title="装备"/>
+    </component>
+    <component id="n15_j5n4" name="PluginBtn" src="kt413b" pkg="htck2ycn" xy="1233,985" pivot="0.5,0.5" group="n19_jrff">
+      <relation target="" sidePair="right-right,bottom-bottom"/>
+      <Button title="插件"/>
+    </component>
+    <component id="n16_j5n4" name="GuildBtn" src="kt413b" pkg="htck2ycn" xy="1403,985" pivot="0.5,0.5" group="n19_jrff">
+      <relation target="" sidePair="right-right,bottom-bottom"/>
+      <Button title="公会"/>
+    </component>
+    <component id="n27_kadv" name="FriendBtn" src="kt413b" pkg="htck2ycn" xy="1573,985" pivot="0.5,0.5" group="n19_jrff">
+      <relation target="" sidePair="right-right,bottom-bottom"/>
+      <Button title="好友&#xA;"/>
+    </component>
+    <component id="n28_raov" name="SettingBtn" src="kt413b" pkg="htck2ycn" xy="1743,985" pivot="0.5,0.5" group="n19_jrff">
+      <relation target="" sidePair="right-right,bottom-bottom"/>
+      <Button title="设置&#xA;"/>
+    </component>
+    <group id="n19_jrff" name="n19" xy="553,985" size="1330,76" advanced="true" layout="hz" colGap="30" excludeInvisibles="true">
+      <relation target="" sidePair="right-right,bottom-bottom"/>
+    </group>
+    <component id="n20_tumk" name="ResourcesBar" src="g5vp5g" pkg="htck2ycn" xy="960,0" controller="Number,2">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <list id="n26_v5w7" name="AllResource" xy="1311,76" size="580,45" layout="row" colGap="41" defaultItem="ui://htck2ycnwcfr4j" align="right" scrollItemToViewOnClick="false">
+      <relation target="" sidePair="right-right,top-top"/>
+    </list>
+  </displayList>
+</component>aece1.xml|515|<component size="1920,1080" opaque="false">
+  <displayList>
+    <component id="n16_jrff" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="left-left,top-top"/>
+      <property target="title.title" propertyId="0" value="世界地图"/>
+    </component>
+    <component id="n17_jrff" name="World" src="kt413b" pkg="htck2ycn" xy="400,22" pivot="0.5,0.5">
+      <relation target="" sidePair="left-left,top-top"/>
+      <Button title="世界"/>
+    </component>
+  </displayList>
+</component>e5jc1p.xml|2688|<component size="400,120" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <controller name="WorkState" pages="0,生产中,1,库存已满,2,材料不足,3,空" selected="3"/>
+  <displayList>
+    <image id="n0_e5jc" name="n0" src="e5jc1n" xy="0,0" size="400,120">
+      <gearDisplay controller="button" pages="0,2"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n1_e5jc" name="n1" src="e5jc1o" xy="0,0" size="400,120">
+      <gearDisplay controller="button" pages="1,3"/>
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <loader id="n2_e5jc" name="Icon" xy="72,69" pivot="0.5,0.5" anchor="true" size="256,256" scale="0.25,0.25" url="ui://htck2ycnfrlzr">
+      <gearDisplay controller="WorkState" pages="0,1,2"/>
+    </loader>
+    <text id="n3_e5jc" name="NameText" xy="107,37" size="196,64" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="特技经验药水">
+      <gearDisplay controller="WorkState" pages="0,1,2"/>
+    </text>
+    <text id="n4_e5jc" name="n4" xy="1,2" size="129,34" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#ff0000" strokeSize="2" text="材料不足！">
+      <gearDisplay controller="WorkState" pages="1,2"/>
+      <gearText controller="WorkState" pages="1" values="库存已满！" default="材料不足！"/>
+    </text>
+    <image id="n5_e5jc" name="n5" src="frlzp" pkg="htck2ycn" xy="286,17" size="64,64" group="n8_e5jc" color="#990000">
+      <gearColor controller="WorkState" pages="0" values="#00ff00" default="#990000"/>
+    </image>
+    <text id="n6_e5jc" name="WorkerCount" xy="346,33" size="49,34" group="n8_e5jc" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#00ff00" text="999">
+      <gearColor controller="WorkState" pages="1,2" values="#ffffff,#ff0000|#ffffff,#ff0000" default="#ffffff,#00ff00"/>
+    </text>
+    <text id="n7_e5jc" name="n7" xy="302,69" size="89,34" group="n8_e5jc" fontSize="24" color="#ffffff" align="center" autoSize="none" strokeColor="#00ff00" text="生产中">
+      <gearColor controller="WorkState" pages="1,2" values="#ffffff,#ff0000|#ffffff,#ff0000" default="#ffffff,#00ff00"/>
+      <gearText controller="WorkState" pages="1,2" values="停止|停止" default="生产中"/>
+    </text>
+    <group id="n8_e5jc" name="Worker" xy="286,17" size="109,86" advanced="true">
+      <gearDisplay controller="WorkState" pages="0,1,2"/>
+    </group>
+    <image id="n11_ai9b" name="n11" src="ai9b1u" xy="166,18">
+      <gearDisplay controller="WorkState" pages="3"/>
+    </image>
+  </displayList>
+  <Button mode="Radio"/>
+</component>f2yx38.xml|1011|<component size="1920,1080">
+  <displayList>
+    <component id="n0_f2yx" name="PanelBg" src="kt413l" pkg="htck2ycn" xy="99,56" pivot="0.5,0.5" size="1722,992">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <list id="n1_f2yx" name="Items" xy="960,606" pivot="0.5,0.5" anchor="true" size="1610,672" layout="flow_hz" overflow="scroll" lineGap="20" colGap="5" lineItemCount="5" defaultItem="ui://o174pljyfrlz1d" align="center">
+      <relation target="n0_f2yx" sidePair="center-center,middle-middle"/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <text id="n2_f2yx" name="Title" xy="960,169" pivot="0.5,0.5" anchor="true" size="287,64" font="Font_Normal" fontSize="48" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="选择生产商品">
+      <relation target="n0_f2yx" sidePair="center-center,top-top"/>
+    </text>
+  </displayList>
+</component>f2yx39.xml|1286|<component size="1920,1080" opaque="false" mask="n4_f2yx" reversedMask="true">
+  <displayList>
+    <graph id="n4_f2yx" name="n4" xy="210,137" pivot="0.5,0.5" size="1500,806" touchable="false" type="rect" lineSize="0">
+      <relation target="n3_f2yx" sidePair="center-center,middle-middle"/>
+    </graph>
+    <component id="n0_f2yx" name="Background" src="zu5k5i" pkg="htck2ycn" xy="0,0" pivot="0.5,0.5" touchable="false">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n1_f2yx" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="left-left,top-top"/>
+      <property target="title.title" propertyId="0" value="采集地图"/>
+    </component>
+    <component id="n2_f2yx" name="ResourcesBar" src="g5vp5g" pkg="htck2ycn" xy="960,0" controller="Number,0">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n3_f2yx" name="Window" src="f2yx3a" xy="160,90" pivot="0.5,0.5">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n6_f2yx" name="World" src="f2yx3b" xy="213,952" pivot="0.5,0.5">
+      <relation target="n3_f2yx" sidePair="left-left,bottom-bottom"/>
+    </component>
+  </displayList>
+</component>f2yx3a.xml|356|<component size="1600,900" opaque="false" mask="n1_f2yx" reversedMask="true">
+  <displayList>
+    <graph id="n1_f2yx" name="n1" xy="50,47" pivot="0.5,0.5" size="1500,806" touchable="false" type="rect" lineSize="0"/>
+    <component id="n0_f2yx" name="n0" src="kt413k" pkg="htck2ycn" xy="0,0" size="1600,900" touchable="false"/>
+  </displayList>
+</component>f2yx3b.xml|574|<component size="380,120" extention="Button">
+  <controller name="button" pages="0,up,1,down,2,over,3,selectedOver" selected="0"/>
+  <displayList>
+    <component id="n4_f2yx" name="backBtn" src="wcfr44" pkg="htck2ycn" xy="0,20" size="80,80"/>
+    <text id="n5_f2yx" name="title" xy="114,35" size="217,49" font="Font_Special" fontSize="36" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" strokeSize="3" singleLine="true" text="返回世界地图">
+      <relation target="" sidePair="width-width,height-height"/>
+    </text>
+  </displayList>
+  <Button/>
+</component>fo1p1z.xml|2518|<component size="320,320">
+  <controller name="Status" homePageType="specific" homePage="0" pages="0,Npc,1,Player" selected="0"/>
+  <displayList>
+    <graph id="n30_fo1p" name="NpcBg" xy="0,0" size="320,320" type="rect" fillColor="#80ffffff" corner="10,10,10,10">
+      <gearDisplay controller="Status" pages="0"/>
+    </graph>
+    <graph id="n31_fo1p" name="PlayerBg" xy="0,0" size="320,320" type="rect" fillColor="#4c00cc00" corner="10,10,10,10">
+      <gearDisplay controller="Status" pages="1,2"/>
+    </graph>
+    <loader id="n33_fo1p" name="Icon" xy="160,120" pivot="0.5,0.5" anchor="true" size="128,128" align="center" vAlign="middle" fill="scale"/>
+    <component id="n32_fo1p" name="SaleNode" src="frlz1f" xy="2,0">
+      <gearDisplay controller="Status" pages="0,1"/>
+    </component>
+    <text id="n34_fo1p" name="BuyTitle" xy="23,211" size="127,34" fontSize="24" color="#ffffff" autoSize="none" strokeColor="#000000" text="购买单价："/>
+    <image id="n36_fo1p" name="GoldIcon" src="ogp7v" pkg="htck2ycn" xy="40,247" scale="0.25,0.25"/>
+    <text id="n37_fo1p" name="PriceText" xy="118,255" size="167,44" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="20000"/>
+    <loader id="n38_fo1p" name="PlayerHeadIcon" xy="30,155" size="50,50">
+      <gearDisplay controller="Status" pages="1"/>
+    </loader>
+    <text id="n39_fo1p" name="NameText" xy="160,180" pivot="0.5,0.5" anchor="true" size="158,34" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="名字名字名字"/>
+    <image id="n40_fo1p" name="n40" src="fo1p1i" pkg="htck2ycn" xy="126,107" size="22,34"/>
+    <text id="n41_fo1p" name="WharfCount" xy="154,109" size="34,34" fontSize="24" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="8&#xA;">
+      <gearDisplay controller="Status" pages="0,1"/>
+    </text>
+    <graph id="n42_fo1p" name="n42" xy="203,3" size="119,41" group="n44_fo1p" type="rect" fillColor="#ff00ff00"/>
+    <text id="n43_fo1p" name="n43" xy="216,7" size="95,34" group="n44_fo1p" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="推荐!"/>
+    <group id="n44_fo1p" name="FlagNode" xy="203,3" size="119,41" advanced="true">
+      <gearDisplay controller="Status" pages="0,1"/>
+    </group>
+    <component id="n45_jym9" name="StatusItem" src="frlzv" xy="170,192" controller="Status,4">
+      <gearDisplay controller="Status" pages="0,1,2,9"/>
+    </component>
+  </displayList>
+</component>fo1p20.xml|4014|<component size="1920,1080">
+  <controller name="Page" pages="0,选目标,1,调整,2,已有列表" selected="1"/>
+  <displayList>
+    <component id="n44_f2yx" name="Background" src="zu5k5i" pkg="htck2ycn" xy="0,0" pivot="0.5,0.5">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n45_f2yx" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="left-left,top-top"/>
+      <property target="title.title" propertyId="0" value="贸易目标"/>
+    </component>
+    <component id="n46_f2yx" name="ResourcesBar" src="g5vp5g" pkg="htck2ycn" xy="960,0" controller="Number,0">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n7_frlz" name="BGIcon" src="kt413k" pkg="htck2ycn" xy="960,537" pivot="0.5,0.5" anchor="true" size="1600,800">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <text id="n9_frlz" name="Title" xy="988,182" pivot="0.5,0.5" anchor="true" size="287,64" font="Font_Normal" fontSize="48" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="选择贸易目标">
+      <gearDisplay controller="Page" pages="0"/>
+      <relation target="n7_frlz" sidePair="center-center,top-top"/>
+    </text>
+    <loader id="n14_fo1p" name="ItemIcon" xy="259,396" size="256,256" group="n24_fo1p" url="ui://htck2ycnfrlzr"/>
+    <text id="n15_fo1p" name="ItemName" xy="253,301" size="267,64" group="n24_fo1p" fontSize="48" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" strokeSize="2" text="名字名字"/>
+    <text id="n17_fo1p" name="BuyTitle" xy="241,674" size="127,34" group="n24_fo1p" fontSize="24" color="#ffffff" autoSize="none" strokeColor="#000000" text="基础售价："/>
+    <image id="n18_fo1p" name="GoldIcon" src="ogp7v" pkg="htck2ycn" xy="258,710" size="64,64" group="n24_fo1p"/>
+    <text id="n19_fo1p" name="PriceText" xy="336,718" size="267,44" group="n24_fo1p" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="20000"/>
+    <text id="n20_fo1p" name="StockTitle" xy="242,779" size="127,34" group="n24_fo1p" fontSize="24" color="#ffffff" autoSize="none" strokeColor="#000000" text="库存："/>
+    <image id="n23_fo1p" name="StockIcon" src="ivc01" pkg="htck2ycn" xy="259,813" size="64,64" group="n24_fo1p"/>
+    <text id="n22_fo1p" name="StockText" xy="338,823" size="264,44" group="n24_fo1p" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="20000"/>
+    <group id="n24_fo1p" name="ItemInfo" xy="241,301" size="362,576" advanced="true">
+      <relation target="n7_frlz" sidePair="middle-middle,left-left"/>
+    </group>
+    <list id="n3_vbll" name="SelectList" xy="610,227" size="1080,325" layout="row" overflow="scroll" scroll="horizontal" lineGap="20" colGap="5" defaultItem="ui://o174pljyfo1p1z">
+      <gearDisplay controller="Page" pages="0"/>
+      <relation target="n7_frlz" sidePair="right-right,top-top"/>
+    </list>
+    <list id="n38_njzj" name="FlagShipList" xy="605,563" size="1080,327" layout="row" overflow="scroll" scroll="horizontal" lineGap="20" colGap="5" defaultItem="ui://o174pljyjym92e">
+      <gearDisplay controller="Page" pages="0"/>
+      <relation target="n7_frlz" sidePair="right-right,bottom-bottom"/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <list id="n34_fo1p" name="InfoList" xy="607,177" size="1080,740" layout="row" overflow="scroll" scroll="horizontal" colGap="10" defaultItem="ui://o174pljyfo1p24">
+      <gearDisplay controller="Page" pages="2"/>
+      <relation target="n7_frlz" sidePair="center-center,middle-middle"/>
+    </list>
+    <component id="n29_fo1p" name="AssginPanel" src="fo1p21" xy="628,142">
+      <gearDisplay controller="Page" pages="1"/>
+      <relation target="n7_frlz" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n35_fysk" name="DetailPanel" src="fysk25" xy="1242,89">
+      <relation target="n7_frlz" sidePair="middle-middle,right-right"/>
+    </component>
+  </displayList>
+</component>fo1p21.xml|2366|<component size="600,800">
+  <displayList>
+    <component id="n57_f2yx" name="PopupBack" src="kt413l" pkg="htck2ycn" xy="0,0" size="600,800"/>
+    <component id="n37_fo1p" name="SaleNode" src="frlz1f" xy="18,28"/>
+    <loader id="n16_frlz" name="IslandIcon" xy="303,243" pivot="0.5,0.5" anchor="true" size="256,259"/>
+    <text id="n3_f69l" name="NameText" xy="303,310" pivot="0.5,0.5" anchor="true" size="400,44" font="Font_Normal" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000"/>
+    <loader id="n40_fo1p" name="PlayerHeadIcon" xy="95,275" size="64,64"/>
+    <image id="n44_fo1p" name="Anchor" src="fo1p1i" pkg="htck2ycn" xy="260,356" size="22,34"/>
+    <text id="n45_fo1p" name="WharfCount" xy="288,358" size="34,34" fontSize="24" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="8&#xA;"/>
+    <text id="n26_frlz" name="n26" xy="59,423" size="164,45" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="预期获得："/>
+    <text id="n42_fo1p" name="RateText" xy="318,428" size="97,39" fontSize="28" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="10.5K"/>
+    <text id="n43_fo1p" name="PreHourText" xy="419,430" size="65,34" fontSize="24" color="#ffffff" autoSize="none" strokeColor="#000000" text="/小时&#xA;"/>
+    <image id="n48_fo1p" name="n48" src="ogp7v" pkg="htck2ycn" xy="244,416" size="64,64"/>
+    <text id="n27_frlz" name="n27" xy="58,498" size="164,45" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="工人需求："/>
+    <image id="n28_frlz" name="IconWorker" src="frlzp" pkg="htck2ycn" xy="244,489" size="64,64"/>
+    <text id="n29_frlz" name="WorkerCount" xy="322,498" size="168,44" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="300"/>
+    <image id="n38_fo1p" name="n38" src="njzj2c" xy="13,599" size="64,64"/>
+    <component id="n39_fo1p" name="Slider" src="he8c1h" pkg="htck2ycn" xy="89,591"/>
+    <component id="n55_f2yx" name="ButtonDepart" src="kt4138" pkg="htck2ycn" xy="214,680" pivot="0.5,0.5">
+      <Button title="出发"/>
+    </component>
+    <component id="n53_jm7o" name="BtnClose" src="frlz1b" xy="517,276"/>
+    <component id="n54_jm7o" name="BtnOpen" src="frlz1a" xy="517,276"/>
+  </displayList>
+</component>fo1p24.xml|3058|<component size="400,740">
+  <controller name="Operator" homePageType="specific" homePage="0" pages="" selected="-1"/>
+  <controller name="Type" pages="0,已分配,1,空位置" selected="1"/>
+  <displayList>
+    <graph id="n54_fo1p" name="Bg" xy="0,0" size="400,740" type="rect" fillColor="#ffcccccc" corner="20,20,20,20"/>
+    <component id="n37_fo1p" name="SaleNode" src="frlz1f" xy="0,13" group="n58_jym9"/>
+    <loader id="n16_frlz" name="IslandIcon" xy="201,180" pivot="0.5,0.5" anchor="true" size="256,259" group="n58_jym9">
+      <gearDisplay controller="Operator" pages="0,1,2,9"/>
+    </loader>
+    <text id="n3_f69l" name="NameText" xy="201,247" pivot="0.5,0.5" anchor="true" size="280,44" group="n58_jym9" font="Font_Normal" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" strokeSize="2">
+      <gearDisplay controller="Operator" pages="0,1,2,9,10"/>
+    </text>
+    <loader id="n40_fo1p" name="PlayerHeadIcon" xy="31,212" size="64,64" group="n58_jym9"/>
+    <image id="n44_fo1p" name="Anchor" src="fo1p1i" pkg="htck2ycn" xy="158,293" size="22,34" group="n58_jym9"/>
+    <text id="n45_fo1p" name="WharfCount" xy="186,295" size="34,34" group="n58_jym9" fontSize="24" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="8&#xA;"/>
+    <text id="n26_frlz" name="n26" xy="43,349" size="164,45" group="n58_jym9" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="预期获得："/>
+    <text id="n42_fo1p" name="RateText" xy="157,403" size="194,39" group="n58_jym9" fontSize="28" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="10.5K"/>
+    <image id="n48_fo1p" name="n48" src="ogp7v" pkg="htck2ycn" xy="88,391" size="64,64" group="n58_jym9"/>
+    <text id="n27_frlz" name="n27" xy="33,463" size="164,45" group="n58_jym9" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="工人需求："/>
+    <image id="n28_frlz" name="IconWorker" src="frlzp" pkg="htck2ycn" xy="81,516" size="64,64" group="n58_jym9"/>
+    <text id="n29_frlz" name="WorkerCount" xy="155,527" size="197,44" group="n58_jym9" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="300"/>
+    <component id="n57_jm7o" name="AssignStatus" src="frlzv" xy="120,597" group="n58_jym9"/>
+    <text id="n53_fo1p" name="n53" xy="200,710" pivot="0.5,0.5" anchor="true" size="245,44" group="n58_jym9" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="点击调试&#xA;"/>
+    <component id="n55_jm7o" name="BtnClose" src="frlz1b" xy="324,0" group="n58_jym9"/>
+    <component id="n56_jm7o" name="BtnOpen" src="frlz1a" xy="324,0" group="n58_jym9"/>
+    <group id="n58_jym9" name="n58" xy="0,0" size="400,732" advanced="true">
+      <gearDisplay controller="Type" pages="0"/>
+    </group>
+    <image id="n59_jym9" name="n59" src="f69lf" pkg="htck2ycn" xy="162,329">
+      <gearDisplay controller="Type" pages="1"/>
+    </image>
+  </displayList>
+</component>frlz12.xml|2372|<component size="600,900">
+  <controller name="Operator" homePageType="specific" homePage="0" pages="0,调整,1,出发" selected="0">
+    <action type="change_page" fromPage="" toPage="" objectId="n15_frlz" controller="Icon" targetPage="~1"/>
+  </controller>
+  <displayList>
+    <component id="n44_f2yx" name="PopupBack" src="kt413l" pkg="htck2ycn" xy="0,0" size="600,900"/>
+    <text id="n3_f69l" name="ItemName" xy="300,100" pivot="0.5,0.5" anchor="true" size="200,44" font="Font_Normal" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000">
+      <gearDisplay controller="Operator" pages="0,1,2,9,10"/>
+    </text>
+    <loader id="n16_frlz" name="IslandIcon" xy="300,240" pivot="0.5,0.5" anchor="true" size="128,128">
+      <gearDisplay controller="Operator" pages="0,1,2,9"/>
+    </loader>
+    <component id="n41_f2yx" name="ButtonDepart" src="kt4138" pkg="htck2ycn" xy="214,737" pivot="0.5,0.5">
+      <gearDisplay controller="Operator" pages="1"/>
+      <Button title="出发"/>
+    </component>
+    <component id="n42_f2yx" name="ButtonAdjust" src="kt4139" pkg="htck2ycn" xy="214,735" pivot="0.5,0.5">
+      <gearDisplay controller="Operator" pages="0"/>
+      <Button title="调整"/>
+    </component>
+    <component id="n35_frlz" name="AssignBar" src="frlzz" xy="-1,594" controller="Type,1">
+      <gearDisplay controller="Operator" pages="1"/>
+    </component>
+    <component id="n39_fo1p" name="AssignStatus" src="frlzv" xy="217,615">
+      <gearDisplay controller="Operator" pages="0"/>
+    </component>
+    <component id="n40_qy0a" name="WreckageItems" src="qy0a2l" xy="25,292" pivot="0.5,0.5"/>
+    <text id="n26_frlz" name="n26" xy="65,458" size="164,45" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="预期获得："/>
+    <component id="n25_frlz" name="Efficiency" src="frlz13" xy="387,482" pivot="0.5,0.5" anchor="true"/>
+    <text id="n27_frlz" name="n27" xy="63,525" size="164,45" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="工人需求："/>
+    <image id="n28_frlz" name="IconWorker" src="frlzp" pkg="htck2ycn" xy="273,516" size="64,64"/>
+    <text id="n29_frlz" name="WorkerCount" xy="356,527" size="168,44" fontSize="32" color="#ffffff" autoSize="none" strokeColor="#000000" text="300"/>
+  </displayList>
+</component>frlz13.xml|1502|<component size="300,80">
+  <controller name="Status" homePageType="specific" homePage="0" pages="0,正常,1,拥挤,2,停滞,9,未安排" selected="0"/>
+  <displayList>
+    <loader id="n17_frlz" name="ResourceIcon" xy="-58,-87" pivot="0.5,0.5" size="256,256" scale="0.25,0.25" align="center" vAlign="middle" fill="scale">
+      <gearDisplay controller="Status" pages="0,1,2"/>
+    </loader>
+    <text id="n18_frlz" name="RateText" xy="109,21" size="103,39" font="Font_Normal" fontSize="28" color="#ffffff" align="right" strokeColor="#000000">
+      <gearDisplay controller="Status" pages="0,1"/>
+      <gearColor controller="Status" pages="0" values="#ffffff,#000000" default="#cc6633,#000000"/>
+    </text>
+    <text id="n19_frlz" name="PreHourText" xy="213,23" size="65,34" font="Font_Normal" fontSize="24" color="#ffffff" autoSize="none" strokeColor="#000000" text="/小时&#xA;">
+      <gearDisplay controller="Status" pages="0,1"/>
+      <relation target="n18_frlz" sidePair="middle-middle,left-right"/>
+    </text>
+    <text id="n20_frlz" name="StopText" xy="115,18" size="158,46" fontSize="32" color="#990000" align="center" autoSize="none" strokeColor="#000000" text="采集停滞">
+      <gearDisplay controller="Status" pages="2"/>
+    </text>
+    <text id="n23_frlz" name="n23" xy="150,40" pivot="0.5,0.5" anchor="true" size="155,44" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="未安排">
+      <gearDisplay controller="Status" pages="9"/>
+    </text>
+  </displayList>
+</component>frlz19.xml|503|<component size="400,50">
+  <displayList>
+    <loader id="n6_frlz" name="Icon" xy="16,-7" size="256,256" scale="0.25,0.25" url="ui://htck2ycnfrlzr"/>
+    <text id="n9_frlz" name="Title" xy="90,0" size="200,44" fontSize="24" color="#ffffff" vAlign="middle" autoSize="shrink" strokeColor="#000000" text="贸易飞空"/>
+    <text id="n11_frlz" name="Content" xy="210,0" size="164,44" fontSize="24" color="#ffffff" vAlign="middle" autoSize="none" strokeColor="#000000" text="名字名字名字"/>
+  </displayList>
+</component>frlz1a.xml|236|<component size="76,82" extention="Button">
+  <controller name="button" pages="0,up,1,down" selected="0"/>
+  <displayList>
+    <image id="n3_f69l" name="n3" src="f69lf" pkg="htck2ycn" xy="0,0"/>
+  </displayList>
+  <Button/>
+</component>frlz1b.xml|236|<component size="76,82" extention="Button">
+  <controller name="button" pages="0,up,1,down" selected="0"/>
+  <displayList>
+    <image id="n3_f69l" name="n3" src="f69lg" pkg="htck2ycn" xy="0,0"/>
+  </displayList>
+  <Button/>
+</component>frlz1d.xml|1719|<component size="320,320">
+  <controller name="Found" pages="0,,1," selected="0"/>
+  <displayList>
+    <graph id="n5_f69l" name="Bg" xy="0,0" size="320,320" alpha="0.6" type="rect" lineSize="0" fillColor="#ff666666"/>
+    <text id="n25_frlz" name="NotFound" xy="160,120" pivot="0.5,0.5" anchor="true" size="130,44" fontSize="32" color="#ffffff" align="center" strokeColor="#000000" text="尚未发现">
+      <gearDisplay controller="Found" pages="1"/>
+    </text>
+    <component id="n19_frlz" name="SaleNode" src="frlz1f" xy="0,0" group="n26_frlz"/>
+    <component id="n28_kp77" name="Icon" src="wcfr4c" pkg="htck2ycn" xy="80,54" group="n26_frlz"/>
+    <text id="n20_frlz" name="NameText" xy="156,209" pivot="0.5,0.5" anchor="true" size="130,44" group="n26_frlz" font="Font_Normal" fontSize="32" color="#ffffff" align="center" vAlign="middle" text="商品名称"/>
+    <image id="n17_frlz" name="n17" src="ivc01" pkg="htck2ycn" xy="50,239" size="64,64" group="n26_frlz"/>
+    <text id="n21_frlz" name="Count" xy="130,252" pivot="0.5,0.5" size="60,34" group="n26_frlz" font="Font_Normal" fontSize="24" color="#ffffff" align="center" vAlign="middle" text="9999"/>
+    <image id="n22_frlz" name="WorkerIcon" src="frlzp" pkg="htck2ycn" xy="209,1" size="64,64" group="n24_frlz" color="#00ff66"/>
+    <text id="n23_frlz" name="WorkerCount" xy="267,16" size="32,34" group="n24_frlz" font="Font_Normal" fontSize="24" color="#00ff66" strokeColor="#000000" text="50"/>
+    <group id="n24_frlz" name="WorkerNode" xy="209,1" size="90,64" group="n26_frlz" advanced="true"/>
+    <group id="n26_frlz" name="Product" xy="0,0" size="299,303" advanced="true">
+      <gearDisplay controller="Found" pages="0"/>
+    </group>
+  </displayList>
+</component>frlz1f.xml|464|<component size="120,60">
+  <displayList>
+    <image id="n4_frlz" name="n4" src="frlz1e" xy="0,0" size="120,60">
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <text id="n5_frlz" name="RateText" xy="23,8" size="73,44" font="Font_Normal" fontSize="32" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </text>
+  </displayList>
+</component>frlz1i.xml|1782|<component size="600,800">
+  <displayList>
+    <image id="n44_kp77" name="AssignBg" src="frlzu" pkg="htck2ycn" xy="0,0" size="600,800"/>
+    <text id="n3_f69l" name="WorkShopIName" xy="46,30" pivot="0,0.5" size="117,44" font="Font_Normal" fontSize="32" color="#ffffff" vAlign="middle"/>
+    <loader id="n16_frlz" name="WorkShopIcon" xy="300,297" pivot="0.5,0.5" anchor="true" size="512,400">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </loader>
+    <component id="n35_frlz" name="AssignBar" src="frlzz" xy="300,594" pivot="0.5,0.5" anchor="true" controller="Type,0">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <text id="n42_frlz" name="n42" xy="55,372" size="153,41" fontSize="24" color="#ffffff" align="right" autoSize="none" text="预计产出：">
+      <relation target="" sidePair="right-center"/>
+    </text>
+    <component id="n36_frlz" name="Efficiency" src="frlz13" xy="222,353">
+      <relation target="" sidePair="left-left"/>
+    </component>
+    <text id="n37_frlz" name="n37" xy="433,16" size="153,41" group="n41_frlz" font="Font_Normal" fontSize="24" color="#ffffff" align="right" autoSize="none" text="剩余工位："/>
+    <image id="n39_frlz" name="n39" src="frlz1k" xy="444,62" size="64,64" group="n41_frlz"/>
+    <text id="n40_frlz" name="StationCount" xy="508,70" size="58,34" group="n41_frlz" font="Font_Normal" fontSize="24" color="#ffffff" vAlign="middle"/>
+    <group id="n41_frlz" name="Station" xy="433,16" size="153,110" advanced="true">
+      <relation target="" sidePair="right-right,top-top"/>
+    </group>
+    <component id="n46_kp77" name="StartBtn" src="kt4138" pkg="htck2ycn" xy="299,720" pivot="0.5,0.5" anchor="true">
+      <Button title="开工"/>
+    </component>
+  </displayList>
+</component>frlz1j.xml|2475|<component size="600,800">
+  <controller name="Status" pages="0,空的,1,有数据" selected="1"/>
+  <displayList>
+    <image id="n46_kp77" name="InfoBg" src="frlzu" pkg="htck2ycn" xy="0,0" size="600,800"/>
+    <component id="n43_frlz" name="Sale" src="frlz1f" xy="2,13">
+      <gearDisplay controller="Status" pages="1"/>
+    </component>
+    <text id="n40_frlz" name="n40" xy="466,12" size="120,40" group="n44_frlz" font="Font_Normal" fontSize="24" color="#ffffff" autoSize="none" text="当前库存:"/>
+    <image id="n41_frlz" name="n41" src="ivc01" pkg="htck2ycn" xy="450,43" size="64,64" group="n44_frlz"/>
+    <text id="n42_frlz" name="ItemCount" xy="515,58" size="62,34" group="n44_frlz" font="Font_Normal" fontSize="24" color="#ffffff"/>
+    <group id="n44_frlz" name="Stock" xy="450,12" size="136,95" advanced="true">
+      <gearDisplay controller="Status" pages="1"/>
+      <relation target="" sidePair="right-right,top-top"/>
+    </group>
+    <component id="n45_kp77" name="ItemIcon" src="wcfr4c" pkg="htck2ycn" xy="300,191" pivot="0.5,0.5" anchor="true" group="n37_frlz"/>
+    <text id="n3_f69l" name="ItemName" xy="301,269" pivot="0.5,0.5" anchor="true" size="200,44" group="n37_frlz" font="Font_Normal" fontSize="32" color="#ffffff" align="center" vAlign="middle" autoSize="none"/>
+    <text id="n26_frlz" name="ItemType" xy="301,323" pivot="0.5,0.5" anchor="true" size="164,45" group="n37_frlz" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" text="商品">
+      <gearDisplay controller="Status" pages="1"/>
+    </text>
+    <group id="n37_frlz" name="Item" xy="201,111" size="200,234" advanced="true"/>
+    <text id="n27_frlz" name="n27" xy="8,378" size="122,34" font="Font_Normal" fontSize="24" color="#ffffff" align="center" vAlign="middle" text="生产需求：">
+      <gearDisplay controller="Status" pages="1"/>
+    </text>
+    <list id="n38_frlz" name="RequiredList" xy="4,436" size="591,128" layout="row" overflow="scroll" defaultItem="ui://o174pljyh8iw1v" align="center">
+      <relation target="" sidePair="width-width"/>
+    </list>
+    <text id="n39_frlz" name="DescText" xy="28,587" size="550,167" font="Font_Normal" fontSize="33" color="#ffffff" autoSize="none">
+      <relation target="" sidePair="width-width"/>
+    </text>
+    <text id="n47_6r7d" name="n47" xy="-3,411" size="181,26" font="Font_Normal" fontSize="18" color="#ffffff" text="（单个商品生产消耗）">
+      <gearDisplay controller="Status" pages="1"/>
+    </text>
+  </displayList>
+</component>frlzt.xml|719|<component size="1920,1080">
+  <displayList>
+    <component id="n0_frlz" name="AssignPanel" src="frlz12" xy="660,101">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n4_frlz" name="BtnClose" src="frlz1b" xy="1130,267">
+      <relation target="n0_frlz" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n3_frlz" name="BtnOpen" src="frlz1a" xy="1130,267">
+      <relation target="n0_frlz" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n9_fysk" name="DetailPanel" src="fysk25" xy="1278,105" size="480,900">
+      <relation target="n0_frlz" sidePair="middle-middle,right-left"/>
+    </component>
+  </displayList>
+</component>frlzv.xml|1009|<component size="150,64">
+  <controller name="Status" pages="4,正常,5,拥挤,6,停滞,11,未安排,12,无订单,13,未发现" selected="0"/>
+  <displayList>
+    <text id="n0_vbll" name="Number" xy="75,15" pivot="0.5,0.5" size="75,42" font="Font_Normal" fontSize="30" color="#ffffff" strokeColor="#000000">
+      <gearDisplay controller="Status" pages="4,5,6"/>
+    </text>
+    <image id="n7_fo1p" name="Icon0" src="njzj2c" xy="0,0" size="64,64">
+      <gearDisplay controller="Status" pages="4"/>
+    </image>
+    <image id="n8_fo1p" name="Icon1" src="njzj2d" xy="0,0" size="64,64">
+      <gearDisplay controller="Status" pages="5"/>
+    </image>
+    <image id="n9_fo1p" name="Icon2" src="njzj2b" xy="0,0" size="64,64">
+      <gearDisplay controller="Status" pages="6"/>
+    </image>
+    <image id="n10_fo1p" name="Icon3" src="njzj2b" xy="44,1" size="64,64">
+      <gearDisplay controller="Status" pages="11"/>
+      <gearLook controller="Status" pages="11" values="1,0,1,0" default="1,0,0,0"/>
+    </image>
+  </displayList>
+</component>frlzz.xml|501|<component size="600,100">
+  <controller name="Type" pages="0,工人,1,飞船" selected="0"/>
+  <displayList>
+    <image id="n17_e5jc" name="n17" src="njzj2c" xy="16,23" size="64,64">
+      <gearDisplay controller="Type" pages="1"/>
+    </image>
+    <image id="n18_e5jc" name="n18" src="frlzp" pkg="htck2ycn" xy="14,17" size="64,64">
+      <gearDisplay controller="Type" pages="0"/>
+    </image>
+    <component id="n19_he8c" name="Slider" src="he8c1h" pkg="htck2ycn" xy="94,12"/>
+  </displayList>
+</component>fysk25.xml|476|<component size="480,900">
+  <displayList>
+    <component id="n3_f2yx" name="PopupBack" src="kt413n" pkg="htck2ycn" xy="0,0" size="480,900" controller="ShowClose,1"/>
+    <list id="n1_fysk" name="Details" xy="240,450" pivot="0.5,0.5" anchor="true" size="480,800" selectionMode="none" overflow="hidden" margin="0,0,30,0" defaultItem="ui://o174pljyfrlz19" align="center">
+      <relation target="" sidePair="width-width,height-height"/>
+    </list>
+  </displayList>
+</component>gpre2r.xml|823|<component size="539,437">
+  <controller name="DisplayCd" pages="0,不显示倒计时,1,显示倒计时" selected="0">
+    <action type="change_page" fromPage="" toPage="" objectId="n7_gpre" controller="DisplayCd" targetPage="~1"/>
+  </controller>
+  <displayList>
+    <component id="n10_f2yx" name="PopupBack" src="kt413n" pkg="htck2ycn" xy="0,0" size="539,437"/>
+    <image id="n8_pcms" name="n8" src="pcms2u" xy="141,90"/>
+    <list id="n5_gpre" name="Pendings" xy="83,71" pivot="0.5,0" size="372,231" overflow="scroll" lineGap="20" defaultItem="ui://o174pljygpre2s"/>
+    <component id="n7_gpre" name="Claim" src="kt4139" pkg="htck2ycn" xy="142,325" pivot="0.5,0.5" size="254,92">
+      <gearLook controller="DisplayCd" pages="1" values="1,0,1,0" default="1,0,0,1"/>
+      <Button title="一键领取"/>
+    </component>
+  </displayList>
+</component>gpre2s.xml|1089|<component size="222,50">
+  <controller name="Type" pages="0,普通,1,宝箱" selected="0"/>
+  <displayList>
+    <graph id="n8_pcms" name="n8" xy="42,43" pivot="0,0.5" anchor="true" size="110,10" alpha="0.5" type="rect" lineSize="0" fillColor="#ff000000" corner="10">
+      <gearSize controller="Type" pages="0,1" values="110,10,1,1|110,10,1.4,1.4"/>
+    </graph>
+    <loader id="n7_pcms" name="Frame" xy="10,10" pivot="0.5,0.5" size="50,50" align="center" fill="scale">
+      <gearSize controller="Type" pages="0" values="50,50,1,1" default="70,70,1,1"/>
+    </loader>
+    <loader id="n6_gpre" name="Icon" xy="10,10" pivot="0.5,0.5" size="50,50" align="center" vAlign="middle" fill="scale">
+      <gearSize controller="Type" pages="1" values="70,70,1,1" default="50,50,1,1"/>
+    </loader>
+    <text id="n5_gpre" name="Count" xy="72,34" pivot="0,0.5" anchor="true" size="74,34" font="Font_Normal" fontSize="24" color="#ffffff" vAlign="middle" strokeColor="#000000">
+      <gearSize controller="Type" pages="1" values="74,34,1.4,1.4" default="74,34,1,1"/>
+    </text>
+  </displayList>
+</component>h8iw1v.xml|799|<component size="200,128">
+  <controller name="EnoughCtrl" pages="0,库存不够一次生产,1,库存足够一次生产" selected="0"/>
+  <displayList>
+    <loader id="n3_frlz" name="ItemBg" xy="0,0" size="256,256" scale="0.5,0.5"/>
+    <loader id="n2_frlz" name="Icon" xy="0,0" size="256,256" scale="0.5,0.5"/>
+    <text id="n1_frlz" name="Count" xy="125,125" pivot="1,1" anchor="true" size="88,34" font="Font_Normal" fontSize="24" color="#bf1d1d" align="right" vAlign="bottom" text="10/10K">
+      <gearColor controller="EnoughCtrl" pages="0" values="#bf1d1d,#000000" default="#ffffff,#000000"/>
+      <relation target="" sidePair="right-right,bottom-bottom"/>
+    </text>
+    <text id="n4_frlz" name="Require" xy="133,73" size="97,44" font="Font_Normal" fontSize="32" color="#ffffff" text="x999k"/>
+  </displayList>
+</component>hboe3e.xml|698|<component size="500,500" pivot="0.5,1" anchor="true">
+  <controller name="Status" pages="0,等待码头,1,等待库存增加（达到出发的需求）,2,等待仓库出现空位" selected="2"/>
+  <displayList>
+    <image id="n0_hboe" name="n0" src="qy0a2i" pkg="htck2ycn" xy="91,135" pivot="0.5,0.5" size="317,230">
+      <gearDisplay controller="Status" pages="2"/>
+    </image>
+    <image id="n1_hboe" name="n1" src="fo1p1i" pkg="htck2ycn" xy="141,86" pivot="0.5,0.5" size="218,328">
+      <gearDisplay controller="Status" pages="0"/>
+    </image>
+    <image id="n2_hboe" name="n2" src="hboe5m" pkg="htck2ycn" xy="169,120" pivot="0.5,0.5" size="162,259">
+      <gearDisplay controller="Status" pages="1"/>
+    </image>
+  </displayList>
+</component>he8c1w.xml|1973|<component size="1920,1080">
+  <displayList>
+    <component id="n18_f2yx" name="Background" src="zu5k5i" pkg="htck2ycn" xy="0,0" pivot="0.5,0.5">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n19_f2yx" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="left-left,top-top"/>
+      <property target="title.title" propertyId="0" value="贸易总览"/>
+    </component>
+    <component id="n20_f2yx" name="ResourcesBar" src="g5vp5g" pkg="htck2ycn" xy="960,0" controller="Number,0">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n7_frlz" name="BGIcon" src="kt413k" pkg="htck2ycn" xy="980,557" pivot="0.5,0.5" anchor="true" size="1800,900" group="n15_9fo5"/>
+    <list id="n3_vbll" name="OverviewList" xy="987,617" pivot="0.5,0.5" anchor="true" size="1700,670" group="n15_9fo5" layout="flow_hz" overflow="scroll" lineGap="20" colGap="5" lineItemCount="5" defaultItem="ui://o174pljyhe8c1y" align="center">
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+      <item/>
+    </list>
+    <text id="n9_frlz" name="Title" xy="979,162" pivot="0.5,0.5" anchor="true" size="335,64" group="n15_9fo5" font="Font_Normal" fontSize="48" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="今日贸易总收益"/>
+    <text id="n10_he8c" name="TotleText" xy="893,212" pivot="0.5,0.5" size="173,44" group="n15_9fo5" font="Font_Normal" fontSize="32" color="#ffffff" align="center" vAlign="middle"/>
+    <component id="n17_f2yx" name="GetAllBtn" src="kt4138" pkg="htck2ycn" xy="1500,145" pivot="0.5,0.5" size="253,92" group="n15_9fo5">
+      <Button title="一键领取"/>
+    </component>
+    <group id="n15_9fo5" name="n15" xy="80,107" size="1800,900" advanced="true">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </group>
+  </displayList>
+</component>he8c1y.xml|2499|<component size="320,320">
+  <controller name="Status" homePageType="specific" homePage="0" pages="0,正常,1,拥挤,2,停滞,9,未安排,11,无订单,10,未发现" selected="0">
+    <action type="change_page" fromPage="" toPage="0,1,2,9" objectId="n15_frlz" controller="Status" targetPage="~1"/>
+  </controller>
+  <displayList>
+    <graph id="n5_f69l" name="n5" xy="0,0" size="320,320" alpha="0.6" type="rect" lineSize="0" fillColor="#ffcccccc">
+      <gearColor controller="Status" pages="9,10" values="#ffffff|#666666" default="#cccccc"/>
+    </graph>
+    <loader id="n16_frlz" name="ItemIcon" xy="160,130" pivot="0.5,0.5" anchor="true" size="256,256" scale="0.5,0.5">
+      <gearDisplay controller="Status" pages="0,1,2,9,11"/>
+      <gearLook controller="Status" pages="0,1,2,9" values="1,0,0,1|1,0,0,1|1,0,0,1|1,0,0,1" default="1,0,1,1"/>
+    </loader>
+    <component id="n15_frlz" name="StatusItem" src="frlzv" xy="79,230">
+      <gearDisplay controller="Status" pages="0,1,2,9"/>
+    </component>
+    <text id="n21_frlz" name="n21" xy="110,12" size="136,39" fontSize="28" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="码头拥挤">
+      <gearDisplay controller="Status" pages="1"/>
+    </text>
+    <text id="n22_frlz" name="n22" xy="109,4" size="161,50" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="库存不足&#xA;">
+      <gearDisplay controller="Status" pages="2"/>
+    </text>
+    <text id="n26_frlz" name="n26" xy="160,134" pivot="0.5,0.5" anchor="true" size="200,44" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="尚未发现">
+      <gearDisplay controller="Status" pages="10"/>
+    </text>
+    <component id="n27_he8c" name="SaleNode" src="frlz1f" xy="2,0">
+      <gearDisplay controller="Status" pages="0,1,2,9"/>
+    </component>
+    <text id="n28_he8c" name="StopText" xy="107,174" size="158,46" fontSize="32" color="#990000" align="center" autoSize="none" strokeColor="#000000" text="贸易停滞">
+      <gearDisplay controller="Status" pages="2,9"/>
+      <gearColor controller="Status" pages="9" values="#ffffff,#000000" default="#990000,#000000"/>
+      <gearText controller="Status" pages="9" values="未安排" default="贸易停滞"/>
+    </text>
+    <text id="n29_he8c" name="n29" xy="160,270" pivot="0.5,0.5" anchor="true" size="184,45" fontSize="32" color="#ffffff" align="center" autoSize="none" strokeColor="#000000" text="今日无订单">
+      <gearDisplay controller="Status" pages="11"/>
+    </text>
+  </displayList>
+</component>jn5c2i.xml|409|<component size="137,45">
+  <displayList>
+    <text id="n0_stjq" name="AcquiredNumber" xy="55,0" pivot="0,0.5" size="82,45" font="Font_Normal" fontSize="33" color="#ffffff" vAlign="middle" strokeColor="#000000"/>
+    <loader id="n3_rm99" name="ItemIcon" xy="2,-2" pivot="0.5,0.5" size="50,50" align="center" fill="scale"/>
+  </displayList>
+  <relation target="n0_stjq" sidePair="rightext-right"/>
+</component>jx8x3c.xml|242|<component size="1920,1080">
+  <displayList>
+    <component id="n0_jx8x" name="Popup" src="gpre2r" xy="690,321" pivot="0.5,0.5">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+  </displayList>
+</component>jx8x3d.xml|186|<component size="400,646">
+  <displayList>
+    <list id="n20_kp77" name="Tabs" xy="0,0" size="400,646" overflow="scroll" defaultItem="ui://o174pljye5jc1p"/>
+  </displayList>
+</component>jym92e.xml|364|<component size="320,320">
+  <displayList>
+    <graph id="n31_fo1p" name="PlayerBg" xy="0,0" size="320,320" type="rect" fillColor="#4c00cc00" corner="10,10,10,10"/>
+    <text id="n45_jym9" name="n45" xy="113,139" pivot="0.5,0.5" size="94,42" font="Font_Normal" fontSize="30" color="#ffffff" align="center" vAlign="middle" text="无好友"/>
+  </displayList>
+</component>kp7736.xml|1587|<component size="1920,1080">
+  <displayList>
+    <component id="n0_kp77" name="Background" src="zu5k5i" pkg="htck2ycn" xy="0,0" pivot="0.5,0.5">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n1_kp77" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="left-left,top-top"/>
+      <property target="title.title" propertyId="0" value="商品工坊"/>
+    </component>
+    <component id="n2_kp77" name="ResourcesBar" src="g5vp5g" pkg="htck2ycn" xy="960,0" controller="Number,0">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n3_kp77" name="Core" src="kt413k" pkg="htck2ycn" xy="85,103" pivot="0.5,0.5" size="1749,960">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n7_kp77" name="TabList" src="jx8x3d" xy="140,264" size="400,646" group="n16_kp77"/>
+    <component id="n9_kp77" name="AssignPanel" src="frlz1i" xy="1180,213" group="n16_kp77"/>
+    <component id="n12_kp77" name="InfoPanel" src="frlz1j" xy="563,213" group="n16_kp77"/>
+    <text id="n15_kp77" name="TitleText" xy="959,169" pivot="0.5,0.5" anchor="true" size="249,64" group="n16_kp77" font="Font_Normal" fontSize="48" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" strokeSize="2" text="生产列表"/>
+    <group id="n16_kp77" name="Assign" xy="140,137" size="1640,876" advanced="true">
+      <relation target="n3_kp77" sidePair="center-center,middle-middle"/>
+    </group>
+  </displayList>
+</component>kp7737.xml|1574|<component size="1920,1080">
+  <displayList>
+    <component id="n0_kp77" name="Background" src="zu5k5i" pkg="htck2ycn" xy="0,0" pivot="0.5,0.5">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n1_kp77" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="left-left,top-top"/>
+      <property target="title.title" propertyId="0" value="战争工坊"/>
+    </component>
+    <component id="n2_kp77" name="ResourcesBar" src="g5vp5g" pkg="htck2ycn" xy="960,0" controller="Number,0">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n3_kp77" name="Core" src="kt413k" pkg="htck2ycn" xy="85,103" pivot="0.5,0.5" size="1749,960">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n20_kp77" name="TabList" src="jx8x3d" xy="140,264" group="n24_kp77"/>
+    <component id="n21_kp77" name="AssignPanel" src="frlz1i" xy="1180,213" group="n24_kp77"/>
+    <component id="n22_kp77" name="InfoPanel" src="frlz1j" xy="563,213" group="n24_kp77"/>
+    <text id="n23_kp77" name="TitleText" xy="959,169" pivot="0.5,0.5" anchor="true" size="249,64" group="n24_kp77" font="Font_Normal" fontSize="48" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" strokeSize="2" text="生产列表"/>
+    <group id="n24_kp77" name="Assign" xy="140,137" size="1640,876" advanced="true">
+      <relation target="n3_kp77" sidePair="center-center,middle-middle"/>
+    </group>
+  </displayList>
+</component>ll7535.xml|325|<component size="200,200">
+  <displayList>
+    <loader id="n0_ll75" name="Icon" xy="0,0" pivot="0.5,0.5" size="200,200" align="center" vAlign="middle" fill="scale"/>
+    <graph id="n1_ll75" name="Sfx" xy="0,0" pivot="0.5,0.5" size="200,200" alpha="0" touchable="false" type="rect" lineSize="0"/>
+  </displayList>
+</component>package.xml|5708|<packageDescription id="o174pljy" name="Production">
+  <resources>
+    <component id="e5jc1p" name="ProductionAssignTab" path="/Button/" size="400,120"/>
+    <component id="f2yx3a" name="CollectMapWindow" path="/Component/" size="1600,900"/>
+    <component id="f2yx3b" name="ReturnWorldMap" path="/Button/" size="380,120"/>
+    <component id="fo1p1z" name="ExchangeSelectItem" path="/Component/" size="320,320"/>
+    <component id="fo1p21" name="ExchangeAssign" path="/Component/" size="600,800"/>
+    <component id="fo1p24" name="ExchangeInfoItem" path="/Component/" size="400,740"/>
+    <component id="frlz12" name="CollectionAssign" path="/Component/" size="600,900"/>
+    <component id="frlz13" name="CollectionEfficiency" path="/Component/" size="300,80"/>
+    <component id="frlz19" name="DetailItem" path="/Component/" size="400,50"/>
+    <component id="frlz1a" name="DetailOpen" path="/Button/" size="76,82"/>
+    <component id="frlz1b" name="DetailClose" path="/Button/" size="76,82"/>
+    <component id="frlz1d" name="ProductionSelectItem" path="/Component/" size="320,320"/>
+    <component id="frlz1f" name="SalesLabel" path="/Component/" size="120,60"/>
+    <component id="frlz1i" name="ProductionAssign" path="/Component/" size="600,800"/>
+    <component id="frlz1j" name="ProductionInfo" path="/Component/" size="600,800"/>
+    <component id="frlzv" name="AssignStatus" path="/Component/" size="150,64"/>
+    <component id="frlzz" name="AssignBar" path="/Component/" size="600,100"/>
+    <component id="fysk25" name="DetailList" path="/Component/" size="480,900"/>
+    <component id="gpre2r" name="FrontlinePendingBonuses" path="/Component/" size="539,437"/>
+    <component id="gpre2s" name="FrontlinePendingBonus" path="/Component/" size="222,50"/>
+    <component id="h8iw1v" name="ProductionRequiredItem" path="/Component/" size="200,128"/>
+    <component id="he8c1y" name="ExchangeOverviewItem" path="/Component/" size="320,320"/>
+    <component id="jx8x3d" name="ProductionTabs" path="/Component/" size="400,646"/>
+    <component id="jym92e" name="ExchangeSelectPlayerItem" path="/Component/" size="320,320"/>
+    <component id="qy0a2k" name="WreckageItem" path="/Component/" size="80,119"/>
+    <component id="qy0a2l" name="WreckageItems" path="/Component/" size="550,150"/>
+    <component id="r2vw2z" name="FrontlineExpectedBonus" path="/Component/" size="300,90"/>
+    <component id="r2vw30" name="FrontlineExpectedBonusList" path="/Component/" size="422,253"/>
+    <component id="r2vw32" name="FrontlineDropBonus" path="/Component/" size="160,160"/>
+    <component id="r2vw33" name="FrontlineBackground" path="/Component/" size="2300,799"/>
+    <component id="sdgk2g" name="CarryItem" path="/Component/" size="30,30"/>
+    <component id="stjq27" name="AcquiredTip" path="/Component/" size="200,150"/>
+    <component id="yc3x2p" name="FrontlineAssign" path="/Component/" size="1644,900"/>
+    <image id="ai9b1u" name="button_add_green" path="/Image/" size="76,82"/>
+    <image id="e5jc1n" name="TabBtnDark" path="/Image/" size="206,107" scale="9grid" scale9grid="50,50,106,7"/>
+    <image id="e5jc1o" name="TabBtnLight" path="/Image/" size="206,107" scale="9grid" scale9grid="50,50,106,7"/>
+    <image id="frlz1e" name="IconSalesLabelBg" path="/Image/" size="239,104"/>
+    <image id="frlz1k" name="IconStation" path="/Image/" size="128,128"/>
+    <image id="njzj2b" name="ship_c1_r-1" path="/Image/" size="48,48"/>
+    <image id="njzj2c" name="ship_c2_r-1" path="/Image/" size="48,48"/>
+    <image id="njzj2d" name="ship_c3_r-1" path="/Image/" size="48,48"/>
+    <image id="pcms2u" name="GiftPack712" path="/Image/" size="256,256"/>
+    <image id="pcms2v" name="阶段目标背景图-攻占月岛" path="/Image/" size="584,203" scale9grid="146,50,292,100"/>
+    <image id="r2vw31" name="气泡-永夜旗舰任务气泡" path="/Image/" size="104,81"/>
+    <component id="aece0" name="BaseShipPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="aece1" name="WorldMapPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="f2yx38" name="SelectProductPopup" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="f2yx39" name="CollectMapPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="fo1p20" name="ExchangeSelectPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="frlzt" name="CollectionAssignPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="hboe3e" name="ShipWaitingHint" path="/Component/" size="500,500" exported="true"/>
+    <component id="he8c1w" name="ExchangeOverviewPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="jn5c2i" name="AcquiredItem" path="/Component/" size="137,45" exported="true"/>
+    <component id="jx8x3c" name="FrontlineBonusPopup" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="kp7736" name="ProductWorkshopPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="kp7737" name="WarWorkshopPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="ll7535" name="OutpostBox" path="/Component/" size="200,200" exported="true"/>
+    <component id="r2vw34" name="FrontlineDropFlying" path="/Component/" size="80,80" exported="true"/>
+    <component id="rr2x2o" name="FrontlineAssignPanel" path="/Main/" size="1920,1080" exported="true"/>
+    <component id="sdgk2f" name="CarryIcon" path="/Component/" size="122,34" exported="true"/>
+    <component id="stjq26" name="PutInStorageUi" path="/Component/" size="500,500" exported="true"/>
+    <atlas id="atlas0" size="512,512" file="atlas0.png"/>
+    <atlas id="atlas_pcms2v" size="584,203" file="atlas_pcms2v.png"/>
+  </resources>
+</packageDescription>qy0a2k.xml|377|<component size="80,119">
+  <displayList>
+    <loader id="n0_qy0a" name="Icon" xy="0,0" pivot="0.5,0.5" size="80,80" align="center" vAlign="middle" fill="scale"/>
+    <text id="n1_qy0a" name="Probability" xy="6,76" pivot="0.5,0.5" size="68,42" font="Font_Normal" fontSize="30" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000"/>
+  </displayList>
+</component>qy0a2l.xml|480|<component size="550,150">
+  <displayList>
+    <graph id="n0_qy0a" name="n0" xy="0,0" size="550,150" alpha="0.7" type="rect" lineSize="0" fillColor="#ff000000" corner="5"/>
+    <list id="n1_qy0a" name="Items" xy="6,0" pivot="0.5,0.5" size="538,150" layout="row" colGap="30" defaultItem="ui://o174pljyqy0a2k" align="center" vAlign="bottom"/>
+    <image id="n2_qy0a" name="Max" src="qy0a2i" pkg="htck2ycn" xy="455,-34" pivot="0.5,0.5" visible="false"/>
+  </displayList>
+</component>r2vw2z.xml|2959|<component size="300,90">
+  <controller name="Type" pages="0,收益倍率：基础,1,收益倍率：基础+高倍,2,收益倍率：高倍" selected="2"/>
+  <displayList>
+    <component id="n17_r2vw" name="Frame" src="wcfr4g" pkg="htck2ycn" xy="0,0" pivot="0.5,0.5" size="90,90" controller="Quality,0"/>
+    <loader id="n6_gpre" name="Icon" xy="0,0" pivot="0.5,0.5" size="90,90" align="center" vAlign="middle" fill="scale"/>
+    <text id="n5_gpre" name="BasePartialCount" xy="98,60" pivot="0,0.5" anchor="true" size="86,39" font="Font_Normal" fontSize="28" color="#ffffff" vAlign="middle" strokeColor="#000000">
+      <gearDisplay controller="Type" pages="1"/>
+    </text>
+    <text id="n19_ll75" name="BaseTotalCount" xy="100,45" pivot="0,0.5" anchor="true" size="121,54" font="Font_Normal" fontSize="40" color="#ffffff" vAlign="middle" strokeColor="#000000">
+      <gearDisplay controller="Type" pages="0"/>
+    </text>
+    <text id="n11_r2vw" name="HighTotalCount" xy="100,45" pivot="0,0.5" anchor="true" size="145,54" font="Font_Normal" fontSize="40" color="#aef224" vAlign="middle" strokeColor="#000000">
+      <gearDisplay controller="Type" pages="2"/>
+    </text>
+    <text id="n18_lpzj" name="HighPartialCount" xy="264,17" pivot="1,0.5" anchor="true" size="89,34" font="Font_Normal" fontSize="24" color="#aef224" align="right" vAlign="middle" strokeColor="#000000">
+      <gearDisplay controller="Type" pages="1"/>
+      <relation target="n15_r2vw" sidePair="right-left"/>
+    </text>
+    <text id="n12_r2vw" name="n12" xy="222,44" pivot="0,0.5" anchor="true" size="73,39" font="Font_Normal" fontSize="28" color="#ffffff" vAlign="middle" strokeColor="#000000" text="/小时">
+      <gearDisplay controller="Type" pages="0"/>
+      <relation target="n19_ll75" sidePair="left-right"/>
+    </text>
+    <text id="n13_r2vw" name="n13" xy="246,44" pivot="0,0.5" anchor="true" size="73,39" font="Font_Normal" fontSize="28" color="#ffffff" vAlign="middle" strokeColor="#000000" text="/小时">
+      <gearDisplay controller="Type" pages="2"/>
+      <relation target="n11_r2vw" sidePair="middle-middle,left-right"/>
+    </text>
+    <text id="n14_r2vw" name="n14" xy="174,16" pivot="1,0.5" anchor="true" size="25,49" font="Font_Normal" fontSize="36" color="#aef224" align="right" vAlign="middle" strokeColor="#000000" text="+">
+      <gearDisplay controller="Type" pages="1"/>
+      <relation target="n18_lpzj" sidePair="right-left"/>
+    </text>
+    <text id="n15_r2vw" name="n15" xy="264,-2" size="37,39" font="Font_Normal" fontSize="28" color="#ffff00" strokeColor="#000000" text="x3">
+      <gearDisplay controller="Type" pages="1"/>
+    </text>
+    <text id="n16_r2vw" name="n16" xy="185,59" pivot="0,0.5" anchor="true" size="73,39" scale="0.75,0.75" font="Font_Normal" fontSize="28" color="#ffffff" vAlign="middle" strokeColor="#000000" text="/小时">
+      <gearDisplay controller="Type" pages="1"/>
+      <relation target="n5_gpre" sidePair="middle-middle,left-right"/>
+    </text>
+  </displayList>
+</component>r2vw30.xml|718|<component size="422,253">
+  <controller name="Type" pages="0,收益倍率：基础,1,收益倍率：基础+高倍,2,收益倍率：高倍" selected="0"/>
+  <displayList>
+    <text id="n79_r2vw" name="n79" xy="163,0" pivot="0.5,0.5" size="98,34" fontSize="24" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="预期获取"/>
+    <list id="n81_r2vw" name="ExpectedBonuses" xy="0,40" pivot="0.5,0" size="422,213" overflow="scroll" lineGap="15" defaultItem="ui://o174pljyr2vw2z" autoItemSize="false" align="center"/>
+    <text id="n83_r2vw" name="n83" xy="321,-1" size="37,39" font="Font_Normal" fontSize="28" color="#ffff00" strokeColor="#000000" text="x3">
+      <gearDisplay controller="Type" pages="2"/>
+    </text>
+  </displayList>
+</component>r2vw32.xml|1034|<component size="160,160" pivot="0.5,0.5">
+  <controller name="IsHighMultiple" pages="0,不是高倍掉落,1,是高倍掉落" selected="1"/>
+  <displayList>
+    <component id="n4_r2vw" name="Frame" src="wcfr4g" pkg="htck2ycn" xy="0,0" pivot="0.5,0.5" controller="Quality,0"/>
+    <loader id="n1_r2vw" name="Icon" xy="0,0" pivot="0.5,0.5" size="160,160" align="center" vAlign="middle" fill="scale"/>
+    <text id="n2_r2vw" name="DropCount" xy="79,107" pivot="1,0.5" size="74,54" font="Font_Normal" fontSize="40" color="#aef224" align="right" vAlign="middle" strokeColor="#000000">
+      <gearColor controller="IsHighMultiple" pages="0" values="#ffffff,#000000" default="#aef224,#000000"/>
+    </text>
+    <text id="n3_r2vw" name="n3" xy="109,0" size="51,54" font="Font_Normal" fontSize="40" color="#ffff00" strokeColor="#000000" text="x3">
+      <gearDisplay controller="IsHighMultiple" pages="1"/>
+    </text>
+    <graph id="n5_r2vw" name="SfxGraph" xy="40,40" pivot="0.5,0.5" size="80,80" alpha="0" type="rect" lineSize="0"/>
+  </displayList>
+</component>r2vw33.xml|1944|<component size="2300,799" mask="n75_f2yx">
+  <displayList>
+    <graph id="n75_f2yx" name="n75" xy="360,0" pivot="0.5,0.5" size="1580,800" touchable="false" type="rect" lineSize="0" corner="10"/>
+    <image id="n68_pcms" name="n68" src="pcms2v" xy="0,0" pivot="0.5,0.5" size="2300,799"/>
+    <graph id="n69_r2vw" name="DropStartPoint" xy="1150,304" pivot="0.5,0.5" anchor="true" size="30,30" visible="false" type="rect" lineSize="0"/>
+    <graph id="n70_r2vw" name="DropEndPoint" xy="467,142" pivot="0.5,0.5" anchor="true" size="30,30" visible="false" type="rect" lineSize="0"/>
+    <list id="n73_r2vw" name="DropList" xy="867,426" pivot="0.5,0.5" size="565,169" alpha="0" layout="row" overflow="scroll" colGap="30" defaultItem="ui://o174pljyr2vw32" autoItemSize="false" align="center"/>
+    <component id="n74_ll75" name="OutpostBox" src="ll7535" xy="1150,399" pivot="0.5,0.5" anchor="true" scale="0.25,0.25" alpha="0" touchable="false">
+      <relation target="" sidePair="center-center"/>
+    </component>
+  </displayList>
+  <transition name="DropAppear" frameRate="30">
+    <item time="0" type="Alpha" target="n73_r2vw" tween="true" startValue="0" endValue="1" duration="1"/>
+  </transition>
+  <transition name="DropDisappear">
+    <item time="0" type="Alpha" target="n73_r2vw" value="1"/>
+    <item time="1" type="Alpha" target="n73_r2vw" value="0"/>
+  </transition>
+  <transition name="ShowBox" frameRate="30">
+    <item time="0" type="Alpha" target="n74_ll75" tween="true" startValue="0" endValue="1" duration="10"/>
+    <item time="0" type="Scale" target="n74_ll75" tween="true" startValue="0.25,0.25" endValue="1,1" duration="10" ease="Back.Out"/>
+    <item time="90" type="Scale" target="n74_ll75" value="1,1"/>
+    <item time="104" type="Alpha" target="n74_ll75" value="1"/>
+    <item time="105" type="Alpha" target="n74_ll75" value="0"/>
+    <item time="105" type="Scale" target="n74_ll75" value="1,1"/>
+  </transition>
+</component>r2vw34.xml|336|<component size="80,80" pivot="0.5,0.5" anchor="true">
+  <displayList>
+    <graph id="n5_r2vw" name="SfxGraph" xy="0,0" pivot="0.5,0.5" size="80,80" alpha="0" type="rect" lineSize="0"/>
+    <loader id="n1_r2vw" name="Icon" xy="0,0" pivot="0.5,0.5" size="80,80" align="center" vAlign="middle" fill="scale"/>
+  </displayList>
+</component>rr2x2o.xml|839|<component size="1920,1080">
+  <displayList>
+    <component id="n2_f2yx" name="Background" src="zu5k5i" pkg="htck2ycn" xy="0,0" pivot="0.5,0.5">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <component id="n3_f2yx" name="PanelTitle" src="wcfr46" pkg="htck2ycn" xy="0,0">
+      <relation target="" sidePair="left-left,top-top"/>
+      <property target="title.title" propertyId="0" value="前线"/>
+    </component>
+    <component id="n4_f2yx" name="ResourcesBar" src="g5vp5g" pkg="htck2ycn" xy="960,0" controller="Number,0">
+      <relation target="" sidePair="right-right,top-top"/>
+    </component>
+    <component id="n1_yc3x" name="AssginCom" src="yc3x2p" xy="138,110" pivot="0.5,0.5">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+  </displayList>
+</component>sdgk2f.xml|240|<component size="122,34" pivot="0.5,0.5" anchor="true">
+  <displayList>
+    <list id="n0_sdgk" name="Items" xy="0,0" pivot="0.5,0.5" size="122,34" layout="row" defaultItem="ui://o174pljysdgk2g" align="center"/>
+  </displayList>
+</component>sdgk2g.xml|191|<component size="30,30">
+  <displayList>
+    <loader id="n0_sdgk" name="Icon" xy="0,0" pivot="0.5,0.5" size="30,30" align="center" vAlign="middle" fill="scale"/>
+  </displayList>
+</component>stjq26.xml|984|<component size="500,500" pivot="0.5,1" anchor="true">
+  <controller name="Status" pages="0,显示,1,隐藏,2,上浮" selected="0">
+    <action type="play_transition" fromPage="" toPage="2" transition="Acquired"/>
+  </controller>
+  <displayList>
+    <component id="n0_stjq" name="AcquiredNumber" src="stjq27" xy="250,500" pivot="0.5,1" anchor="true">
+      <gearLook controller="Status" pages="1" values="0,0,0,1" default="1,0,0,1"/>
+      <relation target="" sidePair="center-center,bottom-bottom"/>
+    </component>
+  </displayList>
+  <transition name="Acquired" frameRate="60">
+    <item time="0" type="Alpha" target="n0_stjq" value="1"/>
+    <item time="0" type="XY" target="n0_stjq" tween="true" startValue="-,465" endValue="-,144" duration="39"/>
+    <item time="39" type="Alpha" target="n0_stjq" tween="true" startValue="1" endValue="1" duration="63"/>
+    <item time="102" type="Alpha" target="n0_stjq" tween="true" startValue="1" endValue="0" duration="18"/>
+  </transition>
+</component>stjq27.xml|241|<component size="200,150">
+  <displayList>
+    <list id="n4_jn5c" name="AcquiredList" xy="0,0" pivot="0.5,1" size="200,150" defaultItem="ui://o174pljyjn5c2i" autoItemSize="false" align="center" vAlign="bottom"/>
+  </displayList>
+</component>yc3x2p.xml|7055|<component size="1644,900" overflow="hidden">
+  <controller name="DisplayChangePlan" pages="0,不显示调整计划组件,1,显示调整计划组件" selected="0"/>
+  <controller name="DisplayFloorProgress" pages="0,爬塔层数不变,1,爬塔层数突破" selected="0"/>
+  <displayList>
+    <component id="n105_f2yx" name="n105" src="kt413k" pkg="htck2ycn" xy="0,0" size="1644,900"/>
+    <component id="n68_pcms" name="FrontlineBackground" src="r2vw33" xy="-332,50" pivot="0.5,0.5">
+      <relation target="" sidePair="center-center,middle-middle"/>
+    </component>
+    <graph id="n74_r2vw" name="n74" xy="578,70" pivot="0.5,0.5" size="488,486" alpha="0.7" type="rect" lineSize="0" fillColor="#ff000000" corner="20">
+      <gearDisplay controller="DisplayChangePlan" pages="1"/>
+    </graph>
+    <image id="n38_fo1p" name="n38" src="njzj2c" xy="534,640" size="64,64" group="n51_fo1p"/>
+    <component id="n39_fo1p" name="Slider" src="he8c1h" pkg="htck2ycn" xy="610,632" group="n51_fo1p"/>
+    <group id="n51_fo1p" name="AssignBar" xy="534,632" size="576,80" advanced="true">
+      <gearDisplay controller="DisplayChangePlan" pages="1"/>
+    </group>
+    <component id="n33_frlz" name="ButtonDepart" src="kt4138" pkg="htck2ycn" xy="736,717" pivot="0.5,0.5">
+      <Button title="出发"/>
+    </component>
+    <text id="n69_pcms" name="CurrentFloor" xy="685,4" pivot="0.5,0.5" size="274,54" font="Font_Normal" fontSize="40" color="#ffffff" strokeColor="#661a00"/>
+    <component id="n70_pcms" name="Change" src="kt4138" pkg="htck2ycn" xy="736,717" pivot="0.5,0.5">
+      <gearDisplay controller="DisplayChangePlan" pages="0"/>
+      <Button title="调整" controller="DisplayChangePlan" page="1"/>
+    </component>
+    <loader id="n61_yc3x" name="SoldierItemIcon" xy="908,575" pivot="0.5,0.5" size="64,64" group="n71_pcms" align="center" vAlign="middle" fill="scale"/>
+    <text id="n62_yc3x" name="SoldierText" xy="985,583" pivot="0,0.5" size="98,44" group="n71_pcms" fontSize="32" color="#ffffff" vAlign="middle" strokeColor="#000000" text="20000"/>
+    <text id="n27_frlz" name="n27" xy="561,584" size="164,45" group="n71_pcms" fontSize="24" color="#ffffff" align="center" vAlign="middle" autoSize="none" strokeColor="#000000" text="出兵需求："/>
+    <image id="n28_frlz" name="IconWorker" src="frlzp" pkg="htck2ycn" xy="753,572" size="64,64" group="n71_pcms"/>
+    <text id="n29_frlz" name="WorkerCount" xy="813,582" pivot="0,0.5" size="60,44" group="n71_pcms" font="Font_Normal" fontSize="32" color="#ffffff" strokeColor="#000000" text="300"/>
+    <group id="n71_pcms" name="n71" xy="561,572" size="522,67" advanced="true">
+      <gearDisplay controller="DisplayChangePlan" pages="1"/>
+    </group>
+    <component id="n72_pcms" name="ReturnChangePage" src="wcfr44" pkg="htck2ycn" xy="947,700">
+      <gearDisplay controller="DisplayChangePlan" pages="1"/>
+      <Button controller="DisplayChangePlan" page="0"/>
+    </component>
+    <component id="n79_r2vw" name="FrontlineExpectedBonusList" src="r2vw30" xy="610,296" controller="Type,2">
+      <gearDisplay controller="DisplayChangePlan" pages="1"/>
+    </component>
+    <text id="n90_r2vw" name="FloorProgress" xy="1165,15" pivot="1,0.5" size="467,34" font="Font_Normal" fontSize="24" color="#ffffff" align="right" strokeColor="#661a00">
+      <gearDisplay controller="DisplayFloorProgress" pages="1"/>
+    </text>
+    <text id="n91_r2vw" name="n91" xy="480,851" pivot="0.5,0.5" size="684,34" font="Font_Normal" fontSize="24" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="每天前10个据点掉落奖励翻3倍，成功攻占据点后可夺取据点宝箱"/>
+    <text id="n83_r2vw" name="n83" xy="49,627" pivot="0.5,0.5" size="142,39" fontSize="28" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="兵力投入："/>
+    <text id="n87_r2vw" name="n87" xy="50,753" pivot="0.5,0.5" size="122,34" fontSize="24" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="士兵强度："/>
+    <loader id="n84_r2vw" name="ConsumeIcon" xy="44,671" pivot="0.5,0.5" size="64,64" align="center" vAlign="middle" fill="scale"/>
+    <text id="n85_r2vw" name="ConsumeSpeed" xy="119,684" pivot="0,0.5" size="53,39" font="Font_Normal" fontSize="28" color="#ffffff" vAlign="middle" strokeColor="#000000"/>
+    <text id="n86_r2vw" name="n86" xy="174,685" size="65,34" fontSize="24" color="#ffffff" autoSize="none" strokeColor="#000000" text="/小时&#xA;">
+      <relation target="n85_r2vw" sidePair="middle-middle,left-right"/>
+    </text>
+    <text id="n89_r2vw" name="SoldierStrength" xy="49,798" pivot="0,0.5" size="46,39" font="Font_Normal" fontSize="28" color="#aef224" vAlign="middle" strokeColor="#000000"/>
+    <text id="n94_r2vw" name="n94" xy="1457,601" pivot="0,0.5" size="142,39" font="Font_Normal" fontSize="28" color="#ffffff" vAlign="middle" strokeColor="#000000" text="当前据点："/>
+    <text id="n95_r2vw" name="CurrentOutpostRemainingEnemyCount" xy="1536,665" pivot="0,0.5" size="60,44" font="Font_Normal" fontSize="32" color="#ffffff" vAlign="middle" strokeColor="#000000"/>
+    <loader id="n96_r2vw" name="RemainingIcon" xy="1463,652" pivot="0.5,0.5" size="64,64" align="center" vAlign="middle" fill="scale"/>
+    <text id="n97_r2vw" name="n97" xy="1477,735" pivot="0.5,0.5" size="122,34" fontSize="24" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="敌人强度："/>
+    <text id="n98_r2vw" name="EnemyStrength" xy="1553,782" pivot="0,0.5" size="46,39" font="Font_Normal" fontSize="28" color="#ff1a1a" vAlign="middle" strokeColor="#000000"/>
+    <text id="n73_r2vw" name="n73" xy="764,78" pivot="0.5,0.5" size="114,39" fontSize="28" color="#ffffff" align="center" vAlign="middle" strokeColor="#000000" text="击杀效率"/>
+    <text id="n78_r2vw" name="ExpectedTime" xy="659,224" pivot="0.5,0.5" size="326,34" font="Font_Normal" fontSize="24" color="#ffffff" strokeColor="#661a00"/>
+    <loader id="n75_r2vw" name="EnemyIcon" xy="643,120" pivot="0.5,0.5" size="100,100" align="center" vAlign="middle" fill="scale"/>
+    <text id="n76_r2vw" name="KillSpeed" xy="744,128" pivot="1,0.5" size="145,79" font="Font_Normal" fontSize="60" color="#ffffff" align="right" vAlign="middle" strokeColor="#000000"/>
+    <text id="n77_r2vw" name="n77" xy="890,140" pivot="0,0.5" size="93,49" font="Font_Normal" fontSize="36" color="#ffffff" vAlign="middle" strokeColor="#000000" text="/小时">
+      <relation target="n76_r2vw" sidePair="middle-middle,left-right"/>
+    </text>
+    <text id="n92_r2vw" name="CapturedOutpostCountToday" xy="1440,425" pivot="0,0.5" size="46,49" font="Font_Normal" fontSize="36" color="#ffffff" vAlign="middle" strokeColor="#000000">
+      <relation target="n93_r2vw" sidePair="middle-middle,left-right"/>
+    </text>
+    <text id="n93_r2vw" name="n93" xy="1364,425" pivot="0,0.5" size="75,49" font="Font_Normal" fontSize="36" color="#ffffff" vAlign="middle" strokeColor="#000000" text="据点"/>
+    <image id="n99_r2vw" name="n99" src="r2vw31" xy="1339,194" pivot="0.5,1" size="162,126"/>
+    <loader id="n100_r2vw" name="BoxIcon" xy="1358,172" pivot="0.5,0.5" size="120,120" align="center" vAlign="middle" fill="scale"/>
+  </displayList>
+</component>
