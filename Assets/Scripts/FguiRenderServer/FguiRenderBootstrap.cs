@@ -206,6 +206,7 @@ namespace FguiRenderServer
             }
             catch (Exception ex)
             {
+                UnityEngine.Debug.LogException(ex);
                 sw.Stop();
                 result.ok = false;
                 result.message = ex.Message;
@@ -344,21 +345,7 @@ namespace FguiRenderServer
                 return binaryPath;
             }
 
-            string legacyPath = Path.Combine(packageDir, packageName + ".bytes");
-            if (!File.Exists(legacyPath))
-            {
-                throw new FileNotFoundException(
-                    "Cannot find package description file. Expected '" + packageName + "_fui.bytes' in: " + packageDir,
-                    binaryPath);
-            }
-
-            if (HasFguiBinaryHeader(legacyPath))
-            {
-                return legacyPath;
-            }
-
             throw new InvalidOperationException(
-                "Found legacy package descriptor '" + Path.GetFileName(legacyPath) + "' (text/old format). " +
                 "Runtime rendering requires FairyGUI binary descriptor '_fui.bytes'. " +
                 "Please publish the package with the official FairyGUI runtime format before rendering.");
         }

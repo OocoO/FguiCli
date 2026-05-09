@@ -62,3 +62,4 @@ Packages/manifest.json
 tools/fgui_render_client/FguiRenderServer
 Assets/FguiEditor/Diff.meta
 Assets/FguiEditor/Diff/
+Assets/FguiEditor/TestResources

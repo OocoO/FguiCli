@@ -90,46 +90,30 @@ public static class FguiRenderBuild
         }
     }
     
-    [MenuItem("Tools/Fgui Package/Publish Folder...")]
+    [MenuItem("Tools/Fgui Package/Test Publish Folder...")]
     public static void PublishFolderFromMenu()
     {
-        string packageDir = EditorUtility.OpenFolderPanel("Select FairyGUI package source folder", Application.dataPath, string.Empty);
-        if (string.IsNullOrEmpty(packageDir))
-        {
-            return;
-        }
-
-        string outputDir = EditorUtility.OpenFolderPanel("Select publish output folder", Path.GetDirectoryName(packageDir) ?? packageDir, string.Empty);
-        if (string.IsNullOrEmpty(outputDir))
-        {
-            return;
-        }
-        FguiPackagePublisher.PublishPackage(packageDir, outputDir);
+        string packageSourceDir = "D:/ProjectGit/AirLegion/fgui_airLegion/assets/BattleUI";
+        string outputDir = "D:/Project/FguiCli/Assets/FguiEditor/Diff/BattleUI";
+        
+        FguiPackagePublisher.PublishPackage(packageSourceDir, outputDir);
     }
 
     /// <summary>
-    /// Publish from a FGUI source dir then immediately render one component to PNG (Editor shortcut).
+    /// Publish from a FGUI source dir then render all exported components to PNG (Editor shortcut).
     /// </summary>
     [MenuItem("Tools/Fgui Package/Test Publish and Render Component...")]
     public static void PublishAndRenderFromMenu()
     {
         string packageSourceDir = "D:/ProjectGit/AirLegion/fgui_airLegion/assets/BattleUI";
-        string outPng = "D:/Project/FguiCli/Assets/FguiEditor/Diff/output.png";
+        string outPngDir        = "D:/Project/FguiCli/Assets/FguiEditor/Diff/BattleUI";
 
-        string lastComponent = EditorPrefs.GetString("FguiLastComponentName", string.Empty);
-        string componentName = EditorInputDialog.Show("Component Name", "Enter the component name to render:", lastComponent);
-        if (string.IsNullOrEmpty(componentName)) return;
-        EditorPrefs.SetString("FguiLastComponentName", componentName);
-
-        FguiPublishAndRender.PublishAndRender(new FguiRenderRequest
-        {
-            packageSourceDir = packageSourceDir,
-            componentName = componentName,
-            outPng = outPng,
-            width = 1920,
-            height = 1080,
-            scale = 1f,
-            transparent = true
-        });
+        FguiPublishAndRender.PublishAndRenderAll(
+            packageSourceDir,
+            outPngDir,
+            width: 1920,
+            height: 1080,
+            scale: 1f,
+            transparent: true);
     }
 }

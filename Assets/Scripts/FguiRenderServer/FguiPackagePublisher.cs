@@ -42,6 +42,29 @@ public static class FguiPackagePublisher
         PublishPackage(packageDir, outputDir);
     }
 
+    /// <summary>
+    /// Returns the names (without .xml extension) of all exported components in the package.
+    /// </summary>
+    public static List<string> GetExportedComponentNames(string packageDir)
+    {
+        string fullDir = Path.GetFullPath(packageDir);
+        string xmlPath = Path.Combine(fullDir, "package.xml");
+        if (!File.Exists(xmlPath))
+            throw new FileNotFoundException("Cannot find FairyGUI package.xml", xmlPath);
+
+        XDocument doc = XDocument.Load(xmlPath);
+        XElement resources = doc.Root?.Element("resources");
+        if (resources == null)
+            return new List<string>();
+
+        return resources.Elements("component")
+            .Where(e => string.Equals(e.Attribute("exported")?.Value, "true", StringComparison.OrdinalIgnoreCase))
+            .Select(e => e.Attribute("name")?.Value)
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Select(n => Path.GetFileNameWithoutExtension(n))
+            .ToList();
+    }
+
     /// <summary>Returns the package name declared in package.xml (or folder name as fallback).</summary>
     public static string GetPackageName(string packageDir)
     {
