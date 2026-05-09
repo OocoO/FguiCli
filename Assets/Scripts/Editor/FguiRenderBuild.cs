@@ -113,8 +113,6 @@ public static class FguiRenderBuild
         FguiPublishAndRender.PublishAndRenderAll(
             packageSourceDir,
             outPngDir,
-            width: 1920,
-            height: 1080,
             scale: 1f,
             transparent: true);
     }

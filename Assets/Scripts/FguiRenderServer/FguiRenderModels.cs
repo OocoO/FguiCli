@@ -16,7 +16,7 @@ namespace FguiRenderServer
         /// to a temp folder, then render from there. Leave empty to use a pre-published packageDir.
         /// </summary>
         public string packageSourceDir;
-        public string packageDir;
+        public string allPackageRootDir;
         public string packageName;
         public string componentName;
         public string outPng;
@@ -76,7 +76,7 @@ namespace FguiRenderServer
             FguiRenderRequest req = new FguiRenderRequest
             {
                 packageSourceDir = GetString(map, "--package-source-dir", string.Empty),
-                packageDir = GetString(map, "--package-dir", string.Empty),
+                allPackageRootDir = GetString(map, "--package-dir", string.Empty),
                 packageName = GetString(map, "--package-name", string.Empty),
                 componentName = GetString(map, "--component-name", string.Empty),
                 outPng = GetString(map, "--out-png", string.Empty),

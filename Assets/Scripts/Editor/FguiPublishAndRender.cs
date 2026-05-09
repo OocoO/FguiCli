@@ -16,14 +16,6 @@ namespace Editor
 /// </summary>
 public static class FguiPublishAndRender
 {
-    public static void PublishAndRender(FguiRenderRequest request, Action<FguiRenderResult> onComplete)
-    {
-        if (string.IsNullOrWhiteSpace(request.packageSourceDir))
-            throw new ArgumentException("packageSourceDir must be set.");
-
-        PublishOnceThenRender(request, onComplete);
-    }
-
     /// <summary>
     /// Publish a FGUI source package then render every exported component to a separate PNG
     /// inside <paramref name="outPngDir"/>.  Components are rendered one after another.
@@ -31,8 +23,6 @@ public static class FguiPublishAndRender
     public static void PublishAndRenderAll(
         string packageSourceDir,
         string outPngDir,
-        int width = 1920,
-        int height = 1080,
         float scale = 1f,
         bool transparent = true)
     {
@@ -46,20 +36,19 @@ public static class FguiPublishAndRender
             return;
         }
 
-        PublishPackageOnce(packageSourceDir, out string tempPublishDir, out string packageName);
+        var packageName = FguiPackagePublisher.GetPackageName(packageSourceDir);
+        PublishPackageOnce(packageSourceDir, out string tempPublishDir);
         Debug.Log($"[FguiPublishAndRender] Rendering {componentNames.Count} exported component(s) from '{packageSourceDir}' using published package '{packageName}'...");
-        RenderNextPublished(tempPublishDir, packageName, packageSourceDir, outPngDir, componentNames, 0, width, height, scale, transparent);
+        RenderNextPublished(tempPublishDir, packageName, packageSourceDir, outPngDir, componentNames, 0, scale, transparent);
     }
 
     private static void RenderNextPublished(
-        string packageDir,
+        string tempAllPackageDir,
         string packageName,
         string packageSourceDir,
         string outPngDir,
         List<string> componentNames,
         int index,
-        int width,
-        int height,
         float scale,
         bool transparent)
     {
@@ -67,7 +56,7 @@ public static class FguiPublishAndRender
         {
             Debug.Log($"[FguiPublishAndRender] All {componentNames.Count} component(s) rendered.");
             AssetDatabase.Refresh();
-            TryDeleteTempDir(packageDir);
+            TryDeleteTempDir(tempAllPackageDir);
             return;
         }
 
@@ -76,25 +65,18 @@ public static class FguiPublishAndRender
         // Determine component-specific size from the package. If the component XML
         // contains a size attribute ("width,height"), use that as the render size.
         // Fall back to the provided width/height parameters.
-        int compW = width;
-        int compH = height;
-        try
+        int compW = 1920;
+        int compH = 1080;
+        if (TryGetComponentSize(packageSourceDir, componentName, out int w, out int h))
         {
-            if (TryGetComponentSize(packageSourceDir, componentName, out int w, out int h))
-            {
-                compW = w;
-                compH = h;
-            }
-        }
-        catch (Exception ex)
-        {
-            Debug.LogWarning($"[FguiPublishAndRender] Failed to read component size for '{componentName}': {ex.Message}");
+            compW = w;
+            compH = h;
         }
 
         RenderPublishedOnce(
             new FguiRenderRequest
             {
-                packageDir       = packageDir,
+                allPackageRootDir       = tempAllPackageDir,
                 packageName      = packageName,
                 componentName    = componentName,
                 outPng           = outPng,
@@ -110,7 +92,7 @@ public static class FguiPublishAndRender
                 else
                     Debug.LogWarning($"[FguiPublishAndRender] [{index + 1}/{componentNames.Count}] '{componentName}' failed: {result?.message}");
 
-                RenderNextPublished(packageDir, packageName, packageSourceDir, outPngDir, componentNames, index + 1, width, height, scale, transparent);
+                RenderNextPublished(tempAllPackageDir, packageName, packageSourceDir, outPngDir, componentNames, index + 1, scale, transparent);
             });
     }
 
@@ -119,6 +101,8 @@ public static class FguiPublishAndRender
         if (!EditorApplication.isPlaying)
         {
             EditorApplication.isPlaying = true;
+            Debug.Log($"[FguiPublishAndRender] Publishing Starting");
+            return;
         }
 
         FguiRenderRequest runtimeRequest = CloneRequest(request);
@@ -148,11 +132,11 @@ public static class FguiPublishAndRender
 
     private static void PublishOnceThenRender(FguiRenderRequest request, Action<FguiRenderResult> onComplete)
     {
-        PublishPackageOnce(request.packageSourceDir, out string tempPublishDir, out string packageName);
+        PublishPackageOnce(request.packageSourceDir, out string tempPublishDir);
 
         FguiRenderRequest runtimeRequest = CloneRequest(request);
-        runtimeRequest.packageDir = tempPublishDir;
-        runtimeRequest.packageName = packageName;
+        runtimeRequest.allPackageRootDir = tempPublishDir;
+        // runtimeRequest.packageName = packageName;
         runtimeRequest.packageSourceDir = string.Empty;
 
         if (!EditorApplication.isPlaying)
@@ -194,10 +178,13 @@ public static class FguiPublishAndRender
         }
     }
 
-    private static void PublishPackageOnce(string packageSourceDir, out string tempPublishDir, out string packageName)
+    private static void PublishPackageOnce(string packageSourceDir, out string tempPublishDir)
     {
         tempPublishDir = Path.Combine(Path.GetTempPath(), "fgui_render_" + Guid.NewGuid().ToString("N"));
-        packageName = FguiPackagePublisher.GetPackageName(packageSourceDir);
+        
+        // temp: decode with packageSourceDir
+        var fguiProjectRoot = new DirectoryInfo(packageSourceDir).Parent.FullName;
+        FguiPackagePublisher.PublishPackageAll(fguiProjectRoot, tempPublishDir);
     }
 
     private static void TryDeleteTempDir(string dir)
@@ -276,7 +263,7 @@ public static class FguiPublishAndRender
         return new FguiRenderRequest
         {
             packageSourceDir = request.packageSourceDir,
-            packageDir = request.packageDir,
+            allPackageRootDir = request.allPackageRootDir,
             packageName = request.packageName,
             componentName = request.componentName,
             outPng = request.outPng,

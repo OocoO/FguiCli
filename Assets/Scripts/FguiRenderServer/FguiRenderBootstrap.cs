@@ -136,7 +136,7 @@ namespace FguiRenderServer
                         "fgui_render_" + Guid.NewGuid().ToString("N"));
 
                     string pkgName = FguiPackagePublisher.GetPackageName(request.packageSourceDir);
-                    request.packageDir  = tempPublishDir;
+                    request.allPackageRootDir  = tempPublishDir;
                     request.packageName = pkgName;
                 }
                 catch (Exception ex)
@@ -175,13 +175,12 @@ namespace FguiRenderServer
                     StageCamera.main.backgroundColor = Color.white;
                 }
 
-                FguiPackageFileLoader loader = new FguiPackageFileLoader(validRequest.packageDir);
-                LoadAllPublishedPackages(validRequest.packageDir, loader, loadedPackages);
+                LoadAllPublishedPackages(validRequest.allPackageRootDir, loadedPackages);
                 loadedPackage = UIPackage.GetByName(validRequest.packageName);
                 if (loadedPackage == null)
                 {
                     throw new InvalidOperationException(
-                        string.Format("Package '{0}' was not found after loading published packages from '{1}'.", validRequest.packageName, validRequest.packageDir));
+                        string.Format("Package '{0}' was not found after loading published packages from '{1}'.", validRequest.packageName, validRequest.allPackageRootDir));
                 }
 
                 GObject created = UIPackage.CreateObject(loadedPackage.name, validRequest.componentName);
@@ -283,7 +282,6 @@ namespace FguiRenderServer
 
         private static void LoadAllPublishedPackages(
             string packageDir,
-            FguiPackageFileLoader loader,
             List<UIPackage> loadedPackages)
         {
             string[] descriptorPaths = Directory.GetFiles(packageDir, "*_fui.bytes", SearchOption.TopDirectoryOnly);
@@ -301,6 +299,8 @@ namespace FguiRenderServer
                 }
 
                 byte[] descData = File.ReadAllBytes(descriptorPath);
+                var packagePath = Directory.GetParent(descriptorPath).FullName;
+                FguiPackageFileLoader loader = new FguiPackageFileLoader(packagePath);
                 UIPackage loaded = UIPackage.AddPackage(descData, packageName, loader.Load);
                 if (loaded == null)
                 {
@@ -346,7 +346,7 @@ namespace FguiRenderServer
             }
 
             bool hasSourceDir = !string.IsNullOrWhiteSpace(request.packageSourceDir);
-            bool hasPackageDir = !string.IsNullOrWhiteSpace(request.packageDir);
+            bool hasPackageDir = !string.IsNullOrWhiteSpace(request.allPackageRootDir);
 
             if (!hasSourceDir && !hasPackageDir)
             {
@@ -360,9 +360,9 @@ namespace FguiRenderServer
 
             if (!hasSourceDir)
             {
-                if (!Directory.Exists(request.packageDir))
+                if (!Directory.Exists(request.allPackageRootDir))
                 {
-                    throw new DirectoryNotFoundException("packageDir does not exist: " + request.packageDir);
+                    throw new DirectoryNotFoundException("packageDir does not exist: " + request.allPackageRootDir);
                 }
 
                 if (string.IsNullOrWhiteSpace(request.packageName))

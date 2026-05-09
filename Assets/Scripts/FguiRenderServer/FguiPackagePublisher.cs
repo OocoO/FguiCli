@@ -74,12 +74,20 @@ namespace FguiRenderServer
         return new DirectoryInfo(fullDir).Name;
     }
 
-    public static void PublishPackage(string packageDir, string outputDir)
+    public static void PublishPackageAll(string fGuiProjectRoot, string outputRoot)
     {
-        PublishOfficialRuntimePackage(packageDir, outputDir);
+        // D:\ProjectGit\AirLegion\fgui_airLegion\assets
+        var packagePath = Directory.GetDirectories(fGuiProjectRoot, "*");
+        foreach (var path in packagePath)
+        {
+            var packageName = Path.GetFileName(path);
+            var outputDir = Path.Combine(outputRoot, packageName);
+            PublishPackage(path, outputDir);
+        }
     }
+    
 
-    private static void PublishOfficialRuntimePackage(string packageDir, string outputDir)
+    public static void PublishPackage(string packageDir, string outputDir)
     {
         string fullPackageDir = Path.GetFullPath(packageDir);
         string fullOutputDir = Path.GetFullPath(outputDir);
