@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using FguiRenderServer;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
@@ -87,5 +88,48 @@ public static class FguiRenderBuild
             var destSubDir = Path.Combine(destinationDir, dirName);
             CopyDirectory(dirPath, destSubDir, overwrite);
         }
+    }
+    
+    [MenuItem("Tools/Fgui Package/Publish Folder...")]
+    public static void PublishFolderFromMenu()
+    {
+        string packageDir = EditorUtility.OpenFolderPanel("Select FairyGUI package source folder", Application.dataPath, string.Empty);
+        if (string.IsNullOrEmpty(packageDir))
+        {
+            return;
+        }
+
+        string outputDir = EditorUtility.OpenFolderPanel("Select publish output folder", Path.GetDirectoryName(packageDir) ?? packageDir, string.Empty);
+        if (string.IsNullOrEmpty(outputDir))
+        {
+            return;
+        }
+        FguiPackagePublisher.PublishPackage(packageDir, outputDir);
+    }
+
+    /// <summary>
+    /// Publish from a FGUI source dir then immediately render one component to PNG (Editor shortcut).
+    /// </summary>
+    [MenuItem("Tools/Fgui Package/Test Publish and Render Component...")]
+    public static void PublishAndRenderFromMenu()
+    {
+        string packageSourceDir = "D:/ProjectGit/AirLegion/fgui_airLegion/assets/BattleUI";
+        string outPng = "D:/Project/FguiCli/Assets/FguiEditor/Diff/output.png";
+
+        string lastComponent = EditorPrefs.GetString("FguiLastComponentName", string.Empty);
+        string componentName = EditorInputDialog.Show("Component Name", "Enter the component name to render:", lastComponent);
+        if (string.IsNullOrEmpty(componentName)) return;
+        EditorPrefs.SetString("FguiLastComponentName", componentName);
+
+        FguiPublishAndRender.PublishAndRender(new FguiRenderRequest
+        {
+            packageSourceDir = packageSourceDir,
+            componentName = componentName,
+            outPng = outPng,
+            width = 1920,
+            height = 1080,
+            scale = 1f,
+            transparent = true
+        });
     }
 }

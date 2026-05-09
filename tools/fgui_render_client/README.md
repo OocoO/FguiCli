@@ -22,3 +22,16 @@ python tools/fgui_render_client/run_render_once.py \
   --scale 1.0 \
   --transparent
 ```
+
+# 方式 A：直接指定已发布目录（原有用法不变）
+FguiRenderServer.exe --render-once `
+  --package-dir "D:\out\BattleUI" `
+--package-name "BattleUI" `
+  --component-name "com_damageFloat" `
+--out-png "D:\render\output.png"
+
+# 方式 B：指定源目录，自动发布再渲染（新功能）
+FguiRenderServer.exe --render-once `
+  --package-source-dir "D:\ProjectGit\AirLegion\fgui_airLegion\assets\BattleUI" `
+--component-name "com_damageFloat" `
+--out-png "D:\render\output.png"

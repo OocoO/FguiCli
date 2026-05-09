@@ -1,10 +1,9 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using FairyGUI;
+using UnityEditor;
 using UnityEngine;
 
 namespace FguiRenderServer
@@ -12,6 +11,11 @@ namespace FguiRenderServer
     [Serializable]
     public class FguiRenderRequest
     {
+        /// <summary>
+        /// When set, the pipeline will first publish the FGUI source package at this directory
+        /// to a temp folder, then render from there. Leave empty to use a pre-published packageDir.
+        /// </summary>
+        public string packageSourceDir;
         public string packageDir;
         public string packageName;
         public string componentName;
@@ -31,225 +35,6 @@ namespace FguiRenderServer
         public int width;
         public int height;
         public long durationMs;
-    }
-
-    public sealed class FguiRenderBootstrap : MonoBehaviour
-    {
-        private const string ResultPrefix = "[FGUI_RENDER_RESULT]";
-        private FguiRenderRequest _request;
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        private static void AutoStartInPlayer()
-        {
-            string[] args = Environment.GetCommandLineArgs();
-            if (!CommandLineArgs.TryGetFlag(args, "--render-once"))
-            {
-                return;
-            }
-
-            GameObject host = new GameObject("FguiRenderBootstrap");
-            DontDestroyOnLoad(host);
-            FguiRenderBootstrap bootstrap = host.AddComponent<FguiRenderBootstrap>();
-            bootstrap._request = CommandLineArgs.ParseRequest(args);
-        }
-
-        private IEnumerator Start()
-        {
-            if (_request == null)
-            {
-                yield break;
-            }
-
-            Application.runInBackground = true;
-            yield return StartCoroutine(RenderOnce(_request, OnComplete));
-        }
-
-        private void OnComplete(FguiRenderResult result)
-        {
-            string json = JsonUtility.ToJson(result);
-            UnityEngine.Debug.Log(ResultPrefix + json);
-
-#if !UNITY_EDITOR
-            Application.Quit();
-#endif
-        }
-
-        private IEnumerator RenderOnce(FguiRenderRequest request, Action<FguiRenderResult> onDone)
-        {
-            Stopwatch sw = Stopwatch.StartNew();
-            FguiRenderResult result = new FguiRenderResult();
-            string requestedOutPng = request == null ? string.Empty : (request.outPng ?? string.Empty);
-            UIPackage loadedPackage = null;
-            GComponent rootChild = null;
-
-            try
-            {
-                FguiRenderRequest validRequest = request;
-                if (validRequest == null)
-                {
-                    throw new ArgumentNullException("request");
-                }
-
-                ValidateRequest(validRequest);
-
-                Stage.Instantiate();
-                GRoot root = GRoot.inst;
-                root.RemoveChildren(0, -1, true);
-                root.SetContentScaleFactor(Mathf.Max(1, validRequest.width), Mathf.Max(1, validRequest.height));
-
-                if (!validRequest.transparent && StageCamera.main != null)
-                {
-                    StageCamera.main.clearFlags = CameraClearFlags.SolidColor;
-                    StageCamera.main.backgroundColor = Color.white;
-                }
-
-                string descPath = Path.Combine(validRequest.packageDir, validRequest.packageName + "_fui.bytes");
-                if (!File.Exists(descPath))
-                {
-                    throw new FileNotFoundException("Cannot find package description file", descPath);
-                }
-
-                byte[] descData = File.ReadAllBytes(descPath);
-                FguiPackageFileLoader loader = new FguiPackageFileLoader(validRequest.packageDir);
-                loadedPackage = UIPackage.AddPackage(descData, validRequest.packageName, loader.Load);
-                if (loadedPackage == null)
-                {
-                    throw new InvalidOperationException("UIPackage.AddPackage returned null. Check package files and texture import format.");
-                }
-
-                GObject created = UIPackage.CreateObject(loadedPackage.name, validRequest.componentName);
-                if (created == null)
-                {
-                    throw new InvalidOperationException(
-                        string.Format("Component '{0}' was not found in package '{1}'", validRequest.componentName, loadedPackage.name));
-                }
-
-                rootChild = created.asCom;
-                if (rootChild == null)
-                {
-                    throw new InvalidOperationException("Target component is not a GComponent.");
-                }
-
-                rootChild.SetPosition(0, 0, 0);
-                if (validRequest.width > 0 && validRequest.height > 0)
-                {
-                    rootChild.SetSize(validRequest.width, validRequest.height);
-                }
-
-                root.AddChild(rootChild);
-            }
-            catch (Exception ex)
-            {
-                sw.Stop();
-                result.ok = false;
-                result.message = ex.Message;
-                result.pngPath = requestedOutPng;
-                result.durationMs = sw.ElapsedMilliseconds;
-
-                CleanupLoadedObjects(rootChild, loadedPackage);
-                onDone(result);
-                yield break;
-            }
-
-            yield return null;
-            yield return new WaitForEndOfFrame();
-
-            try
-            {
-                FguiRenderRequest validRequest = request;
-                if (validRequest == null)
-                {
-                    throw new ArgumentNullException("request");
-                }
-
-                Texture2D capture = rootChild.displayObject.GetScreenShot(null, Mathf.Max(0.01f, validRequest.scale));
-                if (capture == null)
-                {
-                    throw new InvalidOperationException("Capture failed because screenshot texture is null.");
-                }
-
-                string outputPath = Path.GetFullPath(validRequest.outPng);
-                string outputDir = Path.GetDirectoryName(outputPath);
-                if (!string.IsNullOrEmpty(outputDir))
-                {
-                    Directory.CreateDirectory(outputDir);
-                }
-
-                int outputWidth = capture.width;
-                int outputHeight = capture.height;
-                File.WriteAllBytes(outputPath, capture.EncodeToPNG());
-                UnityEngine.Object.Destroy(capture);
-
-                sw.Stop();
-                result.ok = true;
-                result.message = "ok";
-                result.pngPath = outputPath;
-                result.width = outputWidth;
-                result.height = outputHeight;
-                result.durationMs = sw.ElapsedMilliseconds;
-            }
-            catch (Exception ex)
-            {
-                sw.Stop();
-                result.ok = false;
-                result.message = ex.Message;
-                result.pngPath = requestedOutPng;
-                result.durationMs = sw.ElapsedMilliseconds;
-            }
-            finally
-            {
-                CleanupLoadedObjects(rootChild, loadedPackage);
-            }
-
-            onDone(result);
-        }
-
-        private static void CleanupLoadedObjects(GComponent rootChild, UIPackage loadedPackage)
-        {
-            if (rootChild != null)
-            {
-                rootChild.RemoveFromParent();
-                rootChild.Dispose();
-            }
-
-            if (loadedPackage != null)
-            {
-                UIPackage.RemovePackage(loadedPackage.id);
-            }
-        }
-
-        private static void ValidateRequest(FguiRenderRequest request)
-        {
-            if (request == null)
-            {
-                throw new ArgumentNullException("request");
-            }
-
-            if (string.IsNullOrWhiteSpace(request.packageDir))
-            {
-                throw new ArgumentException("--package-dir is required.");
-            }
-
-            if (!Directory.Exists(request.packageDir))
-            {
-                throw new DirectoryNotFoundException("packageDir does not exist: " + request.packageDir);
-            }
-
-            if (string.IsNullOrWhiteSpace(request.packageName))
-            {
-                throw new ArgumentException("--package-name is required.");
-            }
-
-            if (string.IsNullOrWhiteSpace(request.componentName))
-            {
-                throw new ArgumentException("--component-name is required.");
-            }
-
-            if (string.IsNullOrWhiteSpace(request.outPng))
-            {
-                throw new ArgumentException("--out-png is required.");
-            }
-        }
     }
 
     internal static class CommandLineArgs
@@ -290,6 +75,7 @@ namespace FguiRenderServer
 
             FguiRenderRequest req = new FguiRenderRequest
             {
+                packageSourceDir = GetString(map, "--package-source-dir", string.Empty),
                 packageDir = GetString(map, "--package-dir", string.Empty),
                 packageName = GetString(map, "--package-name", string.Empty),
                 componentName = GetString(map, "--component-name", string.Empty),
@@ -430,6 +216,14 @@ namespace FguiRenderServer
                 string key = relative.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
                     .ToLowerInvariant();
                 _fallbackFileMap[key] = file;
+
+                // Also register by bare filename so FairyGUI's "atlas0.png" request can
+                // match a file named "PackageName@atlas0.png" produced by FguiPackagePublisher.
+                string justName = Path.GetFileName(file).ToLowerInvariant();
+                if (!_fallbackFileMap.ContainsKey(justName))
+                {
+                    _fallbackFileMap[justName] = file;
+                }
             }
         }
     }

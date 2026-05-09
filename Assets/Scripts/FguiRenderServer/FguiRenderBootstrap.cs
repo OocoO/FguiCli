@@ -1,0 +1,390 @@
+using System;
+using System.Collections;
+using System.Diagnostics;
+using System.IO;
+using FairyGUI;
+using UnityEngine;
+using Debug = System.Diagnostics.Debug;
+
+namespace FguiRenderServer
+{
+    public sealed class FguiRenderBootstrap : MonoBehaviour
+    {
+        private const string ResultPrefix = "[FGUI_RENDER_RESULT]";
+        private FguiRenderRequest _request;
+        private Action<FguiRenderResult> _externalOnComplete;
+        private bool _quitAfterRender;
+        private bool _isRendering;
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        private static void AutoStartInPlayer()
+        {
+            string[] args = Environment.GetCommandLineArgs();
+            if (!CommandLineArgs.TryGetFlag(args, "--render-once"))
+            {
+                return;
+            }
+
+            GameObject host = new GameObject("FguiRenderBootstrap");
+            DontDestroyOnLoad(host);
+            FguiRenderBootstrap bootstrap = host.AddComponent<FguiRenderBootstrap>();
+            bootstrap.TryStartRender(CommandLineArgs.ParseRequest(args), null, true);
+        }
+
+        public static bool TryRenderInPlayMode(FguiRenderRequest request, Action<FguiRenderResult> onDone)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException("request");
+            }
+
+            GameObject host = GameObject.Find("FguiRenderBootstrap");
+            if (host == null)
+            {
+                host = new GameObject("FguiRenderBootstrap");
+                DontDestroyOnLoad(host);
+            }
+
+            FguiRenderBootstrap bootstrap = host.GetComponent<FguiRenderBootstrap>();
+            if (bootstrap == null)
+            {
+                bootstrap = host.AddComponent<FguiRenderBootstrap>();
+            }
+
+            Application.runInBackground = true;
+            return bootstrap.TryStartRender(request, onDone, false);
+        }
+
+        private void Start()
+        {
+            TryKickoffPendingRender();
+        }
+
+        private bool TryStartRender(FguiRenderRequest request, Action<FguiRenderResult> onDone, bool quitAfterRender)
+        {
+            if (_isRendering || _request != null)
+            {
+                return false;
+            }
+
+            _request = request;
+            _externalOnComplete = onDone;
+            _quitAfterRender = quitAfterRender;
+            TryKickoffPendingRender();
+            return true;
+        }
+
+        private void TryKickoffPendingRender()
+        {
+            if (_isRendering || _request == null || !isActiveAndEnabled)
+            {
+                return;
+            }
+
+            FguiRenderRequest pendingRequest = _request;
+            _request = null;
+            StartCoroutine(RunRender(pendingRequest));
+        }
+
+        private IEnumerator RunRender(FguiRenderRequest request)
+        {
+            _isRendering = true;
+            Application.runInBackground = true;
+            yield return StartCoroutine(RenderOnce(request, OnComplete));
+            _isRendering = false;
+            _quitAfterRender = false;
+        }
+
+        private void OnComplete(FguiRenderResult result)
+        {
+            string json = JsonUtility.ToJson(result);
+            UnityEngine.Debug.Log(ResultPrefix + json);
+
+            Action<FguiRenderResult> onComplete = _externalOnComplete;
+            _externalOnComplete = null;
+            if (onComplete != null)
+            {
+                onComplete(result);
+            }
+
+#if !UNITY_EDITOR
+            if (_quitAfterRender)
+            {
+                Application.Quit();
+            }
+#endif
+        }
+
+        private IEnumerator RenderOnce(FguiRenderRequest request, Action<FguiRenderResult> onDone)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            FguiRenderResult result = new FguiRenderResult();
+            string requestedOutPng = request == null ? string.Empty : (request.outPng ?? string.Empty);
+            UIPackage loadedPackage = null;
+            GComponent rootChild = null;
+            string tempPublishDir = null;
+
+            // ── Pre-step: if a source dir is given, publish to a temp dir first ──────────
+            if (request != null && !string.IsNullOrWhiteSpace(request.packageSourceDir))
+            {
+                try
+                {
+                    tempPublishDir = Path.Combine(
+                        Path.GetTempPath(),
+                        "fgui_render_" + Guid.NewGuid().ToString("N"));
+
+                    string pkgName = FguiPackagePublisher.GetPackageName(request.packageSourceDir);
+                    FguiPackagePublisher.PublishPackage(request.packageSourceDir, tempPublishDir);
+                    request.packageDir  = tempPublishDir;
+                    request.packageName = pkgName;
+                }
+                catch (Exception ex)
+                {
+                    UnityEngine.Debug.LogException(ex);
+                    sw.Stop();
+                    result.ok        = false;
+                    result.message   = "Publish step failed: " + ex.Message;
+                    result.pngPath   = requestedOutPng;
+                    result.durationMs = sw.ElapsedMilliseconds;
+                    TryDeleteTempDir(tempPublishDir);
+                    onDone(result);
+                    yield break;
+                }
+            }
+            // ─────────────────────────────────────────────────────────────────────────────
+
+            try
+            {
+                FguiRenderRequest validRequest = request;
+                if (validRequest == null)
+                {
+                    throw new ArgumentNullException("request");
+                }
+
+                ValidateRequest(validRequest);
+
+                Stage.Instantiate();
+                GRoot root = GRoot.inst;
+                root.RemoveChildren(0, -1, true);
+                root.SetContentScaleFactor(Mathf.Max(1, validRequest.width), Mathf.Max(1, validRequest.height));
+
+                if (!validRequest.transparent && StageCamera.main != null)
+                {
+                    StageCamera.main.clearFlags = CameraClearFlags.SolidColor;
+                    StageCamera.main.backgroundColor = Color.white;
+                }
+
+                string descPath = ResolveBinaryDescriptorPath(validRequest.packageDir, validRequest.packageName);
+                byte[] descData = File.ReadAllBytes(descPath);
+                FguiPackageFileLoader loader = new FguiPackageFileLoader(validRequest.packageDir);
+                loadedPackage = UIPackage.AddPackage(descData, validRequest.packageName, loader.Load);
+                if (loadedPackage == null)
+                {
+                    throw new InvalidOperationException("UIPackage.AddPackage returned null. Check package files and texture import format.");
+                }
+
+                GObject created = UIPackage.CreateObject(loadedPackage.name, validRequest.componentName);
+                if (created == null)
+                {
+                    throw new InvalidOperationException(
+                        string.Format("Component '{0}' was not found in package '{1}'", validRequest.componentName, loadedPackage.name));
+                }
+
+                rootChild = created.asCom;
+                if (rootChild == null)
+                {
+                    throw new InvalidOperationException("Target component is not a GComponent.");
+                }
+
+                rootChild.SetPosition(0, 0, 0);
+                if (validRequest.width > 0 && validRequest.height > 0)
+                {
+                    rootChild.SetSize(validRequest.width, validRequest.height);
+                }
+
+                root.AddChild(rootChild);
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                result.ok = false;
+                result.message = ex.Message;
+                result.pngPath = requestedOutPng;
+                result.durationMs = sw.ElapsedMilliseconds;
+
+                CleanupLoadedObjects(rootChild, loadedPackage);
+                onDone(result);
+                yield break;
+            }
+
+            yield return null;
+            yield return new WaitForEndOfFrame();
+
+            try
+            {
+                FguiRenderRequest validRequest = request;
+                if (validRequest == null)
+                {
+                    throw new ArgumentNullException("request");
+                }
+
+                Texture2D capture = rootChild.displayObject.GetScreenShot(null, Mathf.Max(0.01f, validRequest.scale));
+                if (capture == null)
+                {
+                    throw new InvalidOperationException("Capture failed because screenshot texture is null.");
+                }
+
+                string outputPath = Path.GetFullPath(validRequest.outPng);
+                string outputDir = Path.GetDirectoryName(outputPath);
+                if (!string.IsNullOrEmpty(outputDir))
+                {
+                    Directory.CreateDirectory(outputDir);
+                }
+
+                int outputWidth = capture.width;
+                int outputHeight = capture.height;
+                File.WriteAllBytes(outputPath, capture.EncodeToPNG());
+                UnityEngine.Object.Destroy(capture);
+
+                sw.Stop();
+                result.ok = true;
+                result.message = "ok";
+                result.pngPath = outputPath;
+                result.width = outputWidth;
+                result.height = outputHeight;
+                result.durationMs = sw.ElapsedMilliseconds;
+            }
+            catch (Exception ex)
+            {
+                sw.Stop();
+                result.ok = false;
+                result.message = ex.Message;
+                result.pngPath = requestedOutPng;
+                result.durationMs = sw.ElapsedMilliseconds;
+            }
+            finally
+            {
+                CleanupLoadedObjects(rootChild, loadedPackage);
+            }
+
+            onDone(result);
+            TryDeleteTempDir(tempPublishDir);
+        }
+
+        private static void TryDeleteTempDir(string dir)
+        {
+            if (string.IsNullOrEmpty(dir)) return;
+            try { if (Directory.Exists(dir)) Directory.Delete(dir, true); }
+            catch { /* best-effort */ }
+        }
+
+        private static void CleanupLoadedObjects(GComponent rootChild, UIPackage loadedPackage)
+        {
+            if (rootChild != null)
+            {
+                rootChild.RemoveFromParent();
+                rootChild.Dispose();
+            }
+
+            if (loadedPackage != null)
+            {
+                UIPackage.RemovePackage(loadedPackage.id);
+            }
+        }
+
+        private static void ValidateRequest(FguiRenderRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException("request");
+            }
+
+            bool hasSourceDir = !string.IsNullOrWhiteSpace(request.packageSourceDir);
+            bool hasPackageDir = !string.IsNullOrWhiteSpace(request.packageDir);
+
+            if (!hasSourceDir && !hasPackageDir)
+            {
+                throw new ArgumentException("Either --package-source-dir or --package-dir is required.");
+            }
+
+            if (hasSourceDir && !Directory.Exists(request.packageSourceDir))
+            {
+                throw new DirectoryNotFoundException("packageSourceDir does not exist: " + request.packageSourceDir);
+            }
+
+            if (!hasSourceDir)
+            {
+                if (!Directory.Exists(request.packageDir))
+                {
+                    throw new DirectoryNotFoundException("packageDir does not exist: " + request.packageDir);
+                }
+
+                if (string.IsNullOrWhiteSpace(request.packageName))
+                {
+                    throw new ArgumentException("--package-name is required when --package-source-dir is not used.");
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(request.componentName))
+            {
+                throw new ArgumentException("--component-name is required.");
+            }
+
+            if (string.IsNullOrWhiteSpace(request.outPng))
+            {
+                throw new ArgumentException("--out-png is required.");
+            }
+        }
+
+        private static string ResolveBinaryDescriptorPath(string packageDir, string packageName)
+        {
+            string binaryPath = Path.Combine(packageDir, packageName + "_fui.bytes");
+            if (File.Exists(binaryPath))
+            {
+                return binaryPath;
+            }
+
+            string legacyPath = Path.Combine(packageDir, packageName + ".bytes");
+            if (!File.Exists(legacyPath))
+            {
+                throw new FileNotFoundException(
+                    "Cannot find package description file. Expected '" + packageName + "_fui.bytes' in: " + packageDir,
+                    binaryPath);
+            }
+
+            if (HasFguiBinaryHeader(legacyPath))
+            {
+                return legacyPath;
+            }
+
+            throw new InvalidOperationException(
+                "Found legacy package descriptor '" + Path.GetFileName(legacyPath) + "' (text/old format). " +
+                "Runtime rendering requires FairyGUI binary descriptor '_fui.bytes'. " +
+                "Please publish the package with the official FairyGUI runtime format before rendering.");
+        }
+
+        private static bool HasFguiBinaryHeader(string path)
+        {
+            try
+            {
+                using (FileStream fs = File.OpenRead(path))
+                {
+                    if (fs.Length < 4)
+                    {
+                        return false;
+                    }
+
+                    int b0 = fs.ReadByte();
+                    int b1 = fs.ReadByte();
+                    int b2 = fs.ReadByte();
+                    int b3 = fs.ReadByte();
+                    return b0 == 0x46 && b1 == 0x47 && b2 == 0x55 && b3 == 0x49; // "FGUI"
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+    }
+}

@@ -60,3 +60,5 @@ Packages/manifest.json
 /Library/Cache/
 
 tools/fgui_render_client/FguiRenderServer
+Assets/FguiEditor/Diff.meta
+Assets/FguiEditor/Diff/

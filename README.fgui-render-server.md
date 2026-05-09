@@ -12,6 +12,8 @@ This project now includes a Unity runtime skeleton that can render one FairyGUI 
 Point `--package-dir` to a FairyGUI export directory that contains at least:
 - `<PackageName>_fui.bytes`
 - Atlas/image resources referenced by the package description
+
+If using `packageSourceDir` pre-publish flow, the publisher must run in `OfficialRuntime` mode and produce `*_fui.bytes` before render starts.
 ## Build
 Open Unity, then use menu:
 - `Tools/Fgui Render/Build Windows Player`
