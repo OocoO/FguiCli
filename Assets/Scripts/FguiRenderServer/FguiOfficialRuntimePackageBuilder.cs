@@ -1212,9 +1212,24 @@ namespace FguiRenderServer
                 return writer.ToArray();
             }
 
+            private bool IsComponentDerivedType()
+            {
+                return Type == ObjectType.Component
+                    || Type == ObjectType.Button
+                    || Type == ObjectType.Label
+                    || Type == ObjectType.Slider
+                    || Type == ObjectType.List;
+            }
+
             private byte[] BuildBlock4(StringTable strings)
             {
-                if (Type == ObjectType.Component)
+                // GComponent.Setup_AfterAdd calls buffer.Seek(beginPos, 4) WITHOUT checking the
+                // return value for all GComponent subclasses (Button, Label, Slider, List, …).
+                // If block 4 is absent (offset == 0) Seek leaves the pointer unchanged and the
+                // next ReadShort/ReadS calls read from the wrong position, producing a stale
+                // ushort (e.g. 1536) that is then used as a stringTable index →
+                // IndexOutOfRangeException.  Write the block for every component-derived type.
+                if (IsComponentDerivedType())
                 {
                     BigEndianWriter writer = new BigEndianWriter();
                     writer.WriteShort(-1);
@@ -1284,7 +1299,9 @@ namespace FguiRenderServer
                     return writer.ToArray();
                 }
 
-                if (Type == ObjectType.Component && ExtensionOverride != null)
+                // ExtensionOverride can appear on any component-derived child
+                // (Button, Label, Slider, or plain Component).
+                if (IsComponentDerivedType() && ExtensionOverride != null)
                 {
                     return ExtensionOverride.BuildBlock(strings);
                 }

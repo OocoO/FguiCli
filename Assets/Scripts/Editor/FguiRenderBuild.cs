@@ -5,6 +5,8 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
+namespace Editor
+{
 public static class FguiRenderBuild
 {
     [MenuItem("Tools/Fgui Render/Build Windows Player")]
@@ -116,4 +118,5 @@ public static class FguiRenderBuild
             scale: 1f,
             transparent: true);
     }
+}
 }

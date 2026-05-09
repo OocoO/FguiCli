@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using FairyGUI;
@@ -121,6 +122,7 @@ namespace FguiRenderServer
             FguiRenderResult result = new FguiRenderResult();
             string requestedOutPng = request == null ? string.Empty : (request.outPng ?? string.Empty);
             UIPackage loadedPackage = null;
+            List<UIPackage> loadedPackages = new List<UIPackage>();
             GComponent rootChild = null;
             string tempPublishDir = null;
 
@@ -134,7 +136,6 @@ namespace FguiRenderServer
                         "fgui_render_" + Guid.NewGuid().ToString("N"));
 
                     string pkgName = FguiPackagePublisher.GetPackageName(request.packageSourceDir);
-                    FguiPackagePublisher.PublishPackage(request.packageSourceDir, tempPublishDir);
                     request.packageDir  = tempPublishDir;
                     request.packageName = pkgName;
                 }
@@ -174,13 +175,13 @@ namespace FguiRenderServer
                     StageCamera.main.backgroundColor = Color.white;
                 }
 
-                string descPath = ResolveBinaryDescriptorPath(validRequest.packageDir, validRequest.packageName);
-                byte[] descData = File.ReadAllBytes(descPath);
                 FguiPackageFileLoader loader = new FguiPackageFileLoader(validRequest.packageDir);
-                loadedPackage = UIPackage.AddPackage(descData, validRequest.packageName, loader.Load);
+                LoadAllPublishedPackages(validRequest.packageDir, loader, loadedPackages);
+                loadedPackage = UIPackage.GetByName(validRequest.packageName);
                 if (loadedPackage == null)
                 {
-                    throw new InvalidOperationException("UIPackage.AddPackage returned null. Check package files and texture import format.");
+                    throw new InvalidOperationException(
+                        string.Format("Package '{0}' was not found after loading published packages from '{1}'.", validRequest.packageName, validRequest.packageDir));
                 }
 
                 GObject created = UIPackage.CreateObject(loadedPackage.name, validRequest.componentName);
@@ -213,7 +214,7 @@ namespace FguiRenderServer
                 result.pngPath = requestedOutPng;
                 result.durationMs = sw.ElapsedMilliseconds;
 
-                CleanupLoadedObjects(rootChild, loadedPackage);
+                CleanupLoadedObjects(rootChild, loadedPackages);
                 onDone(result);
                 yield break;
             }
@@ -265,7 +266,7 @@ namespace FguiRenderServer
             }
             finally
             {
-                CleanupLoadedObjects(rootChild, loadedPackage);
+                CleanupLoadedObjects(rootChild, loadedPackages);
             }
 
             onDone(result);
@@ -279,7 +280,39 @@ namespace FguiRenderServer
             catch { /* best-effort */ }
         }
 
-        private static void CleanupLoadedObjects(GComponent rootChild, UIPackage loadedPackage)
+
+        private static void LoadAllPublishedPackages(
+            string packageDir,
+            FguiPackageFileLoader loader,
+            List<UIPackage> loadedPackages)
+        {
+            string[] descriptorPaths = Directory.GetFiles(packageDir, "*_fui.bytes", SearchOption.TopDirectoryOnly);
+            foreach (string descriptorPath in descriptorPaths)
+            {
+                string packageName = Path.GetFileNameWithoutExtension(descriptorPath);
+                if (packageName.EndsWith("_fui", StringComparison.OrdinalIgnoreCase))
+                {
+                    packageName = packageName.Substring(0, packageName.Length - 4);
+                }
+
+                if (UIPackage.GetByName(packageName) != null)
+                {
+                    continue;
+                }
+
+                byte[] descData = File.ReadAllBytes(descriptorPath);
+                UIPackage loaded = UIPackage.AddPackage(descData, packageName, loader.Load);
+                if (loaded == null)
+                {
+                    throw new InvalidOperationException(
+                        string.Format("Failed to load published dependency package '{0}'.", packageName));
+                }
+
+                loadedPackages.Add(loaded);
+            }
+        }
+
+        private static void CleanupLoadedObjects(GComponent rootChild, List<UIPackage> loadedPackages)
         {
             if (rootChild != null)
             {
@@ -287,9 +320,21 @@ namespace FguiRenderServer
                 rootChild.Dispose();
             }
 
-            if (loadedPackage != null)
+            if (loadedPackages != null)
             {
-                UIPackage.RemovePackage(loadedPackage.id);
+                for (int i = loadedPackages.Count - 1; i >= 0; i--)
+                {
+                    UIPackage pkg = loadedPackages[i];
+                    if (pkg == null)
+                    {
+                        continue;
+                    }
+
+                    if (UIPackage.GetById(pkg.id) != null)
+                    {
+                        UIPackage.RemovePackage(pkg.id);
+                    }
+                }
             }
         }
 

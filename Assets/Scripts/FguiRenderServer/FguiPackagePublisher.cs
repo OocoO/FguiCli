@@ -14,19 +14,10 @@ using UnityEngine;
 
 namespace FguiRenderServer
 {
-public enum FguiPublishMode
-{
-    LegacyTextContainer,
-    OfficialRuntime
-}
-
-public static class FguiPackagePublisher
+    public static class FguiPackagePublisher
 {
     private const int AtlasPadding = 2;
     private const int MaxAtlasSize = 2048;
-    private static readonly UTF8Encoding Utf8NoBom = new UTF8Encoding(false);
-
-    
 
     public static void PublishFromCommandLine()
     {
@@ -86,30 +77,6 @@ public static class FguiPackagePublisher
     public static void PublishPackage(string packageDir, string outputDir)
     {
         PublishOfficialRuntimePackage(packageDir, outputDir);
-    }
-
-    private static void PublishLegacyPackage(string packageDir, string outputDir)
-    {
-        PackageSource package = PackageSource.Load(packageDir);
-        PackageDirectoryContext.Current = package.PackageDirectory;
-        try
-        {
-            HashSet<string> includedIds = CollectIncludedResourceIds(package);
-            List<ResourceEntry> includedResources = package.Resources
-                .Where(resource => includedIds.Contains(resource.Id))
-                .ToList();
-
-            PublishResult result = BuildPublishResult(package, includedResources, outputDir);
-            Debug.Log($"Published FairyGUI package '{result.PackageName}' to {result.OutputDirectory}. " +
-                      $"Entries={result.ContainerEntries.Count}, Atlases={result.Atlases.Count}, Sprites={result.SpriteLines.Count - 1}");
-#if UNITY_EDITOR
-            AssetDatabase.Refresh();
-#endif
-        }
-        finally
-        {
-            PackageDirectoryContext.Current = null;
-        }
     }
 
     private static void PublishOfficialRuntimePackage(string packageDir, string outputDir)
@@ -181,30 +148,6 @@ public static class FguiPackagePublisher
             : packageName;
     }
 
-    private static FguiPublishMode ParsePublishMode(string modeText, FguiPublishMode fallback)
-    {
-        if (string.IsNullOrWhiteSpace(modeText))
-        {
-            return fallback;
-        }
-
-        if (string.Equals(modeText, "official", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(modeText, "runtime", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(modeText, "officialruntime", StringComparison.OrdinalIgnoreCase))
-        {
-            return FguiPublishMode.OfficialRuntime;
-        }
-
-        if (string.Equals(modeText, "legacy", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(modeText, "text", StringComparison.OrdinalIgnoreCase)
-            || string.Equals(modeText, "legacytextcontainer", StringComparison.OrdinalIgnoreCase))
-        {
-            return FguiPublishMode.LegacyTextContainer;
-        }
-
-        return fallback;
-    }
-
 #if UNITY_EDITOR
 #endif
 
@@ -235,126 +178,6 @@ public static class FguiPackagePublisher
             string childDest = Path.Combine(destinationDir, childName);
             CopyDirectoryRecursive(childDir, childDest);
         }
-    }
-
-    private static PublishResult BuildPublishResult(PackageSource package, List<ResourceEntry> includedResources, string outputDir)
-    {
-        string fullOutputDir = Path.GetFullPath(outputDir);
-        Directory.CreateDirectory(fullOutputDir);
-
-        List<ResourceEntry> includedComponents = includedResources.Where(resource => resource.Kind == ResourceKind.Component).ToList();
-        List<ResourceEntry> includedImages = includedResources.Where(resource => resource.Kind == ResourceKind.Image).ToList();
-
-        List<AtlasImageInput> atlasInputs = LoadIncludedImages(package, includedImages);
-        List<AtlasOutput> atlases = BuildAtlases(atlasInputs);
-        Dictionary<string, AtlasPlacement> spriteMap = atlases
-            .SelectMany(atlas => atlas.Placements)
-            .ToDictionary(placement => placement.ResourceId, StringComparer.Ordinal);
-
-        string packageXml = BuildPublishedPackageXml(package, includedComponents, includedImages, atlases);
-        List<ContainerEntry> containerEntries = BuildContainerEntries(includedComponents, packageXml);
-        string containerText = string.Concat(containerEntries.Select(entry => entry.Name + "|" + entry.Content.Length.ToString(CultureInfo.InvariantCulture) + "|" + entry.Content));
-
-        string packageBytesPath = Path.Combine(fullOutputDir, package.PackageName + ".bytes");
-        string spritesBytesPath = Path.Combine(fullOutputDir, package.PackageName + "@sprites.bytes");
-
-        File.WriteAllText(packageBytesPath, containerText, Utf8NoBom);
-        File.WriteAllText(spritesBytesPath, BuildSpritesBytes(atlasInputs, spriteMap), Utf8NoBom);
-
-        foreach (AtlasOutput atlas in atlases)
-        {
-            string atlasPath = Path.Combine(fullOutputDir, package.PackageName + "@atlas" + atlas.AtlasIndex.ToString(CultureInfo.InvariantCulture) + ".png");
-            File.WriteAllBytes(atlasPath, atlas.PngBytes);
-        }
-
-        return new PublishResult(package.PackageName, fullOutputDir, containerEntries, atlases, BuildSpriteLines(atlasInputs, spriteMap));
-    }
-
-    private static List<ContainerEntry> BuildContainerEntries(List<ResourceEntry> includedComponents, string packageXml)
-    {
-        List<ContainerEntry> entries = includedComponents
-            .Select(component => new ContainerEntry(component.Id + ".xml", component.GetSanitizedComponentXml()))
-            .ToList();
-
-        entries.Add(new ContainerEntry("package.xml", packageXml));
-        entries.Sort((left, right) => StringComparer.Ordinal.Compare(left.Name, right.Name));
-        return entries;
-    }
-
-    private static string BuildSpritesBytes(List<AtlasImageInput> atlasInputs, Dictionary<string, AtlasPlacement> spriteMap)
-    {
-        return string.Join("\n", BuildSpriteLines(atlasInputs, spriteMap)) + "\n";
-    }
-
-    private static List<string> BuildSpriteLines(List<AtlasImageInput> atlasInputs, Dictionary<string, AtlasPlacement> spriteMap)
-    {
-        List<string> lines = new List<string>
-        {
-            "//FairyGUI atlas sprites."
-        };
-
-        foreach (AtlasImageInput input in atlasInputs.OrderBy(item => item.Resource.Id, StringComparer.Ordinal))
-        {
-            if (!spriteMap.TryGetValue(input.Resource.Id, out AtlasPlacement placement))
-            {
-                throw new InvalidOperationException("Missing atlas placement for image resource: " + input.Resource.Id);
-            }
-
-            lines.Add(string.Format(CultureInfo.InvariantCulture,
-                "{0} {1} {2} {3} {4} {5} {6}",
-                placement.ResourceId,
-                placement.AtlasIndex,
-                placement.X,
-                placement.Y,
-                placement.Width,
-                placement.Height,
-                placement.Rotated ? 1 : 0));
-        }
-
-        return lines;
-    }
-
-    private static string BuildPublishedPackageXml(PackageSource package, List<ResourceEntry> components, List<ResourceEntry> images, List<AtlasOutput> atlases)
-    {
-        XElement root = new XElement("packageDescription");
-        foreach (XAttribute attribute in package.RootAttributes)
-        {
-            root.SetAttributeValue(attribute.Name, attribute.Value);
-        }
-
-        root.SetAttributeValue("name", package.PackageName);
-
-        XElement resourcesElement = new XElement("resources");
-        foreach (ResourceEntry component in components.Where(item => !item.Exported).OrderBy(item => item.Id, StringComparer.Ordinal))
-        {
-            resourcesElement.Add(component.CreatePublishedPackageElement());
-        }
-
-        foreach (ResourceEntry image in images.Where(item => !item.Exported).OrderBy(item => item.Id, StringComparer.Ordinal))
-        {
-            resourcesElement.Add(image.CreatePublishedPackageElement());
-        }
-
-        foreach (ResourceEntry component in components.Where(item => item.Exported).OrderBy(item => item.Id, StringComparer.Ordinal))
-        {
-            resourcesElement.Add(component.CreatePublishedPackageElement());
-        }
-
-        foreach (ResourceEntry image in images.Where(item => item.Exported).OrderBy(item => item.Id, StringComparer.Ordinal))
-        {
-            resourcesElement.Add(image.CreatePublishedPackageElement());
-        }
-
-        foreach (AtlasOutput atlas in atlases.OrderByDescending(item => item.AtlasIndex))
-        {
-            resourcesElement.Add(new XElement("atlas",
-                new XAttribute("id", "atlas" + atlas.AtlasIndex.ToString(CultureInfo.InvariantCulture)),
-                new XAttribute("size", atlas.Width.ToString(CultureInfo.InvariantCulture) + "," + atlas.Height.ToString(CultureInfo.InvariantCulture)),
-                new XAttribute("file", "atlas" + atlas.AtlasIndex.ToString(CultureInfo.InvariantCulture) + ".png")));
-        }
-
-        root.Add(resourcesElement);
-        return SerializeXml(root);
     }
 
     internal static List<AtlasImageInput> LoadIncludedImages(PackageSource package, List<ResourceEntry> images)
