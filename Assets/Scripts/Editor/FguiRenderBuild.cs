@@ -110,10 +110,12 @@ public static class FguiRenderBuild
         string packageSourceDir = "D:/ProjectGit/AirLegion/fgui_airLegion/assets/BattleUI";
         string outPngDir        = "D:/Project/FguiCli/Assets/FguiEditor/Diff/BattleUI";
 
-        FguiPublishAndRender.PublishAndRenderAll(
+        FguiPublishAndRender.PublishPackage(packageSourceDir, out string tempPublishDir);
+        
+        FguiPublishAndRender.RenderAll(
+            tempPublishDir,
             packageSourceDir,
             outPngDir,
-            scale: 1f,
             transparent: true);
     }
 }

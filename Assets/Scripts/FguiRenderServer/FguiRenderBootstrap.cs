@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using FairyGUI;
 using UnityEngine;
-using Debug = System.Diagnostics.Debug;
+using Debug = UnityEngine.Debug;
+using Object = UnityEngine.Object;
 
 namespace FguiRenderServer
 {
@@ -91,7 +91,7 @@ namespace FguiRenderServer
         {
             _isRendering = true;
             Application.runInBackground = true;
-            yield return StartCoroutine(RenderOnce(request, OnComplete));
+            yield return StartCoroutine(RenderOnce(request));
             _isRendering = false;
             _quitAfterRender = false;
         }
@@ -99,7 +99,7 @@ namespace FguiRenderServer
         private void OnComplete(FguiRenderResult result)
         {
             string json = JsonUtility.ToJson(result);
-            UnityEngine.Debug.Log(ResultPrefix + json);
+            Debug.Log(ResultPrefix + json);
 
             Action<FguiRenderResult> onComplete = _externalOnComplete;
             _externalOnComplete = null;
@@ -116,79 +116,50 @@ namespace FguiRenderServer
 #endif
         }
 
-        private IEnumerator RenderOnce(FguiRenderRequest request, Action<FguiRenderResult> onDone)
+        private void LoadAllPackage(FguiRenderRequest request)
         {
             Stopwatch sw = Stopwatch.StartNew();
             FguiRenderResult result = new FguiRenderResult();
-            string requestedOutPng = request == null ? string.Empty : (request.outPng ?? string.Empty);
-            UIPackage loadedPackage = null;
-            List<UIPackage> loadedPackages = new List<UIPackage>();
-            GComponent rootChild = null;
-            string tempPublishDir = null;
-
-            // ── Pre-step: if a source dir is given, publish to a temp dir first ──────────
-            if (request != null && !string.IsNullOrWhiteSpace(request.packageSourceDir))
-            {
-                try
-                {
-                    tempPublishDir = Path.Combine(
-                        Path.GetTempPath(),
-                        "fgui_render_" + Guid.NewGuid().ToString("N"));
-
-                    string pkgName = FguiPackagePublisher.GetPackageName(request.packageSourceDir);
-                    request.allPackageRootDir  = tempPublishDir;
-                    request.packageName = pkgName;
-                }
-                catch (Exception ex)
-                {
-                    UnityEngine.Debug.LogException(ex);
-                    sw.Stop();
-                    result.ok        = false;
-                    result.message   = "Publish step failed: " + ex.Message;
-                    result.pngPath   = requestedOutPng;
-                    result.durationMs = sw.ElapsedMilliseconds;
-                    TryDeleteTempDir(tempPublishDir);
-                    onDone(result);
-                    yield break;
-                }
-            }
             // ─────────────────────────────────────────────────────────────────────────────
-
             try
             {
-                FguiRenderRequest validRequest = request;
-                if (validRequest == null)
-                {
-                    throw new ArgumentNullException("request");
-                }
+                ValidateRequest(request);
 
-                ValidateRequest(validRequest);
-
-                Stage.Instantiate();
-                GRoot root = GRoot.inst;
-                root.RemoveChildren(0, -1, true);
-                root.SetContentScaleFactor(Mathf.Max(1, validRequest.width), Mathf.Max(1, validRequest.height));
-
-                if (!validRequest.transparent && StageCamera.main != null)
+                if (!request.transparent && StageCamera.main != null)
                 {
                     StageCamera.main.clearFlags = CameraClearFlags.SolidColor;
                     StageCamera.main.backgroundColor = Color.white;
                 }
 
-                LoadAllPublishedPackages(validRequest.allPackageRootDir, loadedPackages);
-                loadedPackage = UIPackage.GetByName(validRequest.packageName);
-                if (loadedPackage == null)
-                {
-                    throw new InvalidOperationException(
-                        string.Format("Package '{0}' was not found after loading published packages from '{1}'.", validRequest.packageName, validRequest.allPackageRootDir));
-                }
+                LoadAllPublishedPackages(request.allPackageRootDir);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+                sw.Stop();
+                result.ok = false;
+                result.message = ex.Message;
+                result.durationMs = sw.ElapsedMilliseconds;
 
-                GObject created = UIPackage.CreateObject(loadedPackage.name, validRequest.componentName);
-                if (created == null)
-                {
-                    throw new InvalidOperationException(
-                        string.Format("Component '{0}' was not found in package '{1}'", validRequest.componentName, loadedPackage.name));
-                }
+                _externalOnComplete?.Invoke(result);
+            }
+        }
+
+        private IEnumerator RenderOnce(FguiRenderRequest request)
+        {
+            Stopwatch sw = Stopwatch.StartNew();
+            FguiRenderResult result = new FguiRenderResult();
+            GComponent rootChild = null;
+            string tempPublishDir = null;
+            
+
+            yield return null;
+            yield return new WaitForEndOfFrame();
+
+            try
+            {
+                
+                GObject created = UIPackage.CreateObject(request.packageName, request.componentName);
 
                 rootChild = created.asCom;
                 if (rootChild == null)
@@ -197,62 +168,35 @@ namespace FguiRenderServer
                 }
 
                 rootChild.SetPosition(0, 0, 0);
-                if (validRequest.width > 0 && validRequest.height > 0)
-                {
-                    rootChild.SetSize(validRequest.width, validRequest.height);
-                }
-
+                
+                Stage.Instantiate();
+                GRoot root = GRoot.inst;
+                root.RemoveChildren(0, -1, true);
+                
+                root.SetContentScaleFactor((int)rootChild.width, (int)rootChild.height);
+                
                 root.AddChild(rootChild);
-            }
-            catch (Exception ex)
-            {
-                UnityEngine.Debug.LogException(ex);
-                sw.Stop();
-                result.ok = false;
-                result.message = ex.Message;
-                result.pngPath = requestedOutPng;
-                result.durationMs = sw.ElapsedMilliseconds;
-
-                CleanupLoadedObjects(rootChild, loadedPackages);
-                onDone(result);
-                yield break;
-            }
-
-            yield return null;
-            yield return new WaitForEndOfFrame();
-
-            try
-            {
-                FguiRenderRequest validRequest = request;
-                if (validRequest == null)
-                {
-                    throw new ArgumentNullException("request");
-                }
-
-                Texture2D capture = rootChild.displayObject.GetScreenShot(null, Mathf.Max(0.01f, validRequest.scale));
+                
+                Texture2D capture = rootChild.displayObject.GetScreenShot(null, 1f);
                 if (capture == null)
                 {
                     throw new InvalidOperationException("Capture failed because screenshot texture is null.");
                 }
 
-                string outputPath = Path.GetFullPath(validRequest.outPng);
+                string outputPath = Path.GetFullPath(request.outPng);
                 string outputDir = Path.GetDirectoryName(outputPath);
                 if (!string.IsNullOrEmpty(outputDir))
                 {
                     Directory.CreateDirectory(outputDir);
                 }
 
-                int outputWidth = capture.width;
-                int outputHeight = capture.height;
                 File.WriteAllBytes(outputPath, capture.EncodeToPNG());
-                UnityEngine.Object.Destroy(capture);
+                Destroy(capture);
 
                 sw.Stop();
                 result.ok = true;
                 result.message = "ok";
                 result.pngPath = outputPath;
-                result.width = outputWidth;
-                result.height = outputHeight;
                 result.durationMs = sw.ElapsedMilliseconds;
             }
             catch (Exception ex)
@@ -260,16 +204,14 @@ namespace FguiRenderServer
                 sw.Stop();
                 result.ok = false;
                 result.message = ex.Message;
-                result.pngPath = requestedOutPng;
                 result.durationMs = sw.ElapsedMilliseconds;
             }
             finally
             {
-                CleanupLoadedObjects(rootChild, loadedPackages);
+                CleanupLoadedObjects(rootChild);
             }
 
-            onDone(result);
-            TryDeleteTempDir(tempPublishDir);
+            _externalOnComplete?.Invoke(result);
         }
 
         private static void TryDeleteTempDir(string dir)
@@ -280,11 +222,9 @@ namespace FguiRenderServer
         }
 
 
-        private static void LoadAllPublishedPackages(
-            string packageDir,
-            List<UIPackage> loadedPackages)
+        private static void LoadAllPublishedPackages(string packageDir)
         {
-            string[] descriptorPaths = Directory.GetFiles(packageDir, "*_fui.bytes", SearchOption.TopDirectoryOnly);
+            string[] descriptorPaths = Directory.GetFiles(packageDir, "*_fui.bytes", SearchOption.AllDirectories);
             foreach (string descriptorPath in descriptorPaths)
             {
                 string packageName = Path.GetFileNameWithoutExtension(descriptorPath);
@@ -307,12 +247,10 @@ namespace FguiRenderServer
                     throw new InvalidOperationException(
                         string.Format("Failed to load published dependency package '{0}'.", packageName));
                 }
-
-                loadedPackages.Add(loaded);
             }
         }
 
-        private static void CleanupLoadedObjects(GComponent rootChild, List<UIPackage> loadedPackages)
+        private static void CleanupLoadedObjects(GComponent rootChild)
         {
             if (rootChild != null)
             {
@@ -320,22 +258,7 @@ namespace FguiRenderServer
                 rootChild.Dispose();
             }
 
-            if (loadedPackages != null)
-            {
-                for (int i = loadedPackages.Count - 1; i >= 0; i--)
-                {
-                    UIPackage pkg = loadedPackages[i];
-                    if (pkg == null)
-                    {
-                        continue;
-                    }
-
-                    if (UIPackage.GetById(pkg.id) != null)
-                    {
-                        UIPackage.RemovePackage(pkg.id);
-                    }
-                }
-            }
+            UIPackage.RemoveAllPackages();
         }
 
         private static void ValidateRequest(FguiRenderRequest request)

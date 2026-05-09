@@ -20,9 +20,6 @@ namespace FguiRenderServer
         public string packageName;
         public string componentName;
         public string outPng;
-        public int width = 1920;
-        public int height = 1080;
-        public float scale = 1f;
         public bool transparent = true;
     }
 
@@ -32,8 +29,6 @@ namespace FguiRenderServer
         public bool ok;
         public string message;
         public string pngPath;
-        public int width;
-        public int height;
         public long durationMs;
     }
 
@@ -80,9 +75,6 @@ namespace FguiRenderServer
                 packageName = GetString(map, "--package-name", string.Empty),
                 componentName = GetString(map, "--component-name", string.Empty),
                 outPng = GetString(map, "--out-png", string.Empty),
-                width = GetInt(map, "--width", 1920),
-                height = GetInt(map, "--height", 1080),
-                scale = GetFloat(map, "--scale", 1f),
                 transparent = GetBool(map, "--transparent", true)
             };
             return req;
