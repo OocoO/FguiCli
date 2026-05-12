@@ -107,16 +107,15 @@ public static class FguiRenderBuild
     [MenuItem("Tools/Fgui Package/Test Publish and Render Component...")]
     public static void PublishAndRenderFromMenu()
     {
-        string packageSourceDir = "D:/ProjectGit/AirLegion/fgui_airLegion/assets/BattleUI";
+        string fguiRootPath = "D:/ProjectGit/AirLegion/fgui_airLegion";
         string outPngDir        = "D:/Project/FguiCli/Assets/FguiEditor/Diff/BattleUI";
 
-        FguiPublishAndRender.PublishPackage(packageSourceDir, out string tempPublishDir);
+        FguiPublishAndRender.PublishPackage(fguiRootPath, out string tempPublishDir);
         
         FguiPublishAndRender.RenderAll(
             tempPublishDir,
-            packageSourceDir,
-            outPngDir,
-            transparent: true);
+            fguiRootPath,
+            outPngDir);
     }
 }
 }

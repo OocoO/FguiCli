@@ -1,140 +1,156 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using FguiRenderServer;
 using UnityEngine;
 using UnityEditor;
 
 namespace Editor
 {
-/// <summary>
-/// Editor-side helper that publishes a FGUI source package then launches the pre-built
-/// render server player to capture a component as PNG.
-/// In the built player, use FguiRenderBootstrap with --package-source-dir instead.
-/// </summary>
-public static class FguiPublishAndRender
-{
     /// <summary>
-    /// Publish a FGUI source package then render every exported component to a separate PNG
-    /// inside <paramref name="outPngDir"/>.  Components are rendered one after another.
+    /// Editor-side helper that publishes a FairyGUI project then batch-renders
+    /// all exported components to PNG files.
     /// </summary>
-    public static void RenderAll(
-        string publishDir,
-        string packageSourceDir,
-        string outPngDir,
-        bool transparent = true)
+    public static class FguiPublishAndRender
     {
-        List<string> componentNames = FguiPackagePublisher.GetExportedComponentNames(packageSourceDir);
-        if (componentNames.Count == 0)
+        // Pending batch state – stored before entering play mode, consumed on EnteredPlayMode.
+        private static string _pendingPublishDir;
+        private static List<FguiRenderRequest> _pendingRequests;
+        private static Action<List<FguiRenderResult>> _pendingCallback;
+
+        /// <summary>
+        /// Discovers all exported components in every package under <paramref name="fguiProjectRoot"/>,
+        /// loads them all at once from <paramref name="publishDir"/>, then renders each one to
+        /// <paramref name="outPngDir"/>/<em>packageName</em>/<em>componentName</em>.png.
+        /// </summary>
+        public static void RenderAll(
+            string publishDir,
+            string fguiProjectRoot,
+            string outPngDir)
         {
-            Debug.LogWarning("[FguiPublishAndRender] No exported components found in package.");
-            return;
-        }
-
-        var packageName = FguiPackagePublisher.GetPackageName(packageSourceDir);
-        Debug.Log($"[FguiPublishAndRender] Rendering {componentNames.Count} exported component(s) from '{packageSourceDir}' using published package '{packageName}'...");
-        RenderNext(publishDir, packageName, outPngDir, componentNames, 0, transparent);
-    }
-
-    private static void RenderNext(
-        string tempAllPackageDir,
-        string packageName,
-        string outPngDir,
-        List<string> componentNames,
-        int index,
-        bool transparent)
-    {
-        if (index >= componentNames.Count)
-        {
-            Debug.Log($"[FguiPublishAndRender] All {componentNames.Count} component(s) rendered.");
-            AssetDatabase.Refresh();
-            return;
-        }
-
-        string componentName = componentNames[index];
-        string outPng = Path.Combine(outPngDir, componentName + ".png");
-
-        Render(
-            new FguiRenderRequest
+            string assetsDir = ResolveAssetsDir(fguiProjectRoot);
+            if (assetsDir == null)
             {
-                allPackageRootDir       = tempAllPackageDir,
-                packageName      = packageName,
-                componentName    = componentName,
-                outPng           = outPng,
-                transparent      = transparent
-            },
-            result =>
+                Debug.LogWarning("[FguiPublishAndRender] Cannot find a packages folder under: " + fguiProjectRoot);
+                return;
+            }
+
+            var requests = new List<FguiRenderRequest>();
+            foreach (string pkgDir in Directory.GetDirectories(assetsDir))
             {
-                if (result != null && result.ok)
-                    Debug.Log($"[FguiPublishAndRender] [{index + 1}/{componentNames.Count}] '{componentName}' -> {result.pngPath}");
-                else
-                    Debug.LogWarning($"[FguiPublishAndRender] [{index + 1}/{componentNames.Count}] '{componentName}' failed: {result?.message}");
+                if (!File.Exists(Path.Combine(pkgDir, "package.xml")))
+                    continue;
 
-                RenderNext(tempAllPackageDir, packageName, outPngDir, componentNames, index + 1, transparent);
-            });
-    }
+                string packageName = FguiPackagePublisher.GetPackageName(pkgDir);
+                List<string> components = FguiPackagePublisher.GetExportedComponentNames(pkgDir);
+                if (components.Count == 0)
+                    continue;
 
-    private static void Render(FguiRenderRequest request, Action<FguiRenderResult> onComplete)
-    {
-        if (!EditorApplication.isPlaying)
-        {
-            EditorApplication.isPlaying = true;
-            Debug.Log($"[FguiPublishAndRender] Publishing Starting");
-            return;
-        }
+                Debug.Log($"[FguiPublishAndRender] Package '{packageName}': {components.Count} exported component(s).");
+                foreach (string comp in components)
+                {
+                    requests.Add(new FguiRenderRequest
+                    {
+                        allPackageRootDir = publishDir,
+                        packageName       = packageName,
+                        componentName     = comp,
+                        outPng            = Path.Combine(outPngDir, packageName, comp + ".png"),
+                        transparent       = true,
+                    });
+                }
+            }
 
-        FguiRenderRequest runtimeRequest = CloneRequest(request);
-        runtimeRequest.packageSourceDir = string.Empty;
-
-        bool accepted = FguiRenderBootstrap.TryRenderInPlayMode(runtimeRequest, result =>
-        {
-            if (result != null && result.ok)
+            if (requests.Count == 0)
             {
-                Debug.Log($"[FguiPublishAndRender] Done (PlayMode) -> {result.pngPath}");
+                Debug.LogWarning("[FguiPublishAndRender] No exported components found in any package.");
+                return;
+            }
+
+            Debug.Log($"[FguiPublishAndRender] Queued {requests.Count} render(s) across all packages.");
+            ScheduleBatchRender(publishDir, requests, results =>
+            {
+                int ok = results.Count(r => r.ok);
+                Debug.Log($"[FguiPublishAndRender] Batch complete — {ok}/{results.Count} succeeded.");
                 AssetDatabase.Refresh();
-            }
-            else
-            {
-                string err = string.IsNullOrEmpty(result?.message) ? "Unknown render error." : result.message;
-                Debug.LogError($"[FguiPublishAndRender] Render {request.componentName} failed: " + err);
-            }
+            });
+        }
 
-            onComplete?.Invoke(result);
-        });
-
-        if (!accepted)
+        /// <summary>Publish all packages in <paramref name="fguiProjectRoot"/> to a fresh temp directory.</summary>
+        public static void PublishPackage(string fguiProjectRoot, out string tempPublishDir)
         {
-            Debug.LogError("[FguiPublishAndRender] Renderer is busy or Play Mode host is unavailable.");
+            tempPublishDir = Path.Combine(Path.GetTempPath(), "fgui_render_" + Guid.NewGuid().ToString("N"));
+            FguiPackagePublisher.PublishPackageAll(fguiProjectRoot, tempPublishDir);
+        }
+
+        // ── Private helpers ────────────────────────────────────────────────────────
+
+        /// <summary>
+        /// If already in play mode, dispatch immediately; otherwise store state and
+        /// enter play mode — the batch fires on <see cref="PlayModeStateChange.EnteredPlayMode"/>.
+        /// </summary>
+        private static void ScheduleBatchRender(
+            string allPackagesDir,
+            List<FguiRenderRequest> requests,
+            Action<List<FguiRenderResult>> onDone)
+        {
+            if (EditorApplication.isPlaying)
+            {
+                DispatchBatch(allPackagesDir, requests, onDone);
+                return;
+            }
+
+            _pendingPublishDir = allPackagesDir;
+            _pendingRequests   = requests;
+            _pendingCallback   = onDone;
+            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+            EditorApplication.isPlaying = true;
+        }
+
+        private static void OnPlayModeStateChanged(PlayModeStateChange state)
+        {
+            if (state != PlayModeStateChange.EnteredPlayMode)
+                return;
+
+            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+
+            string dir = _pendingPublishDir;
+            var reqs   = _pendingRequests;
+            var cb     = _pendingCallback;
+            _pendingPublishDir = null;
+            _pendingRequests   = null;
+            _pendingCallback   = null;
+
+            if (reqs != null && reqs.Count > 0)
+                DispatchBatch(dir, reqs, cb);
+        }
+
+        private static void DispatchBatch(
+            string allPackagesDir,
+            List<FguiRenderRequest> requests,
+            Action<List<FguiRenderResult>> onDone)
+        {
+            bool accepted = FguiRenderBootstrap.TryBatchRenderInPlayMode(allPackagesDir, requests, onDone);
+            if (!accepted)
+                Debug.LogError("[FguiPublishAndRender] Renderer is busy — batch render not started.");
+        }
+
+        /// <summary>
+        /// Returns the directory that directly contains the FairyGUI package sub-folders.
+        /// Checks <c>assets/</c> first (FairyGUI convention), then falls back to the root itself.
+        /// </summary>
+        private static string ResolveAssetsDir(string fguiProjectRoot)
+        {
+            string conventional = Path.Combine(fguiProjectRoot, "assets");
+            if (Directory.Exists(conventional))
+                return conventional;
+
+            // Root itself may contain package sub-folders directly.
+            if (Directory.GetDirectories(fguiProjectRoot)
+                .Any(d => File.Exists(Path.Combine(d, "package.xml"))))
+                return fguiProjectRoot;
+
+            return null;
         }
     }
-
-    public static void PublishPackage(string packageSourceDir, out string tempPublishDir)
-    {
-        tempPublishDir = Path.Combine(Path.GetTempPath(), "fgui_render_" + Guid.NewGuid().ToString("N"));
-        
-        // temp: decode with packageSourceDir
-        var fguiProjectRoot = new DirectoryInfo(packageSourceDir).Parent.FullName;
-        FguiPackagePublisher.PublishPackageAll(fguiProjectRoot, tempPublishDir);
-    }
-
-    private static void TryDeleteTempDir(string dir)
-    {
-        if (string.IsNullOrEmpty(dir)) return;
-        try { if (Directory.Exists(dir)) Directory.Delete(dir, true); }
-        catch { /* best-effort */ }
-    }
-
-    private static FguiRenderRequest CloneRequest(FguiRenderRequest request)
-    {
-        return new FguiRenderRequest
-        {
-            packageSourceDir = request.packageSourceDir,
-            allPackageRootDir = request.allPackageRootDir,
-            packageName = request.packageName,
-            componentName = request.componentName,
-            outPng = request.outPng,
-            transparent = request.transparent
-        };
-    }
-}
 }

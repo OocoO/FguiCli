@@ -1,3 +1,6 @@
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -5,9 +8,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
-#if UNITY_EDITOR
-using UnityEditor;
-#endif
 using Debug = UnityEngine.Debug;
 
 namespace FguiRenderServer
@@ -71,14 +71,17 @@ namespace FguiRenderServer
 
         public static void PublishPackageAll(string fGuiProjectRoot, string outputRoot)
         {
-            // D:\ProjectGit\AirLegion\fgui_airLegion\assets
-            var packagePath = Directory.GetDirectories(fGuiProjectRoot, "*");
-            foreach (var path in packagePath)
-            {
-                var packageName = Path.GetFileName(path);
-                var outputDir = Path.Combine(outputRoot, packageName);
-                PublishPackage(path, outputDir);
-            }
+            // fGuiProjectRoot is typically the "assets" folder inside the .fairy project directory.
+            // Locate the .fairy project root and publish everything in one ofgui call.
+            string fairyRoot = FindFairyProjectRoot(fGuiProjectRoot)
+                ?? throw new InvalidOperationException("Cannot find a .fairy project file searching from: " + fGuiProjectRoot);
+
+            Directory.CreateDirectory(outputRoot);
+            RunOfguiPublish(fairyRoot, outputRoot, packageName: null);
+            Debug.Log($"Published all FairyGUI packages via ofgui to {outputRoot}.");
+#if UNITY_EDITOR
+            AssetDatabase.Refresh();
+#endif
         }
 
         public static void PublishPackage(string packageDir, string outputDir)
@@ -94,33 +97,78 @@ namespace FguiRenderServer
                 return;
             }
 
-            RunOfguiPublish(fullPackageDir, fullOutputDir);
-            Debug.Log($"Published FairyGUI package via ofgui to {fullOutputDir}.");
+            string packageName = GetPackageName(fullPackageDir);
+            string fairyRoot = FindFairyProjectRoot(fullPackageDir)
+                ?? throw new InvalidOperationException("Cannot find a .fairy project file searching from: " + fullPackageDir);
+
+            RunOfguiPublish(fairyRoot, fullOutputDir, packageName);
+            Debug.Log($"Published FairyGUI package '{packageName}' via ofgui to {fullOutputDir}.");
 #if UNITY_EDITOR
             AssetDatabase.Refresh();
 #endif
         }
 
-        private static void RunOfguiPublish(string packageDir, string outputDir)
+        /// <summary>
+        /// Walks up the directory tree from <paramref name="startDir"/> looking for a *.fairy file.
+        /// Returns the directory that contains the .fairy file, or null if not found within 6 levels.
+        /// </summary>
+        private static string FindFairyProjectRoot(string startDir)
         {
-            string arguments = "publish " + QuoteArgument(packageDir) +
+            string dir = Path.GetFullPath(startDir);
+            for (int depth = 0; depth < 6; depth++)
+            {
+                if (Directory.GetFiles(dir, "*.fairy", SearchOption.TopDirectoryOnly).Length > 0)
+                    return dir;
+                string parent = Path.GetDirectoryName(dir);
+                if (parent == null || parent == dir)
+                    break;
+                dir = parent;
+            }
+            return null;
+        }
+
+        private static void RunOfguiPublish(string fairyProjectRoot, string outputDir, string packageName)
+        {
+            string ofguiArgs = "publish " + QuoteArgument(fairyProjectRoot) +
                                " --output " + QuoteArgument(outputDir) +
                                " --project-type unity";
 
+            if (!string.IsNullOrWhiteSpace(packageName))
+            {
+                ofguiArgs += " --packages " + QuoteArgument(packageName);
+            }
+
+            // npm global .cmd scripts require the shell (cmd.exe) to resolve correctly.
+            // Unity's editor process does not inherit the user's PATH, so we invoke via cmd /c.
+            string fileName;
+            string arguments;
+            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+            {
+                fileName = "cmd.exe";
+                arguments = "/c ofgui " + ofguiArgs;
+            }
+            else
+            {
+                fileName = "/bin/sh";
+                arguments = "-c \"ofgui " + ofguiArgs.Replace("\"", "\\\"") + "\"";
+            }
+
             ProcessStartInfo psi = new ProcessStartInfo
             {
-                FileName = "ofgui",
+                FileName = fileName,
                 Arguments = arguments,
                 UseShellExecute = false,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 CreateNoWindow = true
             };
+            
+            Debug.Log($"Calling Cmd: {fileName} {arguments}");
 
             Process process = Process.Start(psi);
             if (process == null)
             {
-                throw new InvalidOperationException("Failed to start ofgui process. Make sure @openfairygui/cli is installed: npm install --global @openfairygui/cli");
+                throw new InvalidOperationException("Failed to start ofgui process. Make sure @openfairygui/cli is installed globally: npm install --global @openfairygui/cli");
             }
 
             string stdout = process.StandardOutput.ReadToEnd();
@@ -194,6 +242,11 @@ namespace FguiRenderServer
             {
                 return "\"\"";
             }
+
+            // Remove trailing directory separators: on Windows, a quoted path ending with a
+            // backslash (e.g. "C:\foo\") causes cmd.exe to treat \" as an escaped quote,
+            // breaking argument parsing entirely.
+            value = value.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
             return "\"" + value.Replace("\"", "\\\"") + "\"";
         }

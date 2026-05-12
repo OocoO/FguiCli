@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using FairyGUI;
@@ -39,6 +40,35 @@ namespace FguiRenderServer
                 throw new ArgumentNullException("request");
             }
 
+            FguiRenderBootstrap bootstrap = GetOrCreateBootstrap();
+            Application.runInBackground = true;
+            return bootstrap.TryStartRender(request, onDone, false);
+        }
+
+        /// <summary>
+        /// Loads all published packages from <paramref name="allPackagesDir"/> once, then renders
+        /// every request in <paramref name="requests"/> sequentially, writes PNG files, and
+        /// invokes <paramref name="onDone"/> with the full result list when finished.
+        /// </summary>
+        public static bool TryBatchRenderInPlayMode(
+            string allPackagesDir,
+            List<FguiRenderRequest> requests,
+            Action<List<FguiRenderResult>> onDone)
+        {
+            if (requests == null || requests.Count == 0)
+                throw new ArgumentException("requests must not be null or empty", "requests");
+
+            FguiRenderBootstrap bootstrap = GetOrCreateBootstrap();
+            if (bootstrap._isRendering)
+                return false;
+
+            Application.runInBackground = true;
+            bootstrap.StartCoroutine(bootstrap.RunBatchRender(allPackagesDir, requests, onDone));
+            return true;
+        }
+
+        private static FguiRenderBootstrap GetOrCreateBootstrap()
+        {
             GameObject host = GameObject.Find("FguiRenderBootstrap");
             if (host == null)
             {
@@ -48,12 +78,8 @@ namespace FguiRenderServer
 
             FguiRenderBootstrap bootstrap = host.GetComponent<FguiRenderBootstrap>();
             if (bootstrap == null)
-            {
                 bootstrap = host.AddComponent<FguiRenderBootstrap>();
-            }
-
-            Application.runInBackground = true;
-            return bootstrap.TryStartRender(request, onDone, false);
+            return bootstrap;
         }
 
         private void Start()
@@ -94,6 +120,108 @@ namespace FguiRenderServer
             yield return StartCoroutine(RenderOnce(request));
             _isRendering = false;
             _quitAfterRender = false;
+        }
+
+        /// <summary>
+        /// Batch coroutine: loads all packages once, renders every request, then cleans up.
+        /// </summary>
+        private IEnumerator RunBatchRender(
+            string allPackagesDir,
+            List<FguiRenderRequest> requests,
+            Action<List<FguiRenderResult>> onDone)
+        {
+            _isRendering = true;
+            Application.runInBackground = true;
+
+            var results = new List<FguiRenderResult>(requests.Count);
+
+            yield return null;
+            yield return new WaitForEndOfFrame();
+
+            // ── 1. Load all packages once ──────────────────────────────────────────
+            try
+            {
+                LoadAllPublishedPackages(allPackagesDir);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogException(ex);
+                _isRendering = false;
+                onDone?.Invoke(results);
+                yield break;
+            }
+
+            // ── 2. Render each component (packages stay loaded) ───────────────────
+            for (int i = 0; i < requests.Count; i++)
+            {
+                FguiRenderRequest req = requests[i];
+                Stopwatch sw = Stopwatch.StartNew();
+                FguiRenderResult result = new FguiRenderResult();
+                GComponent rootChild = null;
+
+                yield return new WaitForEndOfFrame();
+
+                try
+                {
+                    GObject created = UIPackage.CreateObject(req.packageName, req.componentName);
+                    rootChild = created?.asCom;
+                    if (rootChild == null)
+                        throw new InvalidOperationException(
+                            $"'{req.packageName}/{req.componentName}' is not a GComponent or CreateObject returned null.");
+
+                    rootChild.SetPosition(0, 0, 0);
+                    Stage.Instantiate();
+                    GRoot root = GRoot.inst;
+                    root.RemoveChildren(0, -1, true);
+                    root.SetContentScaleFactor((int)rootChild.width, (int)rootChild.height);
+                    root.AddChild(rootChild);
+
+                    Texture2D capture = rootChild.displayObject.GetScreenShot(null, 1f);
+                    if (capture == null)
+                        throw new InvalidOperationException("Screenshot texture is null.");
+
+                    string outputPath = Path.GetFullPath(req.outPng);
+                    string outputDir  = Path.GetDirectoryName(outputPath);
+                    if (!string.IsNullOrEmpty(outputDir))
+                        Directory.CreateDirectory(outputDir);
+
+                    File.WriteAllBytes(outputPath, capture.EncodeToPNG());
+                    Destroy(capture);
+
+                    sw.Stop();
+                    result.ok        = true;
+                    result.message   = "ok";
+                    result.pngPath   = outputPath;
+                    result.durationMs = sw.ElapsedMilliseconds;
+                    Debug.Log($"[FguiRenderBootstrap] [{i + 1}/{requests.Count}] ✓ " +
+                              $"'{req.packageName}/{req.componentName}' → {outputPath} ({sw.ElapsedMilliseconds} ms)");
+                }
+                catch (Exception ex)
+                {
+                    sw.Stop();
+                    result.ok        = false;
+                    result.message   = ex.Message;
+                    result.durationMs = sw.ElapsedMilliseconds;
+                    Debug.LogError($"[FguiRenderBootstrap] [{i + 1}/{requests.Count}] ✗ " +
+                                   $"'{req.packageName}/{req.componentName}': {ex.Message}");
+                }
+                finally
+                {
+                    if (rootChild != null)
+                    {
+                        rootChild.RemoveFromParent();
+                        rootChild.Dispose();
+                    }
+                }
+
+                results.Add(result);
+            }
+
+            // ── 3. Cleanup ─────────────────────────────────────────────────────────
+            UIPackage.RemoveAllPackages();
+            _isRendering = false;
+
+            onDone?.Invoke(results);
         }
 
         private void OnComplete(FguiRenderResult result)
@@ -150,15 +278,22 @@ namespace FguiRenderServer
             Stopwatch sw = Stopwatch.StartNew();
             FguiRenderResult result = new FguiRenderResult();
             GComponent rootChild = null;
-            string tempPublishDir = null;
-            
 
             yield return null;
             yield return new WaitForEndOfFrame();
 
             try
             {
-                
+                // Ensure all published packages are loaded before creating objects.
+                if (!string.IsNullOrWhiteSpace(request.allPackageRootDir))
+                    LoadAllPublishedPackages(request.allPackageRootDir);
+
+                if (!request.transparent && StageCamera.main != null)
+                {
+                    StageCamera.main.clearFlags = CameraClearFlags.SolidColor;
+                    StageCamera.main.backgroundColor = Color.white;
+                }
+
                 GObject created = UIPackage.CreateObject(request.packageName, request.componentName);
 
                 rootChild = created.asCom;
