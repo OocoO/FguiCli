@@ -91,15 +91,6 @@ public static class FguiRenderBuild
             CopyDirectory(dirPath, destSubDir, overwrite);
         }
     }
-    
-    [MenuItem("Tools/Fgui Package/Test Publish Folder...")]
-    public static void PublishFolderFromMenu()
-    {
-        string packageSourceDir = "D:/ProjectGit/AirLegion/fgui_airLegion/assets/BattleUI";
-        string outputDir = "D:/Project/FguiCli/Assets/FguiEditor/Diff/BattleUI";
-        
-        FguiPackagePublisher.PublishPackage(packageSourceDir, outputDir);
-    }
 
     /// <summary>
     /// Publish from a FGUI source dir then render all exported components to PNG (Editor shortcut).
@@ -110,10 +101,15 @@ public static class FguiRenderBuild
         string fguiRootPath = "D:/ProjectGit/AirLegion/fgui_airLegion";
         string outPngDir        = "D:/Project/FguiCli/Assets/FguiEditor/Diff/BattleUI";
 
-        FguiPublishAndRender.PublishPackage(fguiRootPath, out string tempPublishDir);
+        var fguiProjectName = Path.GetFileName(fguiRootPath);
+        var publishDir = Path.Combine(Path.GetTempPath(), $"fgui_render_{fguiProjectName}");
+        
+        FguiPackagePublisher.PublishPackageAll(fguiRootPath, publishDir);
+        
+        Debug.Log($"Publish projects to -- {publishDir}");
         
         FguiPublishAndRender.RenderAll(
-            tempPublishDir,
+            publishDir,
             fguiRootPath,
             outPngDir);
     }

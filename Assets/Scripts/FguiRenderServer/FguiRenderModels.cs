@@ -123,7 +123,6 @@ namespace FguiRenderServer
     internal sealed class FguiPackageFileLoader
     {
         private readonly string _packageDir;
-        private Dictionary<string, string> _fallbackFileMap;
 
         public FguiPackageFileLoader(string packageDir)
         {
@@ -175,48 +174,7 @@ namespace FguiRenderServer
                 return directPath;
             }
 
-            if (_fallbackFileMap == null)
-            {
-                BuildFallbackIndex();
-            }
-
-            string key = (normalizedName + extension)
-                .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
-                .ToLowerInvariant();
-
-            if (_fallbackFileMap == null)
-            {
-                return null;
-            }
-
-            return _fallbackFileMap.TryGetValue(key, out string mappedPath) ? mappedPath : null;
-        }
-
-        private void BuildFallbackIndex()
-        {
-            _fallbackFileMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-            if (!Directory.Exists(_packageDir))
-            {
-                return;
-            }
-
-            string[] files = Directory.GetFiles(_packageDir, "*", SearchOption.AllDirectories);
-            foreach (string file in files)
-            {
-                string relative = file.Substring(_packageDir.Length)
-                    .TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-                string key = relative.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar)
-                    .ToLowerInvariant();
-                _fallbackFileMap[key] = file;
-
-                // Also register by bare filename so FairyGUI's "atlas0.png" request can
-                // match a file named "PackageName@atlas0.png" produced by FguiPackagePublisher.
-                string justName = Path.GetFileName(file).ToLowerInvariant();
-                if (!_fallbackFileMap.ContainsKey(justName))
-                {
-                    _fallbackFileMap[justName] = file;
-                }
-            }
+            return null;
         }
     }
 }

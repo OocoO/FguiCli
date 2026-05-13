@@ -76,13 +76,6 @@ namespace Editor
             });
         }
 
-        /// <summary>Publish all packages in <paramref name="fguiProjectRoot"/> to a fresh temp directory.</summary>
-        public static void PublishPackage(string fguiProjectRoot, out string tempPublishDir)
-        {
-            tempPublishDir = Path.Combine(Path.GetTempPath(), "fgui_render_" + Guid.NewGuid().ToString("N"));
-            FguiPackagePublisher.PublishPackageAll(fguiProjectRoot, tempPublishDir);
-        }
-
         // ── Private helpers ────────────────────────────────────────────────────────
 
         /// <summary>
@@ -99,30 +92,9 @@ namespace Editor
                 DispatchBatch(allPackagesDir, requests, onDone);
                 return;
             }
-
-            _pendingPublishDir = allPackagesDir;
-            _pendingRequests   = requests;
-            _pendingCallback   = onDone;
-            EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
             EditorApplication.isPlaying = true;
-        }
-
-        private static void OnPlayModeStateChanged(PlayModeStateChange state)
-        {
-            if (state != PlayModeStateChange.EnteredPlayMode)
-                return;
-
-            EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
-
-            string dir = _pendingPublishDir;
-            var reqs   = _pendingRequests;
-            var cb     = _pendingCallback;
-            _pendingPublishDir = null;
-            _pendingRequests   = null;
-            _pendingCallback   = null;
-
-            if (reqs != null && reqs.Count > 0)
-                DispatchBatch(dir, reqs, cb);
+            
+            Debug.LogError("ScheduleBatchRender in play mode please retry...");
         }
 
         private static void DispatchBatch(
