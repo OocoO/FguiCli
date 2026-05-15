@@ -135,6 +135,7 @@ namespace FguiRenderServer
             if (string.IsNullOrEmpty(resolvedPath) || !File.Exists(resolvedPath))
             {
                 destroyMethod = DestroyMethod.None;
+                Debug.LogError($"[FguiPackageFileLoader] File doesn't exist: {resolvedPath}");
                 return null;
             }
 
@@ -146,21 +147,25 @@ namespace FguiRenderServer
                 {
                     UnityEngine.Object.Destroy(tex);
                     destroyMethod = DestroyMethod.None;
+                    Debug.LogError($"[FguiPackageFileLoader] Failed to load texture: {resolvedPath}");
                     return null;
                 }
 
                 tex.wrapMode = TextureWrapMode.Clamp;
                 tex.filterMode = FilterMode.Bilinear;
                 destroyMethod = DestroyMethod.Destroy;
+                Debug.Log($"[FguiPackageFileLoader] Load Texture Success: {resolvedPath}");
                 return tex;
             }
 
             if (type == typeof(TextAsset))
             {
                 destroyMethod = DestroyMethod.None;
+                Debug.Log($"[FguiPackageFileLoader] Load Binary Success: {resolvedPath}");
                 return File.ReadAllBytes(resolvedPath);
             }
 
+            Debug.LogError($"[FguiPackageFileLoader] Failed to load {type.Name}: {resolvedPath}");
             destroyMethod = DestroyMethod.None;
             return null;
         }

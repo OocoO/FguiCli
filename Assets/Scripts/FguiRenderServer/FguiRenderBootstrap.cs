@@ -41,7 +41,6 @@ namespace FguiRenderServer
             }
 
             FguiRenderBootstrap bootstrap = GetOrCreateBootstrap();
-            Application.runInBackground = true;
             return bootstrap.TryStartRender(request, onDone, false);
         }
 
@@ -62,7 +61,6 @@ namespace FguiRenderServer
             if (bootstrap._isRendering)
                 return false;
 
-            Application.runInBackground = true;
             bootstrap.StartCoroutine(bootstrap.RunBatchRender(allPackagesDir, requests, onDone));
             return true;
         }
@@ -84,6 +82,7 @@ namespace FguiRenderServer
 
         private void Start()
         {
+            Application.runInBackground = true;
             TryKickoffPendingRender();
         }
 
@@ -116,7 +115,6 @@ namespace FguiRenderServer
         private IEnumerator RunRender(FguiRenderRequest request)
         {
             _isRendering = true;
-            Application.runInBackground = true;
             yield return StartCoroutine(RenderOnce(request));
             _isRendering = false;
             _quitAfterRender = false;
@@ -131,7 +129,6 @@ namespace FguiRenderServer
             Action<List<FguiRenderResult>> onDone)
         {
             _isRendering = true;
-            Application.runInBackground = true;
 
             var results = new List<FguiRenderResult>(requests.Count);
 
@@ -149,6 +146,8 @@ namespace FguiRenderServer
                 onDone?.Invoke(results);
                 yield break;
             }
+            
+            yield return null;
 
             // ── 2. Render each component (packages stay loaded) ───────────────────
             for (int i = 0; i < requests.Count; i++)
@@ -210,7 +209,6 @@ namespace FguiRenderServer
             }
 
             // ── 3. Cleanup ─────────────────────────────────────────────────────────
-            UIPackage.RemoveAllPackages();
             _isRendering = false;
 
             onDone?.Invoke(results);
@@ -223,7 +221,6 @@ namespace FguiRenderServer
             GComponent rootChild = null;
 
             yield return null;
-            yield return new WaitForEndOfFrame();
 
             // Ensure all published packages are loaded before creating objects.
             if (!string.IsNullOrWhiteSpace(request.allPackageRootDir))
@@ -258,9 +255,7 @@ namespace FguiRenderServer
                     rootChild.RemoveFromParent();
                     rootChild.Dispose();
                 }
-
-                UIPackage.RemoveAllPackages();
-
+                
                 _externalOnComplete?.Invoke(result);
                 yield break;
             }
@@ -300,8 +295,6 @@ namespace FguiRenderServer
             rootChild.RemoveFromParent();
             rootChild.Dispose();
 
-            UIPackage.RemoveAllPackages();
-
             _externalOnComplete?.Invoke(result);
         }
 
@@ -322,6 +315,7 @@ namespace FguiRenderServer
                     continue;
                 }
 
+                Debug.Log($"Load Package -- {packageName}");
                 byte[] descData = File.ReadAllBytes(descriptorPath);
                 var packagePath = Directory.GetParent(descriptorPath).FullName;
                 FguiPackageFileLoader loader = new FguiPackageFileLoader(packagePath);
