@@ -13,6 +13,7 @@ from fgui_render_client import DEFAULT_SERVER, RenderRequest, health, render_pag
 
 _EXE_DIR = Path(__file__).parent / "FguiRenderServer"
 _EXE_PATH = _EXE_DIR / "FguiRenderServer.exe"
+_PID_FILE = _EXE_DIR / "fgui_render_server.pid"
 _POLL_INTERVAL = 0.5
 _START_TIMEOUT = 30
 
@@ -21,8 +22,30 @@ mcp = FastMCP("fgui-render")
 _render_process: subprocess.Popen[str] | None = None
 
 
+def _is_server_alive(url: str) -> bool:
+    try:
+        result = health(url, timeout_sec=2)
+        return result.ok or bool(result.message)
+    except Exception:
+        return False
+
+
 def _start_render_server() -> None:
     global _render_process
+    url = _get_server_url()
+
+    if _is_server_alive(url):
+        print(f"[fgui-render] server already running at {url}", file=sys.stderr)
+        if _PID_FILE.exists():
+            try:
+                pid = int(_PID_FILE.read_text().strip())
+                print(f"[fgui-render] existing server PID: {pid}", file=sys.stderr)
+            except (ValueError, OSError):
+                pass
+        return
+
+    _PID_FILE.unlink(missing_ok=True)
+
     if not _EXE_PATH.exists():
         print(f"[fgui-render] exe not found: {_EXE_PATH}", file=sys.stderr)
         return
@@ -33,18 +56,19 @@ def _start_render_server() -> None:
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )
+
+    try:
+        _PID_FILE.write_text(str(_render_process.pid))
+    except OSError:
+        pass
+
     atexit.register(_stop_render_server)
 
-    url = _get_server_url()
     deadline = time.monotonic() + _START_TIMEOUT
     while time.monotonic() < deadline:
-        try:
-            result = health(url, timeout_sec=3)
-            if result.ok or result.message:
-                print(f"[fgui-render] server ready at {url}", file=sys.stderr)
-                return
-        except Exception:
-            pass
+        if _is_server_alive(url):
+            print(f"[fgui-render] server ready at {url}", file=sys.stderr)
+            return
         time.sleep(_POLL_INTERVAL)
 
     print(
@@ -63,6 +87,10 @@ def _stop_render_server() -> None:
             _render_process.kill()
             _render_process.wait()
         _render_process = None
+    try:
+        _PID_FILE.unlink(missing_ok=True)
+    except OSError:
+        pass
 
 
 @mcp.tool()
