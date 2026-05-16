@@ -125,7 +125,7 @@ namespace FairyGUIEditor
 			Vector3 pos = panel.GetUIWorldPosition();
 			float sizeFactor = HandleUtility.GetHandleSize(pos);
 #if UNITY_2017_1_OR_NEWER
-			Vector3 newPos = Handles.FreeMoveHandle(pos, Quaternion.identity, sizeFactor, Vector3.one, Handles.ArrowHandleCap);
+			var fmh_128_49_639145471973297733 = Quaternion.identity; Vector3 newPos = Handles.FreeMoveHandle(pos, sizeFactor, Vector3.one, Handles.ArrowHandleCap);
 #else
 			Vector3 newPos = Handles.FreeMoveHandle(pos, Quaternion.identity, sizeFactor, Vector3.one, Handles.ArrowCap);
 #endif
