@@ -1,0 +1,14 @@
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "mcp": {
+    "fgui-render": {
+      "type": "local",
+      "command": ["python", "D:\\Project\\FguiCli\\tools\\fgui_render_client\\run_mcp_server.py"],
+      "environment": {
+        "FGUI_RENDER_SERVER_URL": "http://127.0.0.1:18765",
+        "PYTHONUNBUFFERED": "1"
+      },
+      "enabled": true
+    }
+  }
+}
