@@ -1,10 +1,7 @@
 ﻿# FGUI Render Client (Python)
 This folder provides a minimal Python wrapper for the Unity renderer executable.
 ## Files
-- `fgui_render_client.py`: wrapper API (`render_once`)
-- `run_render_once.py`: command-line runner
-- `tests/mock_renderer.py`: mock renderer for parser/protocol tests
-- `tests/test_client.py`: unittest harness
+- `invoke_render_page.ps1`: call always-on HTTP render server
 ## Quick test (no Unity needed)
 ```bash
 python -m unittest discover -s tools/fgui_render_client/tests -v
@@ -23,15 +20,13 @@ python tools/fgui_render_client/run_render_once.py \
   --transparent
 ```
 
-# 方式 A：直接指定已发布目录（原有用法不变）
-FguiRenderServer.exe --render-once `
-  --package-dir "D:\out\BattleUI" `
---package-name "BattleUI" `
-  --component-name "com_damageFloat" `
---out-png "D:\render\output.png"
+## Always-on HTTP server call (PowerShell)
 
-# 方式 B：指定源目录，自动发布再渲染（新功能）
-FguiRenderServer.exe --render-once `
-  --package-source-dir "D:\ProjectGit\AirLegion\fgui_airLegion\assets\BattleUI" `
---component-name "com_damageFloat" `
---out-png "D:\render\output.png"
+```powershell
+& "tools/fgui_render_client/invoke_render_page.ps1" `
+  -ProjectRootDir "D:/ProjectGit/AirLegion/fgui_airLegion" `
+  -PackageName "BattleUI" `
+  -ComponentName "main_FormationSelect.xml" `
+  -OutPng "D:/render/output.png" `
+  -BranchTag "eng"
+```

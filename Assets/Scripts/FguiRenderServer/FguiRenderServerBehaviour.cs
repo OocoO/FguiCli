@@ -1,0 +1,590 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using FairyGUI;
+using UnityEngine;
+
+namespace FguiRenderServer
+{
+    public sealed class FguiRenderServerBehaviour : MonoBehaviour
+    {
+        const string ResultPrefix = "[FGUI_RENDER_RESULT]";
+        const string DefaultHost = "127.0.0.1";
+        const int DefaultPort = 18765;
+
+        readonly Queue<RenderJob> _pendingJobs = new Queue<RenderJob>();
+        readonly object _pendingLock = new object();
+
+        HttpListener _listener;
+        CancellationTokenSource _listenerCancellation;
+        RenderJob _activeJob;
+
+        bool _oneShotMode;
+        string _host = DefaultHost;
+        int _port = DefaultPort;
+
+        void Awake()
+        {
+            DontDestroyOnLoad(gameObject);
+            Stage.Instantiate();
+
+            Dictionary<string, string> args = ParseCommandLineArguments(Environment.GetCommandLineArgs());
+            _oneShotMode = args.ContainsKey("render-once");
+
+            if (TryReadInt(args, "port", out int port) && port > 0)
+            {
+                _port = port;
+            }
+
+            if (args.TryGetValue("host", out string host) && !string.IsNullOrWhiteSpace(host))
+            {
+                _host = host.Trim();
+            }
+
+            if (_oneShotMode)
+            {
+                RenderRequest request = BuildOneShotRequest(args);
+                EnqueueJob(request);
+                StartCoroutine(WaitForOneShotAndExit());
+                return;
+            }
+
+            StartListener();
+        }
+
+        void Update()
+        {
+            if (_activeJob == null)
+            {
+                lock (_pendingLock)
+                {
+                    if (_pendingJobs.Count > 0)
+                    {
+                        _activeJob = _pendingJobs.Dequeue();
+                    }
+                }
+
+                if (_activeJob != null)
+                {
+                    StartCoroutine(RunRenderJob(_activeJob));
+                }
+            }
+        }
+
+        void OnDestroy()
+        {
+            StopListener();
+        }
+
+        void StartListener()
+        {
+            if (_listener != null)
+            {
+                return;
+            }
+
+            _listener = new HttpListener();
+            _listener.Prefixes.Add(string.Format("http://{0}:{1}/", _host, _port));
+            _listener.Start();
+
+            _listenerCancellation = new CancellationTokenSource();
+            _ = Task.Run(() => ListenLoopAsync(_listenerCancellation.Token));
+
+            UnityEngine.Debug.Log(string.Format("FGUI Render Server listening on http://{0}:{1}/", _host, _port));
+        }
+
+        void StopListener()
+        {
+            if (_listenerCancellation != null)
+            {
+                _listenerCancellation.Cancel();
+                _listenerCancellation.Dispose();
+                _listenerCancellation = null;
+            }
+
+            if (_listener != null)
+            {
+                try
+                {
+                    _listener.Stop();
+                    _listener.Close();
+                }
+                catch (Exception ex)
+                {
+                    UnityEngine.Debug.LogWarning("FGUI Render Server stop listener failed: " + ex.Message);
+                }
+                finally
+                {
+                    _listener = null;
+                }
+            }
+        }
+
+        async Task ListenLoopAsync(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested && _listener != null)
+            {
+                HttpListenerContext context;
+                try
+                {
+                    context = await _listener.GetContextAsync();
+                }
+                catch (Exception ex)
+                {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        UnityEngine.Debug.LogWarning("FGUI Render Server listener error: " + ex.Message);
+                    }
+                    continue;
+                }
+
+                _ = Task.Run(() => HandleContextAsync(context, cancellationToken), cancellationToken);
+            }
+        }
+
+        async Task HandleContextAsync(HttpListenerContext context, CancellationToken cancellationToken)
+        {
+            try
+            {
+                string path = context.Request.Url == null ? "/" : context.Request.Url.AbsolutePath.ToLowerInvariant();
+
+                if (context.Request.HttpMethod == "GET" && path == "/health")
+                {
+                    await WriteJsonAsync(context, new HealthResponse
+                    {
+                        ok = true,
+                        message = "ready",
+                        pendingJobs = GetPendingCount(),
+                        hasActiveJob = _activeJob != null,
+                    });
+                    return;
+                }
+
+                if (context.Request.HttpMethod == "POST" && path == "/render_page")
+                {
+                    string body = ReadRequestBody(context.Request);
+                    RenderRequest request = JsonUtility.FromJson<RenderRequest>(body);
+                    string validationError = ValidateRequest(request);
+                    if (validationError != null)
+                    {
+                        await WriteJsonAsync(context, new RenderResult
+                        {
+                            ok = false,
+                            message = validationError,
+                        }, 400);
+                        return;
+                    }
+
+                    RenderJob job = EnqueueJob(request);
+                    RenderResult result;
+                    int timeoutSec = request.timeoutSec <= 0 ? 120 : request.timeoutSec;
+
+                    try
+                    {
+                        Task completed = await Task.WhenAny(job.Completion.Task, Task.Delay(TimeSpan.FromSeconds(timeoutSec), cancellationToken));
+                        if (completed != job.Completion.Task)
+                        {
+                            result = new RenderResult
+                            {
+                                ok = false,
+                                message = "render timeout",
+                                jobId = job.jobId,
+                            };
+                        }
+                        else
+                        {
+                            result = job.Completion.Task.Result;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        result = new RenderResult
+                        {
+                            ok = false,
+                            message = "render request failed: " + ex.Message,
+                            jobId = job.jobId,
+                        };
+                    }
+
+                    await WriteJsonAsync(context, result, result.ok ? 200 : 500);
+                    return;
+                }
+
+                await WriteJsonAsync(context, new RenderResult
+                {
+                    ok = false,
+                    message = "endpoint not found",
+                }, 404);
+            }
+            catch (Exception ex)
+            {
+                UnityEngine.Debug.LogException(ex);
+                if (context.Response.OutputStream.CanWrite)
+                {
+                    await WriteJsonAsync(context, new RenderResult
+                    {
+                        ok = false,
+                        message = "internal error: " + ex.Message,
+                    }, 500);
+                }
+            }
+            finally
+            {
+                try
+                {
+                    context.Response.OutputStream.Close();
+                }
+                catch
+                {
+                    // Ignore stream close errors.
+                }
+            }
+        }
+
+        RenderJob EnqueueJob(RenderRequest request)
+        {
+            RenderJob job = new RenderJob
+            {
+                jobId = Guid.NewGuid().ToString("N"),
+                request = request,
+                Completion = new TaskCompletionSource<RenderResult>(),
+            };
+
+            lock (_pendingLock)
+            {
+                _pendingJobs.Enqueue(job);
+            }
+
+            return job;
+        }
+
+        int GetPendingCount()
+        {
+            lock (_pendingLock)
+            {
+                return _pendingJobs.Count;
+            }
+        }
+
+        System.Collections.IEnumerator WaitForOneShotAndExit()
+        {
+            while (_activeJob == null && GetPendingCount() > 0)
+            {
+                yield return null;
+            }
+
+            while (_activeJob != null)
+            {
+                yield return null;
+            }
+
+            lock (_pendingLock)
+            {
+                if (_pendingJobs.Count == 0)
+                {
+                    Application.Quit();
+                }
+            }
+        }
+
+        System.Collections.IEnumerator RunRenderJob(RenderJob job)
+        {
+            System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            RenderResult result = new RenderResult
+            {
+                ok = false,
+                jobId = job.jobId,
+            };
+            Exception error = null;
+            string pngPath = null;
+
+            RenderRequest request = job.request;
+            try
+            {
+                if (request.width > 0 && request.height > 0)
+                {
+                    Screen.SetResolution(request.width, request.height, false);
+                }
+
+                UIPackage.RemoveAllPackages(true);
+                GRoot.inst.RemoveChildren(0, -1, true);
+
+                FguiProjectLoader loader = FguiProjectLoader.LoadProject(request.projectRootDir, request.branchTag);
+                UIPackage package = loader.GetPackage(request.packageName);
+                if (package == null)
+                {
+                    throw new InvalidOperationException("package not found: " + request.packageName);
+                }
+
+                GObject panel = UIPackage.CreateObject(request.packageName, request.componentName);
+                if (panel == null)
+                {
+                    throw new InvalidOperationException("component not found: " + request.componentName);
+                }
+
+                panel.MakeFullScreen();
+                GRoot.inst.AddChild(panel);
+            }
+            catch (Exception ex)
+            {
+                error = ex;
+            }
+
+            if (error == null)
+            {
+                // Wait one frame so FairyGUI layout and textures are ready before capture.
+                yield return null;
+                yield return new WaitForEndOfFrame();
+
+                try
+                {
+                    Texture2D screenshot = ScreenCapture.CaptureScreenshotAsTexture();
+                    if (screenshot == null)
+                    {
+                        throw new InvalidOperationException("capture failed: screenshot texture is null");
+                    }
+
+                    pngPath = Path.GetFullPath(request.outPng);
+                    string pngDirectory = Path.GetDirectoryName(pngPath);
+                    if (!string.IsNullOrEmpty(pngDirectory))
+                    {
+                        Directory.CreateDirectory(pngDirectory);
+                    }
+
+                    byte[] pngBytes = screenshot.EncodeToPNG();
+                    Destroy(screenshot);
+                    File.WriteAllBytes(pngPath, pngBytes);
+                }
+                catch (Exception ex)
+                {
+                    error = ex;
+                }
+            }
+
+            stopwatch.Stop();
+            result.durationMs = (int)stopwatch.ElapsedMilliseconds;
+
+            if (error == null)
+            {
+                result.ok = true;
+                result.message = "ok";
+                result.pngPath = pngPath;
+                result.width = Screen.width;
+                result.height = Screen.height;
+            }
+            else
+            {
+                result.ok = false;
+                result.message = error.Message;
+            }
+
+            job.Completion.TrySetResult(result);
+            _activeJob = null;
+
+            if (_oneShotMode)
+            {
+                UnityEngine.Debug.Log(ResultPrefix + JsonUtility.ToJson(result));
+            }
+        }
+
+        RenderRequest BuildOneShotRequest(Dictionary<string, string> args)
+        {
+            RenderRequest request = new RenderRequest();
+
+            if (!args.TryGetValue("project-root-dir", out request.projectRootDir))
+            {
+                if (args.TryGetValue("package-dir", out string packageDir) && !string.IsNullOrWhiteSpace(packageDir))
+                {
+                    request.projectRootDir = TryInferProjectRootFromPackageDir(packageDir);
+                    if (!args.ContainsKey("package-name"))
+                    {
+                        request.packageName = Path.GetFileName(Path.GetFullPath(packageDir));
+                    }
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(request.packageName))
+            {
+                args.TryGetValue("package-name", out request.packageName);
+            }
+            args.TryGetValue("component-name", out request.componentName);
+            args.TryGetValue("out-png", out request.outPng);
+            args.TryGetValue("branch", out request.branchTag);
+
+            if (!TryReadInt(args, "width", out request.width))
+            {
+                request.width = 1920;
+            }
+
+            if (!TryReadInt(args, "height", out request.height))
+            {
+                request.height = 1080;
+            }
+
+            if (!TryReadInt(args, "timeout", out request.timeoutSec))
+            {
+                request.timeoutSec = 120;
+            }
+
+            string validationError = ValidateRequest(request);
+            if (validationError != null)
+            {
+                throw new ArgumentException(validationError);
+            }
+
+            return request;
+        }
+
+        static string TryInferProjectRootFromPackageDir(string packageDir)
+        {
+            string fullPackageDir = Path.GetFullPath(packageDir);
+            DirectoryInfo packageDirectory = new DirectoryInfo(fullPackageDir);
+            DirectoryInfo assetsDirectory = packageDirectory.Parent;
+            if (assetsDirectory != null && string.Equals(assetsDirectory.Name, "assets", StringComparison.OrdinalIgnoreCase))
+            {
+                DirectoryInfo rootDirectory = assetsDirectory.Parent;
+                if (rootDirectory != null)
+                {
+                    return rootDirectory.FullName;
+                }
+            }
+
+            return fullPackageDir;
+        }
+
+        static bool TryReadInt(Dictionary<string, string> args, string key, out int value)
+        {
+            value = 0;
+            return args.TryGetValue(key, out string raw)
+                   && !string.IsNullOrWhiteSpace(raw)
+                   && int.TryParse(raw.Trim(), out value);
+        }
+
+        static Dictionary<string, string> ParseCommandLineArguments(string[] args)
+        {
+            Dictionary<string, string> parsed = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            for (int i = 0; i < args.Length; i++)
+            {
+                string token = args[i];
+                if (string.IsNullOrEmpty(token) || !token.StartsWith("--", StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                string key = token.Substring(2);
+                string value = "true";
+
+                if (i + 1 < args.Length)
+                {
+                    string next = args[i + 1];
+                    if (!next.StartsWith("--", StringComparison.Ordinal))
+                    {
+                        value = next;
+                        i += 1;
+                    }
+                }
+
+                parsed[key] = value;
+            }
+
+            return parsed;
+        }
+
+        static string ValidateRequest(RenderRequest request)
+        {
+            if (request == null)
+            {
+                return "request body is required";
+            }
+
+            if (string.IsNullOrWhiteSpace(request.projectRootDir))
+            {
+                return "projectRootDir is required";
+            }
+
+            if (string.IsNullOrWhiteSpace(request.packageName))
+            {
+                return "packageName is required";
+            }
+
+            if (string.IsNullOrWhiteSpace(request.componentName))
+            {
+                return "componentName is required";
+            }
+
+            if (string.IsNullOrWhiteSpace(request.outPng))
+            {
+                return "outPng is required";
+            }
+
+            return null;
+        }
+
+        static string ReadRequestBody(HttpListenerRequest request)
+        {
+            using (StreamReader reader = new StreamReader(request.InputStream, request.ContentEncoding ?? Encoding.UTF8))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
+        static async Task WriteJsonAsync(HttpListenerContext context, object payload, int statusCode = 200)
+        {
+            string body = JsonUtility.ToJson(payload);
+            byte[] bytes = Encoding.UTF8.GetBytes(body);
+
+            context.Response.StatusCode = statusCode;
+            context.Response.ContentType = "application/json";
+            context.Response.ContentEncoding = Encoding.UTF8;
+            context.Response.ContentLength64 = bytes.Length;
+            await context.Response.OutputStream.WriteAsync(bytes, 0, bytes.Length);
+        }
+
+        [Serializable]
+        sealed class RenderRequest
+        {
+            public string projectRootDir;
+            public string packageName;
+            public string componentName;
+            public string outPng;
+            public string branchTag;
+            public int width = 1920;
+            public int height = 1080;
+            public int timeoutSec = 120;
+        }
+
+        [Serializable]
+        sealed class RenderResult
+        {
+            public bool ok;
+            public string message;
+            public string jobId;
+            public string pngPath;
+            public int width;
+            public int height;
+            public int durationMs;
+        }
+
+        [Serializable]
+        sealed class HealthResponse
+        {
+            public bool ok;
+            public string message;
+            public int pendingJobs;
+            public bool hasActiveJob;
+        }
+
+        sealed class RenderJob
+        {
+            public string jobId;
+            public RenderRequest request;
+            public TaskCompletionSource<RenderResult> Completion;
+        }
+    }
+}
+
+
