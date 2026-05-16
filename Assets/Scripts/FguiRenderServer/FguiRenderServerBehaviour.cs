@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,6 +16,22 @@ namespace FguiRenderServer
         const string ResultPrefix = "[FGUI_RENDER_RESULT]";
         const string DefaultHost = "127.0.0.1";
         const int DefaultPort = 18765;
+        const int DefaultWindowWidth = 1280;
+        const int DefaultWindowHeight = 720;
+
+        // Keep capture defaults at 1080p while runtime window can stay smaller.
+        const int DefaultRenderWidth = 1920;
+        const int DefaultRenderHeight = 1080;
+
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+        const int SwMinimize = 6;
+
+        [DllImport("user32.dll")]
+        static extern IntPtr GetActiveWindow();
+
+        [DllImport("user32.dll")]
+        static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+#endif
 
         readonly Queue<RenderJob> _pendingJobs = new Queue<RenderJob>();
         readonly object _pendingLock = new object();
@@ -24,6 +41,7 @@ namespace FguiRenderServer
         RenderJob _activeJob;
 
         bool _oneShotMode;
+        bool _autoMinimize = true;
         string _host = DefaultHost;
         int _port = DefaultPort;
 
@@ -34,6 +52,21 @@ namespace FguiRenderServer
 
             Dictionary<string, string> args = ParseCommandLineArguments(Environment.GetCommandLineArgs());
             _oneShotMode = args.ContainsKey("render-once");
+
+            // Server mode defaults: run in background, windowed, and start with a small window.
+            Application.runInBackground = true;
+            Screen.fullScreenMode = FullScreenMode.Windowed;
+            Screen.SetResolution(DefaultWindowWidth, DefaultWindowHeight, FullScreenMode.Windowed);
+
+            if (args.ContainsKey("no-minimize"))
+            {
+                _autoMinimize = false;
+            }
+
+            if (_autoMinimize)
+            {
+                StartCoroutine(MinimizeWindowNextFrame());
+            }
 
             if (TryReadInt(args, "port", out int port) && port > 0)
             {
@@ -54,6 +87,20 @@ namespace FguiRenderServer
             }
 
             StartListener();
+        }
+
+        System.Collections.IEnumerator MinimizeWindowNextFrame()
+        {
+            // Wait one frame to ensure native window is created before minimizing.
+            yield return null;
+
+#if UNITY_STANDALONE_WIN && !UNITY_EDITOR
+            IntPtr hwnd = GetActiveWindow();
+            if (hwnd != IntPtr.Zero)
+            {
+                ShowWindow(hwnd, SwMinimize);
+            }
+#endif
         }
 
         void Update()
@@ -417,12 +464,12 @@ namespace FguiRenderServer
 
             if (!TryReadInt(args, "width", out request.width))
             {
-                request.width = 1920;
+                request.width = DefaultRenderWidth;
             }
 
             if (!TryReadInt(args, "height", out request.height))
             {
-                request.height = 1080;
+                request.height = DefaultRenderHeight;
             }
 
             if (!TryReadInt(args, "timeout", out request.timeoutSec))
@@ -552,8 +599,8 @@ namespace FguiRenderServer
             public string componentName;
             public string outPng;
             public string branchTag;
-            public int width = 1920;
-            public int height = 1080;
+            public int width = DefaultRenderWidth;
+            public int height = DefaultRenderHeight;
             public int timeoutSec = 120;
         }
 

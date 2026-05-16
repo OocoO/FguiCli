@@ -12,7 +12,7 @@ namespace FguiRenderServer.Editor
 		const string DefaultComponentName = "main_FormationSelect.xml";
 		const string DefaultBranchTag = "eng";
 
-		[MenuItem("Tools/FairyGUI/Smoke Test/Load AirLegion BattleUI")]
+		[MenuItem("Tools/Fgui Render/Smoke Test")]
 		public static void LoadAirLegionBattleUi()
 		{
 			try
