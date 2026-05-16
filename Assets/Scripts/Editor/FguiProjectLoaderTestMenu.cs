@@ -1,8 +1,9 @@
 using System;
+using FairyGUI;
 using UnityEditor;
 using UnityEngine;
 
-namespace FairyGUI.EditorTools
+namespace FguiRenderServer.Editor
 {
 	public static class FguiProjectLoaderTestMenu
 	{

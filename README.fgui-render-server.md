@@ -109,6 +109,12 @@ Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:18765/render_page' -Conten
 
 - `tools/fgui_render_client/invoke_render_page.ps1`
 
+## Build & packaging helper
+
+- `tools/fgui_render_client/package_fgui_render_server.ps1`
+- Unity build entry: `Assets/Scripts/Editor/FguiRenderBuild.cs`
+
 ## Python wrapper
 
 - `tools/fgui_render_client/README.md`
+- `tools/fgui_render_client/fgui_render_mcp_server.py`

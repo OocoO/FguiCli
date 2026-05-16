@@ -1,107 +1,101 @@
-﻿from __future__ import annotations
+from __future__ import annotations
 
 import dataclasses
 import json
-import subprocess
-from typing import Optional, Sequence
+from typing import Any
+from urllib import error, request
 
-RESULT_PREFIX = "[FGUI_RENDER_RESULT]"
+DEFAULT_SERVER = "http://127.0.0.1:18765"
 
 
 @dataclasses.dataclass
 class RenderRequest:
-    package_dir: str
+    project_root_dir: str
     package_name: str
     component_name: str
     out_png: str
+    branch_tag: str = ""
     width: int = 1920
     height: int = 1080
-    scale: float = 1.0
-    transparent: bool = True
+    timeout_sec: int = 120
 
 
 @dataclasses.dataclass
 class RenderResult:
     ok: bool
     message: str
+    job_id: str
     png_path: str
     width: int
     height: int
     duration_ms: int
 
 
-def _build_args(exe_path: str, request: RenderRequest, pre_args: Optional[Sequence[str]]) -> list[str]:
-    args = [exe_path]
-    if pre_args:
-        args.extend(pre_args)
+@dataclasses.dataclass
+class HealthResult:
+    ok: bool
+    message: str
+    pending_jobs: int
+    has_active_job: bool
 
-    args.extend(
-        [
-            "--render-once",
-            "--package-dir",
-            request.package_dir,
-            "--package-name",
-            request.package_name,
-            "--component-name",
-            request.component_name,
-            "--out-png",
-            request.out_png,
-            "--width",
-            str(request.width),
-            "--height",
-            str(request.height),
-            "--scale",
-            str(request.scale),
-            "--transparent",
-            str(request.transparent).lower(),
-        ]
+
+def render_page(server_url: str, req: RenderRequest, timeout_sec: int | None = None) -> RenderResult:
+    payload = {
+        "projectRootDir": req.project_root_dir,
+        "packageName": req.package_name,
+        "componentName": req.component_name,
+        "outPng": req.out_png,
+        "branchTag": req.branch_tag,
+        "width": req.width,
+        "height": req.height,
+        "timeoutSec": req.timeout_sec,
+    }
+    data = _post_json(server_url.rstrip("/") + "/render_page", payload, timeout_sec=timeout_sec)
+    return RenderResult(
+        ok=bool(data.get("ok", False)),
+        message=str(data.get("message", "")),
+        job_id=str(data.get("jobId", "")),
+        png_path=str(data.get("pngPath", "")),
+        width=int(data.get("width", 0)),
+        height=int(data.get("height", 0)),
+        duration_ms=int(data.get("durationMs", 0)),
     )
 
-    return args
 
-
-def render_once(
-    exe_path: str,
-    request: RenderRequest,
-    timeout_sec: int = 120,
-    pre_args: Optional[Sequence[str]] = None,
-) -> RenderResult:
-    process = subprocess.run(
-        _build_args(exe_path, request, pre_args),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        text=True,
-        timeout=timeout_sec,
-        check=False,
+def health(server_url: str, timeout_sec: int = 10) -> HealthResult:
+    data = _get_json(server_url.rstrip("/") + "/health", timeout_sec=timeout_sec)
+    return HealthResult(
+        ok=bool(data.get("ok", False)),
+        message=str(data.get("message", "")),
+        pending_jobs=int(data.get("pendingJobs", 0)),
+        has_active_job=bool(data.get("hasActiveJob", False)),
     )
 
-    parsed = _parse_result(process.stdout)
-    if parsed is None:
-        raise RuntimeError("Renderer did not emit a result line. Output:\n" + process.stdout)
 
-    return parsed
-
-
-def _parse_result(output: str) -> Optional[RenderResult]:
-    for line in output.splitlines():
-        if RESULT_PREFIX in line:
-            payload = line.split(RESULT_PREFIX, 1)[1].strip()
-            data = json.loads(payload)
-            return RenderResult(
-                ok=bool(data.get("ok", False)),
-                message=str(data.get("message", "")),
-                png_path=str(data.get("pngPath", "")),
-                width=int(data.get("width", 0)),
-                height=int(data.get("height", 0)),
-                duration_ms=int(data.get("durationMs", 0)),
-            )
-
-    return None
+def _post_json(url: str, payload: dict[str, Any], timeout_sec: int | None) -> dict[str, Any]:
+    req = request.Request(
+        url=url,
+        method="POST",
+        data=json.dumps(payload, ensure_ascii=True).encode("utf-8"),
+        headers={"Content-Type": "application/json"},
+    )
+    timeout = timeout_sec if timeout_sec is not None else max(int(payload.get("timeoutSec", 120)) + 5, 10)
+    return _send(req, timeout)
 
 
-if __name__ == "__main__":
-    # Tiny local sanity check for parser only.
-    sample = '[FGUI_RENDER_RESULT]{"ok":true,"message":"ok","pngPath":"out.png","width":100,"height":50,"durationMs":10}'
-    result = _parse_result(sample)
-    assert result and result.ok
-    print("parser_ok")
+def _get_json(url: str, timeout_sec: int) -> dict[str, Any]:
+    req = request.Request(url=url, method="GET")
+    return _send(req, timeout_sec)
+
+
+def _send(req: request.Request, timeout_sec: int) -> dict[str, Any]:
+    try:
+        with request.urlopen(req, timeout=timeout_sec) as resp:
+            text = resp.read().decode("utf-8")
+            return json.loads(text)
+    except error.HTTPError as ex:
+        body = ex.read().decode("utf-8", errors="replace")
+        raise RuntimeError(f"HTTP {ex.code}: {body}") from ex
+    except error.URLError as ex:
+        raise RuntimeError(f"Render server request failed: {ex}") from ex
+
