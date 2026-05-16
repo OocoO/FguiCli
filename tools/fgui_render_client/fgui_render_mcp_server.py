@@ -1,12 +1,68 @@
 from __future__ import annotations
 
+import atexit
 import os
+import subprocess
+import sys
+import time
+from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
 from fgui_render_client import DEFAULT_SERVER, RenderRequest, health, render_page
 
+_EXE_DIR = Path(__file__).parent / "FguiRenderServer"
+_EXE_PATH = _EXE_DIR / "FguiRenderServer.exe"
+_POLL_INTERVAL = 0.5
+_START_TIMEOUT = 30
+
 mcp = FastMCP("fgui-render")
+
+_render_process: subprocess.Popen[str] | None = None
+
+
+def _start_render_server() -> None:
+    global _render_process
+    if not _EXE_PATH.exists():
+        print(f"[fgui-render] exe not found: {_EXE_PATH}", file=sys.stderr)
+        return
+
+    _render_process = subprocess.Popen(
+        [str(_EXE_PATH)],
+        cwd=str(_EXE_DIR),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+    atexit.register(_stop_render_server)
+
+    url = _get_server_url()
+    deadline = time.monotonic() + _START_TIMEOUT
+    while time.monotonic() < deadline:
+        try:
+            result = health(url, timeout_sec=3)
+            if result.ok or result.message:
+                print(f"[fgui-render] server ready at {url}", file=sys.stderr)
+                return
+        except Exception:
+            pass
+        time.sleep(_POLL_INTERVAL)
+
+    print(
+        f"[fgui-render] server did not become ready within {_START_TIMEOUT}s",
+        file=sys.stderr,
+    )
+
+
+def _stop_render_server() -> None:
+    global _render_process
+    if _render_process is not None:
+        _render_process.terminate()
+        try:
+            _render_process.wait(timeout=5)
+        except subprocess.TimeoutExpired:
+            _render_process.kill()
+            _render_process.wait()
+        _render_process = None
 
 
 @mcp.tool()
@@ -52,6 +108,7 @@ def _get_server_url() -> str:
 
 
 def main() -> int:
+    _start_render_server()
     mcp.run(transport="stdio")
     return 0
 

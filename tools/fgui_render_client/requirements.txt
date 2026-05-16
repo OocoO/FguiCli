@@ -1,2 +1,2 @@
-# Standard library only.
+mcp>=1.0.0
 
