@@ -8,7 +8,7 @@ namespace FairyGUI.EditorTools
 	{
 		const string DefaultProjectRoot = @"D:\ProjectGit\AirLegion\fgui_airLegion";
 		const string DefaultPackageName = "BattleUI";
-		const string DefaultComponentName = "mainBattleHudPanel.xml";
+		const string DefaultComponentName = "main_FormationSelect.xml";
 		const string DefaultBranchTag = "eng";
 
 		[MenuItem("Tools/FairyGUI/Smoke Test/Load AirLegion BattleUI")]

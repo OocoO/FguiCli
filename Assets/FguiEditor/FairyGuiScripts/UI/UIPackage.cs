@@ -906,8 +906,17 @@ namespace FairyGUI
 					break;
 
 				case PackageItemType.Font:
-					pi.bitmapFont = new BitmapFont(pi);
-					FontManager.RegisterFont(pi.bitmapFont, null);
+					if (IsProjectDynamicFontResource(resourceData))
+					{
+						// For raw TTF/OTF project fonts, let FontManager fall back to dynamic fonts.
+						// This avoids forcing a bitmap-font decode path that depends on *.fnt.
+						pi.decoded = true;
+					}
+					else
+					{
+						pi.bitmapFont = new BitmapFont(pi);
+						FontManager.RegisterFont(pi.bitmapFont, null);
+					}
 					break;
 
 				case PackageItemType.Component:
@@ -916,6 +925,22 @@ namespace FairyGUI
 			}
 
 			return pi;
+		}
+
+		bool IsProjectDynamicFontResource(FguiProjectLoader.ProjectResourceData resourceData)
+		{
+			if (resourceData == null)
+				return false;
+
+			string ext = Path.GetExtension(resourceData.relativeFile);
+			if (string.IsNullOrEmpty(ext))
+				ext = Path.GetExtension(resourceData.name);
+
+			if (string.IsNullOrEmpty(ext))
+				return false;
+
+			ext = ext.ToLowerInvariant();
+			return ext == ".ttf" || ext == ".otf";
 		}
 
 		void RegisterItemByName(PackageItem item)
@@ -1723,9 +1748,18 @@ namespace FairyGUI
 
 		void LoadFont(PackageItem item)
 		{
+			if (item.bitmapFont == null)
+				return;
+
 			BitmapFont font = item.bitmapFont;
 
-			string str = _descPack[item.id + ".fnt"];
+			string str;
+			if (!_descPack.TryGetValue(item.id + ".fnt", out str))
+			{
+				Debug.LogWarning("FairyGUI: font desc not found, fallback to default dynamic font for '" + item.name + "' in package '" + this.name + "'.");
+				return;
+			}
+
 			string[] arr = str.Split('\n');
 			int cnt = arr.Length;
 			Dictionary<string, string> kv = new Dictionary<string, string>();
