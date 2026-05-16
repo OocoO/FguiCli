@@ -17,6 +17,7 @@ namespace FairyGUI
 		public int width;
 		public int height;
 		public string file;
+		public string branchTag;
 		public bool decoded;
 		public bool exported;
 

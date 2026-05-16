@@ -48,9 +48,11 @@ namespace FairyGUI
 		Dictionary<string, PackageItem> _itemsByName;
 		Dictionary<string, string> _descPack;
 		Dictionary<string, PixelHitTestData> _hitTestDatas;
+		Dictionary<string, FguiProjectLoader.ProjectResourceData> _projectResourcesById;
 		AssetBundle _resBundle;
 		string _assetNamePrefix;
 		string _customId;
+		string _activeBranchTag;
 		bool _fromBundle;
 		bool _loadingPackage;
 		bool _unloadBundleAfterLoaded;
@@ -76,6 +78,8 @@ namespace FairyGUI
 		public UIPackage()
 		{
 			_items = new List<PackageItem>();
+			_itemsById = new Dictionary<string, PackageItem>();
+			_itemsByName = new Dictionary<string, PackageItem>();
 			_sprites = new Dictionary<string, AtlasSprite>();
 			_hitTestDatas = new Dictionary<string, PixelHitTestData>();
 		}
@@ -289,6 +293,29 @@ namespace FairyGUI
 			_packageInstById[pkg.id] = pkg;
 			_packageInstByName[pkg.name] = pkg;
 			_packageList.Add(pkg);
+
+			return pkg;
+		}
+
+		public static UIPackage AddPackage(FguiProjectLoader.ProjectPackageData packageData)
+		{
+			if (packageData == null)
+				throw new ArgumentNullException("packageData");
+			if (string.IsNullOrEmpty(packageData.packageId))
+				throw new Exception("FairyGUI: project package id is missing.");
+
+			UIPackage pkg;
+			if (_packageInstById.TryGetValue(packageData.packageId, out pkg))
+				return pkg;
+
+			pkg = new UIPackage();
+			pkg.Create(packageData);
+			if (_packageInstById.ContainsKey(pkg.id))
+				Debug.LogWarning("FairyGUI: Package id conflicts, '" + pkg.name + "' and '" + _packageInstById[pkg.id].name + "'");
+			_packageInstById[pkg.id] = pkg;
+			_packageInstByName[pkg.name] = pkg;
+			_packageList.Add(pkg);
+			pkg.assetPath = packageData.packageDirectory;
 
 			return pkg;
 		}
@@ -626,6 +653,38 @@ namespace FairyGUI
 			LoadPackage();
 		}
 
+		void Create(FguiProjectLoader.ProjectPackageData packageData)
+		{
+			if (!Application.isPlaying)
+				UIObjectFactory.Clear();
+
+			_descPack = new Dictionary<string, string>();
+			_projectResourcesById = new Dictionary<string, FguiProjectLoader.ProjectResourceData>();
+			_activeBranchTag = packageData.activeBranchTag;
+			id = packageData.packageId;
+			name = packageData.packageName;
+			assetPath = packageData.packageDirectory;
+			_loadingPackage = true;
+
+			int cnt = packageData.resources.Count;
+			for (int i = 0; i < cnt; i++)
+			{
+				FguiProjectLoader.ProjectResourceData resourceData = packageData.resources[i];
+				PackageItem pi = CreateProjectPackageItem(resourceData);
+				if (pi == null)
+					continue;
+
+				_items.Add(pi);
+				_itemsById[pi.id] = pi;
+				_projectResourcesById[pi.id] = resourceData;
+				RegisterItemByName(pi);
+				CacheProjectResourceDescription(resourceData);
+			}
+
+			_items.Sort(ComparePackageItem);
+			_loadingPackage = false;
+		}
+
 		void DecodeDesc(byte[] descBytes)
 		{
 			if (descBytes.Length < 4
@@ -819,6 +878,98 @@ namespace FairyGUI
 			}
 
 			_loadingPackage = false;
+		}
+
+		PackageItem CreateProjectPackageItem(FguiProjectLoader.ProjectResourceData resourceData)
+		{
+			PackageItemType itemType = FieldTypes.ParsePackageItemType(resourceData.type);
+			if (string.IsNullOrEmpty(resourceData.id))
+				return null;
+
+			PackageItem pi = new PackageItem();
+			pi.owner = this;
+			pi.type = itemType;
+			pi.id = resourceData.id;
+			pi.name = resourceData.name;
+			pi.file = resourceData.relativeFile;
+			pi.branchTag = resourceData.branchTag;
+			pi.exported = resourceData.exported;
+			pi.width = resourceData.width;
+			pi.height = resourceData.height;
+
+			switch (pi.type)
+			{
+				case PackageItemType.Image:
+					pi.scale9Grid = resourceData.scale9Grid;
+					pi.scaleByTile = resourceData.scaleByTile;
+					pi.tileGridIndice = resourceData.tileGridIndice;
+					break;
+
+				case PackageItemType.Font:
+					pi.bitmapFont = new BitmapFont(pi);
+					FontManager.RegisterFont(pi.bitmapFont, null);
+					break;
+
+				case PackageItemType.Component:
+					UIObjectFactory.ResolvePackageItemExtension(pi);
+					break;
+			}
+
+			return pi;
+		}
+
+		void RegisterItemByName(PackageItem item)
+		{
+			if (string.IsNullOrEmpty(item.name))
+				return;
+
+			PackageItem existing;
+			if (!_itemsByName.TryGetValue(item.name, out existing))
+			{
+				_itemsByName[item.name] = item;
+				return;
+			}
+
+			if (ShouldOverrideNamedItem(existing, item))
+				_itemsByName[item.name] = item;
+		}
+
+		bool ShouldOverrideNamedItem(PackageItem existing, PackageItem candidate)
+		{
+			bool candidateIsActiveBranch = !string.IsNullOrEmpty(candidate.branchTag) && candidate.branchTag == _activeBranchTag;
+			bool existingIsActiveBranch = !string.IsNullOrEmpty(existing.branchTag) && existing.branchTag == _activeBranchTag;
+
+			if (candidateIsActiveBranch && !existingIsActiveBranch)
+				return true;
+			if (!candidateIsActiveBranch && existingIsActiveBranch)
+				return false;
+
+			return string.IsNullOrEmpty(existing.branchTag) && !string.IsNullOrEmpty(candidate.branchTag) && candidate.branchTag == _activeBranchTag;
+		}
+
+		void CacheProjectResourceDescription(FguiProjectLoader.ProjectResourceData resourceData)
+		{
+			if (string.IsNullOrEmpty(resourceData.absoluteFile))
+				return;
+			if (!File.Exists(resourceData.absoluteFile))
+				return;
+
+			string extension = Path.GetExtension(resourceData.absoluteFile);
+			if (extension == null)
+				return;
+
+			extension = extension.ToLowerInvariant();
+			if (extension == ".xml" || extension == ".fnt")
+				_descPack[resourceData.id + extension] = File.ReadAllText(resourceData.absoluteFile, Encoding.UTF8);
+		}
+
+		bool TryGetProjectResource(PackageItem item, out FguiProjectLoader.ProjectResourceData resourceData)
+		{
+			if (_projectResourcesById != null)
+				return _projectResourcesById.TryGetValue(item.id, out resourceData);
+
+			resourceData = null;
+			return false;
 		}
 
 		void UnloadResBundle(object param)
@@ -1130,6 +1281,8 @@ namespace FairyGUI
 						AtlasSprite sprite;
 						if (_sprites.TryGetValue(item.id, out sprite))
 							item.texture = CreateSpriteTexture(sprite);
+						else if (TryGetProjectResource(item, out _))
+							LoadAtlas(item);
 						else
 							item.texture = NTexture.Empty;
 					}
@@ -1185,7 +1338,7 @@ namespace FairyGUI
 					if (!item.decoded)
 					{
 						item.decoded = true;
-						item.binary = LoadBinary(item.file);
+						item.binary = LoadBinary(item);
 					}
 					return item.binary;
 			}
@@ -1193,6 +1346,27 @@ namespace FairyGUI
 
 		void LoadAtlas(PackageItem item)
 		{
+			FguiProjectLoader.ProjectResourceData projectResource;
+			if (TryGetProjectResource(item, out projectResource))
+			{
+				Texture2D texture = LoadProjectTexture(projectResource.absoluteFile);
+				if (texture == null)
+				{
+					Debug.LogWarning("FairyGUI: texture '" + projectResource.absoluteFile + "' not found in " + this.name);
+					item.texture = NTexture.Empty;
+					return;
+				}
+
+				if (item.width <= 0)
+					item.width = texture.width;
+				if (item.height <= 0)
+					item.height = texture.height;
+
+				item.texture = new NTexture(texture);
+				item.texture.storedODisk = false;
+				return;
+			}
+
 			string fileName = string.IsNullOrEmpty(item.file) ? (item.id + ".png") : item.file;
 			string filePath = _assetNamePrefix + Path.GetFileNameWithoutExtension(fileName);
 			string ext = Path.GetExtension(fileName);
@@ -1247,6 +1421,14 @@ namespace FairyGUI
 
 		void LoadSound(PackageItem item)
 		{
+			FguiProjectLoader.ProjectResourceData projectResource;
+			if (TryGetProjectResource(item, out projectResource))
+			{
+				Debug.LogWarning("FairyGUI: raw project sound loading is not implemented yet - " + projectResource.absoluteFile);
+				item.audioClip = null;
+				return;
+			}
+
 			string fileName = _assetNamePrefix + Path.GetFileNameWithoutExtension(item.file);
 			string ext = Path.GetExtension(item.file);
 			if (_resBundle != null)
@@ -1263,7 +1445,13 @@ namespace FairyGUI
 
 		void LoadComponent(PackageItem item)
 		{
-			string str = _descPack[item.id + ".xml"];
+			string str;
+			if (!_descPack.TryGetValue(item.id + ".xml", out str))
+			{
+				FguiProjectLoader.ProjectResourceData projectResource;
+				if (TryGetProjectResource(item, out projectResource) && File.Exists(projectResource.absoluteFile))
+					str = File.ReadAllText(projectResource.absoluteFile, Encoding.UTF8);
+			}
 			item.componentData = new XML(str);
 		}
 
@@ -1446,6 +1634,15 @@ namespace FairyGUI
 				else
 					return ((TextAsset)ret).bytes;
 			}
+		}
+
+		byte[] LoadBinary(PackageItem item)
+		{
+			FguiProjectLoader.ProjectResourceData projectResource;
+			if (TryGetProjectResource(item, out projectResource) && File.Exists(projectResource.absoluteFile))
+				return File.ReadAllBytes(projectResource.absoluteFile);
+
+			return LoadBinary(item.file);
 		}
 
 		string LoadString(string fileName)
@@ -1706,6 +1903,26 @@ namespace FairyGUI
 			font.mainTexture = mainTexture;
 			if (!ttf || hasFullChannel)
 				font.shader = ShaderConfig.imageShader;
+		}
+
+		Texture2D LoadProjectTexture(string absoluteFile)
+		{
+			if (string.IsNullOrEmpty(absoluteFile) || !File.Exists(absoluteFile))
+				return null;
+
+			byte[] bytes = File.ReadAllBytes(absoluteFile);
+			Texture2D texture = new Texture2D(2, 2, TextureFormat.ARGB32, false);
+			texture.hideFlags = DisplayOptions.hideFlags;
+			if (!texture.LoadImage(bytes))
+			{
+				if (Application.isPlaying)
+					UnityEngine.Object.Destroy(texture);
+				else
+					UnityEngine.Object.DestroyImmediate(texture);
+				return null;
+			}
+
+			return texture;
 		}
 	}
 }
