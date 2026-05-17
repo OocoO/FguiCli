@@ -15,6 +15,8 @@ from fgui_render_client import RenderRequest, health, render_page
 
 
 class _MockHandler(BaseHTTPRequestHandler):
+    last_render_request: dict | None = None
+
     def do_GET(self) -> None:  # noqa: N802
         if self.path == "/health":
             self._write_json(
@@ -34,6 +36,7 @@ class _MockHandler(BaseHTTPRequestHandler):
             size = int(self.headers.get("Content-Length", "0"))
             body = self.rfile.read(size).decode("utf-8")
             req = json.loads(body)
+            _MockHandler.last_render_request = req
             self._write_json(
                 200,
                 {
@@ -97,6 +100,32 @@ class RenderClientTests(unittest.TestCase):
         self.assertEqual(result.png_path, "D:/render/output.png")
         self.assertEqual(result.width, 1280)
         self.assertEqual(result.height, 720)
+
+    def test_render_page_with_component_id(self) -> None:
+        result = render_page(
+            self.base_url,
+            RenderRequest(
+                project_root_dir="D:/ProjectGit/AirLegion/fgui_airLegion",
+                package_name="BattleUI",
+                component_id="ui://3qbfu3hkscr325",
+                out_png="D:/render/output_id.png",
+            ),
+            timeout_sec=10,
+        )
+        self.assertTrue(result.ok)
+        self.assertEqual(_MockHandler.last_render_request["componentId"], "ui://3qbfu3hkscr325")
+
+    def test_selector_validation_requires_exactly_one(self) -> None:
+        with self.assertRaisesRegex(ValueError, "Exactly one"):
+            render_page(
+                self.base_url,
+                RenderRequest(
+                    project_root_dir="D:/ProjectGit/AirLegion/fgui_airLegion",
+                    package_name="BattleUI",
+                    out_png="D:/render/output_invalid.png",
+                ),
+                timeout_sec=10,
+            )
 
 
 if __name__ == "__main__":

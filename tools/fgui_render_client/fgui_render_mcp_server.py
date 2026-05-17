@@ -106,18 +106,31 @@ def check_health() -> str:
 def render_page_tool(
     projectRootDir: str,
     packageName: str,
-    componentName: str,
     outPng: str,
+    componentName: str = "",
+    componentPath: str = "",
+    componentId: str = "",
     branchTag: str = "",
     width: int = 1920,
     height: int = 1080,
     timeoutSec: int = 120,
 ) -> str:
+    """Render one component.
+
+    Provide exactly one selector:
+    - componentName: e.g. SoldierSkillUpgradePanel
+    - componentPath: e.g. Main/SoldierListPanel.xml
+    - componentId: e.g. ui://3qbfu3hkscr325
+    """
+    _validate_component_selector(componentName, componentPath, componentId)
+
     req = RenderRequest(
         project_root_dir=projectRootDir,
         package_name=packageName,
-        component_name=componentName,
         out_png=outPng,
+        component_name=componentName,
+        component_path=componentPath,
+        component_id=componentId,
         branch_tag=branchTag,
         width=width,
         height=height,
@@ -133,6 +146,15 @@ def render_page_tool(
 
 def _get_server_url() -> str:
     return os.environ.get("FGUI_RENDER_SERVER_URL", DEFAULT_SERVER)
+
+
+def _validate_component_selector(component_name: str, component_path: str, component_id: str) -> None:
+    selectors = [bool(component_name.strip()), bool(component_path.strip()), bool(component_id.strip())]
+    count = sum(selectors)
+    if count != 1:
+        raise ValueError("Exactly one of componentName / componentPath / componentId must be provided")
+    if component_id.strip() and not component_id.strip().startswith("ui://"):
+        raise ValueError("componentId must start with 'ui://'")
 
 
 def main() -> int:

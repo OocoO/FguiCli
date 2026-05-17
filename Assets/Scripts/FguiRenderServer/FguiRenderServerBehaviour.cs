@@ -23,6 +23,8 @@ namespace FguiRenderServer
         const int DefaultRenderWidth = 1920;
         const int DefaultRenderHeight = 1080;
 
+        const string UiUrlPrefix = "ui://";
+
 #if UNITY_STANDALONE_WIN && !UNITY_EDITOR
         const int SwMinimize = 6;
 
@@ -367,11 +369,7 @@ namespace FguiRenderServer
                     throw new InvalidOperationException("package not found: " + request.packageName);
                 }
 
-                GObject panel = UIPackage.CreateObject(request.packageName, request.componentName);
-                if (panel == null)
-                {
-                    throw new InvalidOperationException("component not found: " + request.componentName);
-                }
+                GObject panel = CreatePanelFromRequest(request);
 
                 panel.MakeFullScreen();
                 GRoot.inst.AddChild(panel);
@@ -459,6 +457,8 @@ namespace FguiRenderServer
                 args.TryGetValue("package-name", out request.packageName);
             }
             args.TryGetValue("component-name", out request.componentName);
+            args.TryGetValue("component-path", out request.componentPath);
+            args.TryGetValue("component-id", out request.componentId);
             args.TryGetValue("out-png", out request.outPng);
             args.TryGetValue("branch", out request.branchTag);
 
@@ -558,9 +558,34 @@ namespace FguiRenderServer
                 return "packageName is required";
             }
 
-            if (string.IsNullOrWhiteSpace(request.componentName))
+            int selectorCount = 0;
+            if (!string.IsNullOrWhiteSpace(request.componentName))
             {
-                return "componentName is required";
+                selectorCount += 1;
+            }
+            if (!string.IsNullOrWhiteSpace(request.componentPath))
+            {
+                selectorCount += 1;
+            }
+            if (!string.IsNullOrWhiteSpace(request.componentId))
+            {
+                selectorCount += 1;
+            }
+
+            if (selectorCount == 0)
+            {
+                return "one of componentName / componentPath / componentId is required";
+            }
+
+            if (selectorCount > 1)
+            {
+                return "only one of componentName / componentPath / componentId can be set";
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.componentId)
+                && !request.componentId.Trim().StartsWith(UiUrlPrefix, StringComparison.OrdinalIgnoreCase))
+            {
+                return "componentId must start with ui://";
             }
 
             if (string.IsNullOrWhiteSpace(request.outPng))
@@ -597,11 +622,54 @@ namespace FguiRenderServer
             public string projectRootDir;
             public string packageName;
             public string componentName;
+            public string componentPath;
+            public string componentId;
             public string outPng;
             public string branchTag;
             public int width = DefaultRenderWidth;
             public int height = DefaultRenderHeight;
             public int timeoutSec = 120;
+        }
+
+        static GObject CreatePanelFromRequest(RenderRequest request)
+        {
+            if (!string.IsNullOrWhiteSpace(request.componentId))
+            {
+                string componentId = request.componentId.Trim();
+                GObject panelById = UIPackage.CreateObjectFromURL(componentId);
+                if (panelById == null)
+                {
+                    throw new InvalidOperationException("component not found by id: " + componentId);
+                }
+
+                return panelById;
+            }
+
+            string componentName = request.componentName;
+            if (string.IsNullOrWhiteSpace(componentName) && !string.IsNullOrWhiteSpace(request.componentPath))
+            {
+                componentName = ExtractComponentNameFromPath(request.componentPath);
+            }
+
+            GObject panel = UIPackage.CreateObject(request.packageName, componentName);
+            if (panel == null)
+            {
+                throw new InvalidOperationException("component not found: " + componentName);
+            }
+
+            return panel;
+        }
+
+        static string ExtractComponentNameFromPath(string componentPath)
+        {
+            string normalizedPath = componentPath.Trim().Replace('\\', '/');
+            string fileName = Path.GetFileNameWithoutExtension(normalizedPath);
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                throw new ArgumentException("invalid componentPath: " + componentPath);
+            }
+
+            return fileName;
         }
 
         [Serializable]

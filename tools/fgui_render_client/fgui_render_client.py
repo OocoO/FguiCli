@@ -12,8 +12,10 @@ DEFAULT_SERVER = "http://127.0.0.1:18765"
 class RenderRequest:
     project_root_dir: str
     package_name: str
-    component_name: str
     out_png: str
+    component_name: str = ""
+    component_path: str = ""
+    component_id: str = ""
     branch_tag: str = ""
     width: int = 1920
     height: int = 1080
@@ -40,10 +42,13 @@ class HealthResult:
 
 
 def render_page(server_url: str, req: RenderRequest, timeout_sec: int | None = None) -> RenderResult:
+    _validate_component_selector(req)
     payload = {
         "projectRootDir": req.project_root_dir,
         "packageName": req.package_name,
         "componentName": req.component_name,
+        "componentPath": req.component_path,
+        "componentId": req.component_id,
         "outPng": req.out_png,
         "branchTag": req.branch_tag,
         "width": req.width,
@@ -98,4 +103,18 @@ def _send(req: request.Request, timeout_sec: int) -> dict[str, Any]:
         raise RuntimeError(f"HTTP {ex.code}: {body}") from ex
     except error.URLError as ex:
         raise RuntimeError(f"Render server request failed: {ex}") from ex
+
+
+def _validate_component_selector(req: RenderRequest) -> None:
+    selectors = [
+        bool(req.component_name and req.component_name.strip()),
+        bool(req.component_path and req.component_path.strip()),
+        bool(req.component_id and req.component_id.strip()),
+    ]
+    count = sum(selectors)
+    if count != 1:
+        raise ValueError("Exactly one of component_name / component_path / component_id must be set")
+    if req.component_id and req.component_id.strip() and not req.component_id.strip().startswith("ui://"):
+        raise ValueError("component_id must start with 'ui://'")
+
 
