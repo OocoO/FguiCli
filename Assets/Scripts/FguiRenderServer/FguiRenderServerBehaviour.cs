@@ -387,7 +387,7 @@ namespace FguiRenderServer
 
                 try
                 {
-                    Texture2D screenshot = ScreenCapture.CaptureScreenshotAsTexture();
+                    Texture2D screenshot = CaptureUiTexture(Screen.width, Screen.height);
                     if (screenshot == null)
                     {
                         throw new InvalidOperationException("capture failed: screenshot texture is null");
@@ -693,6 +693,33 @@ namespace FguiRenderServer
             public bool hasActiveJob;
         }
 
+        static Texture2D CaptureUiTexture(int width, int height)
+        {
+            Camera camera = StageCamera.main;
+            if (camera == null)
+            {
+                throw new InvalidOperationException("capture failed: StageCamera.main is null");
+            }
+
+            RenderTexture rt = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32);
+            RenderTexture previousRT = camera.targetTexture;
+            RenderTexture previousActive = RenderTexture.active;
+
+            camera.targetTexture = rt;
+            GL.Clear(true, true, Color.clear);
+            camera.Render();
+            camera.targetTexture = previousRT;
+
+            RenderTexture.active = rt;
+            Texture2D tex = new Texture2D(width, height, TextureFormat.ARGB32, false);
+            tex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
+            tex.Apply();
+            RenderTexture.active = previousActive;
+            RenderTexture.ReleaseTemporary(rt);
+
+            return tex;
+        }
+      
         sealed class RenderJob
         {
             public string jobId;

@@ -974,6 +974,14 @@ namespace FairyGUI
 
 		void CacheProjectResourceDescription(FguiProjectLoader.ProjectResourceData resourceData)
 		{
+			// For resource types whose XML description is stored in package.xml (like movieclip and component),
+			// serialize the parsed XML node and cache it into _descPack.
+			if (resourceData.resourceXml != null)
+			{
+				_descPack[resourceData.id + ".xml"] = resourceData.resourceXml.ToXmlString();
+				return;
+			}
+
 			if (string.IsNullOrEmpty(resourceData.absoluteFile))
 				return;
 			if (!File.Exists(resourceData.absoluteFile))
@@ -1681,7 +1689,14 @@ namespace FairyGUI
 
 		void LoadMovieClip(PackageItem item)
 		{
-			string str = _descPack[item.id + ".xml"];
+			string str;
+			if (!_descPack.TryGetValue(item.id + ".xml", out str))
+			{
+				if (Application.isPlaying)
+					Debug.LogWarning("FairyGUI: MovieClip xml not found: " + item.id);
+				return;
+			}
+
 			XML xml = new XML(str);
 			string[] arr = null;
 

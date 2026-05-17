@@ -259,13 +259,64 @@ namespace FairyGUI.Utils
 		}
 
 		void Cleanup()
-		{
-			this.name = null;
-			if (this._attributes != null)
-				this._attributes.Clear();
-			if (this._children != null)
-				this._children.Clear();
-			this.text = null;
-		}
-	}
+        {
+            this.name = null;
+            if (this._attributes != null)
+                this._attributes.Clear();
+            if (this._children != null)
+                this._children.Clear();
+            this.text = null;
+        }
+
+        /// <summary>
+        /// Serialize this XML node and its children back to an XML string.
+        /// Used for extracting inline MovieClip descriptions from package.xml resource nodes.
+        /// </summary>
+        public string ToXmlString()
+        {
+            StringBuilder sb = new StringBuilder();
+            AppendToXmlString(sb);
+            return sb.ToString();
+        }
+
+        void AppendToXmlString(StringBuilder sb)
+        {
+            sb.Append('<');
+            sb.Append(name);
+            if (_attributes != null)
+            {
+                foreach (KeyValuePair<string, string> kv in _attributes)
+                {
+                    sb.Append(' ');
+                    sb.Append(kv.Key);
+                    sb.Append("=\"");
+                    sb.Append(XMLUtils.EncodeString(kv.Value));
+                    sb.Append('\"');
+                }
+            }
+
+            if ((_children == null || _children.Count == 0) && text == null)
+            {
+                sb.Append("/>");
+                return;
+            }
+
+            sb.Append('>');
+
+            if (text != null)
+            {
+                sb.Append(XMLUtils.EncodeString(text));
+            }
+
+            if (_children != null)
+            {
+                foreach (XML child in _children.rawList)
+                    child.AppendToXmlString(sb);
+            }
+
+            sb.Append("</");
+            sb.Append(name);
+            sb.Append('>');
+        }
+    }
 }

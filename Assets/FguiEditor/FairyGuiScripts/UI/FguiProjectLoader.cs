@@ -26,6 +26,7 @@ namespace FairyGUI
 			public Rect? scale9Grid;
 			public bool scaleByTile;
 			public int tileGridIndice;
+			public XML resourceXml;
 		}
 
 		public sealed class ProjectPackageData
@@ -262,6 +263,11 @@ namespace FairyGUI
 						resourceData.scale9Grid = rect;
 					}
 				}
+
+				// Store the original XML node for resource types whose description is inline in package.xml.
+				// For movieclips, the frame data is embedded directly in the <movieclip> resource node.
+				if (resourceXml.name == "movieclip")
+					resourceData.resourceXml = resourceXml;
 
 				packageData.resources.Add(resourceData);
 			}
