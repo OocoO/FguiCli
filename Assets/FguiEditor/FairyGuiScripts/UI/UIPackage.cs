@@ -974,14 +974,6 @@ namespace FairyGUI
 
 		void CacheProjectResourceDescription(FguiProjectLoader.ProjectResourceData resourceData)
 		{
-			// For resource types whose XML description is stored in package.xml (like movieclip and component),
-			// serialize the parsed XML node and cache it into _descPack.
-			if (resourceData.resourceXml != null)
-			{
-				_descPack[resourceData.id + ".xml"] = resourceData.resourceXml.ToXmlString();
-				return;
-			}
-
 			if (string.IsNullOrEmpty(resourceData.absoluteFile))
 				return;
 			if (!File.Exists(resourceData.absoluteFile))

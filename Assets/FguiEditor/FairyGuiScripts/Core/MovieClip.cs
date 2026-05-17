@@ -88,6 +88,9 @@ namespace FairyGUI
 		/// <param name="boundsRect"></param>
 		public void SetData(NTexture texture, Frame[] frames, Rect boundsRect)
 		{
+			if (frames == null)
+				return;
+
 			this.frames = frames;
 			this.frameCount = frames.Length;
 			_contentRect = boundsRect;

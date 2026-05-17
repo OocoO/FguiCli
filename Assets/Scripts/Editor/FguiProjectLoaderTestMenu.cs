@@ -120,19 +120,6 @@ namespace FguiRenderServer.Editor
 					GObject panel = null;
 					Texture2D screenshot = null;
 					List<string> componentLogs = new List<string>();
-					Application.LogCallback callback = (condition, stackTrace, type) =>
-					{
-						if (componentLogs.Count >= MaxLogLinesPerComponent)
-							return;
-
-						string logLine = type + ": " + Shorten(condition, MaxLogLineLength);
-						if (type == LogType.Exception || type == LogType.Error || type == LogType.Assert)
-						{
-							logLine += " | stack: " + Shorten(stackTrace, MaxLogLineLength);
-						}
-
-						componentLogs.Add(logLine);
-					};
 
 					panel = UIPackage.CreateObject(pkg.name, resourceName);
 					if (panel == null)
@@ -157,6 +144,7 @@ namespace FguiRenderServer.Editor
 					string pngName = item.id + "_" + SanitizeFileName(Path.GetFileNameWithoutExtension(resourceName)) + ".png";
 					string pngPath = Path.Combine(packageOutputDir, pngName);
 					byte[] pngBytes = screenshot.EncodeToPNG();
+					Debug.Log($"Export Png -- {pngPath}");
 					File.WriteAllBytes(pngPath, pngBytes);
 					successCount += 1;
 				}
