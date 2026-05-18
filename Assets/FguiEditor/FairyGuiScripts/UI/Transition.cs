@@ -1103,7 +1103,7 @@ namespace FairyGUI
 					break;
 
 				case TransitionActionType.Rotation:
-					value.f1 = int.Parse(str);
+					value.f1 = float.Parse(str);
 					break;
 
 				case TransitionActionType.Scale:

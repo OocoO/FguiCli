@@ -997,6 +997,40 @@ namespace FairyGUI
 			return false;
 		}
 
+		bool TryGetProjectFontTexture(PackageItem fontItem, out NTexture mainTexture, out float texScaleX, out float texScaleY, out AtlasSprite sprite)
+		{
+			mainTexture = null;
+			texScaleX = 1;
+			texScaleY = 1;
+			sprite = null;
+
+			FguiProjectLoader.ProjectResourceData resourceData;
+			if (!TryGetProjectResource(fontItem, out resourceData))
+				return false;
+			if (string.IsNullOrEmpty(resourceData.fontTextureId))
+				return false;
+
+			PackageItem textureItem;
+			if (!_itemsById.TryGetValue(resourceData.fontTextureId, out textureItem))
+				return false;
+
+			// Load the font texture image through the normal image path.
+			GetItemAsset(textureItem);
+			if (textureItem.texture == null || textureItem.texture == NTexture.Empty)
+				return false;
+
+			mainTexture = textureItem.texture.root;
+			texScaleX = mainTexture.uvRect.width / mainTexture.width;
+			texScaleY = mainTexture.uvRect.height / mainTexture.height;
+
+			// Build a synthetic AtlasSprite so the glyph UV calculation uses the full texture.
+			sprite = new AtlasSprite();
+			sprite.atlas = resourceData.fontTextureId;
+			sprite.rect = new Rect(0, 0, mainTexture.width, mainTexture.height);
+			sprite.rotated = false;
+			return true;
+		}
+
 		void UnloadResBundle(object param)
 		{
 			((AssetBundle)param).Unload(false);
@@ -1911,6 +1945,18 @@ namespace FairyGUI
 							mainTexture = (NTexture)GetItemAsset(atlasItem);
 							texScaleX = mainTexture.root.uvRect.width / mainTexture.width;
 							texScaleY = mainTexture.root.uvRect.height / mainTexture.height;
+						}
+						else if (TryGetProjectFontTexture(item, out mainTexture, out texScaleX, out texScaleY, out mainSprite))
+						{
+							// Resolved via project resource fontTextureId.
+						}
+						else
+						{
+							// Sprite data not available in project-source path for atlas-based fonts.
+							// Fall back gracefully — the font will not render but won't crash.
+							Debug.LogWarning("FairyGUI: atlas sprite data not found for font '" + item.name
+								+ "' in package '" + this.name + "'. Font will not render.");
+							return;
 						}
 					}
 					if (kv.TryGetValue("size", out str))

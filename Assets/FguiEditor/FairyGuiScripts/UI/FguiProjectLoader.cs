@@ -26,6 +26,7 @@ namespace FairyGUI
 			public Rect? scale9Grid;
 			public bool scaleByTile;
 			public int tileGridIndice;
+			public string fontTextureId;
 		}
 
 		public sealed class ProjectPackageData
@@ -224,6 +225,7 @@ namespace FairyGUI
 				resourceData.branchTag = branchTag;
 				resourceData.exported = resourceXml.GetAttributeBool("exported");
 				resourceData.tileGridIndice = resourceXml.GetAttributeInt("gridTile");
+				resourceData.fontTextureId = resourceXml.GetAttribute("texture");
 
 				string size = resourceXml.GetAttribute("size");
 				if (!string.IsNullOrEmpty(size))
