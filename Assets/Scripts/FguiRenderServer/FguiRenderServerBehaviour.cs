@@ -644,8 +644,16 @@ namespace FguiRenderServer
 
                 return panelById;
             }
-
+            
             string componentName = request.componentName;
+            if (!string.IsNullOrEmpty(componentName))
+            {
+                if (!componentName.EndsWith(".xml"))
+                {
+                    componentName += ".xml";
+                }
+            }
+            
             if (string.IsNullOrWhiteSpace(componentName) && !string.IsNullOrWhiteSpace(request.componentPath))
             {
                 componentName = ExtractComponentNameFromPath(request.componentPath);
@@ -663,7 +671,7 @@ namespace FguiRenderServer
         static string ExtractComponentNameFromPath(string componentPath)
         {
             string normalizedPath = componentPath.Trim().Replace('\\', '/');
-            string fileName = Path.GetFileNameWithoutExtension(normalizedPath);
+            string fileName = Path.GetFileName(normalizedPath);
             if (string.IsNullOrWhiteSpace(fileName))
             {
                 throw new ArgumentException("invalid componentPath: " + componentPath);
