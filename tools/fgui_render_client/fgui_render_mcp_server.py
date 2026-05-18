@@ -95,6 +95,7 @@ def _stop_render_server() -> None:
 
 @mcp.tool()
 def check_health() -> str:
+    _start_render_server()
     result = health(_get_server_url())
     return (
         f"ok={result.ok}, message={result.message}, "
@@ -123,6 +124,7 @@ def render_page_tool(
     - componentId: e.g. ui://3qbfu3hkscr325
     """
     _validate_component_selector(componentName, componentPath, componentId)
+    _start_render_server()
 
     req = RenderRequest(
         project_root_dir=projectRootDir,
@@ -158,7 +160,6 @@ def _validate_component_selector(component_name: str, component_path: str, compo
 
 
 def main() -> int:
-    _start_render_server()
     mcp.run(transport="stdio")
     return 0
 

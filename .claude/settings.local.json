@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__qwen-image-gen__qwen_batch_generate_images",
+      "Bash(python3 -c \"import uuid; print\\(uuid.uuid4\\(\\).hex\\)\")",
+      "Bash(powershell -Command \"[guid]::NewGuid\\(\\).ToString\\('N'\\)\")"
+    ]
+  }
+}
