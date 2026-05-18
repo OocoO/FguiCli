@@ -51,6 +51,7 @@ namespace FguiRenderServer
         {
             DontDestroyOnLoad(gameObject);
             Stage.Instantiate();
+            GRoot.inst.SetContentScaleFactor(1920, 1080);
 
             Dictionary<string, string> args = ParseCommandLineArguments(Environment.GetCommandLineArgs());
             _oneShotMode = args.ContainsKey("render-once");
@@ -372,6 +373,7 @@ namespace FguiRenderServer
                 GObject panel = CreatePanelFromRequest(request);
 
                 panel.MakeFullScreen();
+                panel.position = Vector3.zero;
                 GRoot.inst.AddChild(panel);
             }
             catch (Exception ex)
