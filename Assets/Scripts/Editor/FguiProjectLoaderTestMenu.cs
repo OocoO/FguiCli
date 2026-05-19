@@ -13,8 +13,8 @@ namespace FguiRenderServer.Editor
 	public static class FguiProjectLoaderTestMenu
 	{
 		const string DefaultProjectRoot = @"D:\ProjectGit\AirLegion\fgui_airLegion";
-		const string DefaultPackageName = "Soldier";
-		const string DefaultComponentName = "SoldierSkillUpgradePanel.xml";
+		const string DefaultPackageName = "BattleUI";
+		const string DefaultComponentName = "jtaTest.xml";
 		const string DefaultBranchTag = "eng";
 		const string FullTestProjectRoot = @"D:\ProjectGit\fgui_idle_dev\FGUIProject";
 		const string FullTestOutputRoot = @"D:\Project\FguiCli\Temp\renderTest";

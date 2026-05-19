@@ -14,6 +14,7 @@ namespace FairyGUI
 		/// </summary>
 		public struct Frame
 		{
+			public NTexture texture;
 			public Rect rect;
 			public float addDelay;
 			public Rect uvRect;
@@ -90,6 +91,18 @@ namespace FairyGUI
 		{
 			if (frames == null)
 				return;
+
+			if (texture == null)
+			{
+				for (int i = 0; i < frames.Length; i++)
+				{
+					if (frames[i].texture != null)
+					{
+						texture = frames[i].texture;
+						break;
+					}
+				}
+			}
 
 			this.frames = frames;
 			this.frameCount = frames.Length;
@@ -234,10 +247,16 @@ namespace FairyGUI
 			{
 				Frame frame = frames[_currentFrame];
 
-				if (frame.rect.width == 0)
+				if (frame.rect.width == 0 || frame.texture == null)
 					graphics.ClearMesh();
 				else
 				{
+					if (graphics.texture != frame.texture)
+					{
+						graphics.texture = frame.texture;
+						InvalidateBatchingState();
+					}
+
 					Rect uvRect = frame.uvRect;
 					if (_flip != FlipType.None)
 						ToolSet.FlipRect(ref uvRect, _flip);

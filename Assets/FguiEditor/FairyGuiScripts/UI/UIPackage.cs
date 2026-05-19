@@ -1044,24 +1044,50 @@ namespace FairyGUI
 				return 0;
 		}
 
+		void DisposeTexture(NTexture texture, bool allowDestroyingAssets)
+		{
+			if (texture == null)
+				return;
+
+			if (texture.alphaTexture != null)
+			{
+				texture.alphaTexture.Dispose(allowDestroyingAssets);
+				texture.alphaTexture = null;
+			}
+
+			if (texture != NTexture.Empty)
+				texture.Dispose(allowDestroyingAssets);
+			else
+				texture.DestroyMaterials();
+		}
+
 		void Dispose(bool allowDestroyingAssets)
 		{
 			int cnt = _items.Count;
 			for (int i = 0; i < cnt; i++)
 			{
 				PackageItem pi = _items[i];
-				if (pi.texture != null)
+				if (pi.movieClipTextures != null)
 				{
-					if (pi.texture.alphaTexture != null)
+					HashSet<NTexture> disposedTextures = new HashSet<NTexture>();
+					for (int j = 0; j < pi.movieClipTextures.Length; j++)
 					{
-						pi.texture.alphaTexture.Dispose(allowDestroyingAssets);
-						pi.texture.alphaTexture = null;
-					}
+						NTexture texture = pi.movieClipTextures[j];
+						if (texture == null)
+							continue;
 
-					if (pi.texture != NTexture.Empty)
-						pi.texture.Dispose(allowDestroyingAssets);
-					else
-						pi.texture.DestroyMaterials();
+						NTexture root = texture.root ?? texture;
+						if (root == NTexture.Empty || !disposedTextures.Add(root))
+							continue;
+
+						DisposeTexture(root, allowDestroyingAssets);
+					}
+					pi.movieClipTextures = null;
+					pi.texture = null;
+				}
+				else if (pi.texture != null)
+				{
+					DisposeTexture(pi.texture, allowDestroyingAssets);
 					pi.texture = null;
 				}
 				else if (pi.audioClip != null)
@@ -1715,75 +1741,131 @@ namespace FairyGUI
 
 		void LoadMovieClip(PackageItem item)
 		{
-			string str;
-			if (!_descPack.TryGetValue(item.id + ".xml", out str))
-			{
-				if (Application.isPlaying)
-					Debug.LogWarning("FairyGUI: MovieClip xml not found: " + item.id);
+			byte[] data = LoadBinary(item);
+			if (TryLoadMovieClipFromJta(item, data))
 				return;
-			}
 
-			XML xml = new XML(str);
-			string[] arr = null;
+			if (Application.isPlaying)
+				Debug.LogWarning("FairyGUI: MovieClip data not found: " + item.id);
+		}
 
-			str = xml.GetAttribute("interval");
-			if (str != null)
-				item.interval = float.Parse(str) / 1000f;
-			item.swing = xml.GetAttributeBool("swing", false);
-			str = xml.GetAttribute("repeatDelay");
-			if (str != null)
-				item.repeatDelay = float.Parse(str) / 1000f;
-			int frameCount = xml.GetAttributeInt("frameCount");
-			item.frames = new MovieClip.Frame[frameCount];
+		bool TryLoadMovieClipFromJta(PackageItem item, byte[] data)
+		{
+			if (data == null || data.Length < 2)
+				return false;
 
-			int i = 0;
-			string spriteId;
-			XML frameNode;
-			MovieClip.Frame frame;
-			AtlasSprite sprite;
-
-			XMLList.Enumerator et = xml.GetNode("frames").GetEnumerator();
-			while (et.MoveNext())
+			try
 			{
-				frameNode = et.Current;
-				frame = new MovieClip.Frame();
+				ByteBuffer buffer = new ByteBuffer(data);
+				buffer.endian = ByteBuffer.Endian.BIG_ENDIAN;
 
-				arr = frameNode.GetAttributeArray("rect");
-				frame.rect = new Rect(int.Parse(arr[0]), int.Parse(arr[1]), int.Parse(arr[2]), int.Parse(arr[3]));
-				str = frameNode.GetAttribute("addDelay");
-				if (str != null)
-					frame.addDelay = float.Parse(str) / 1000f;
+				if (buffer.ReadString() != "yytou")
+					return false;
 
-				str = frameNode.GetAttribute("sprite");
-				if (str != null)
-					spriteId = item.id + "_" + str;
-				else if (frame.rect.width != 0)
-					spriteId = item.id + "_" + i;
-				else
-					spriteId = null;
+				int version = buffer.ReadInt();
+				int fps = buffer.ReadByte();
+				if (fps <= 0)
+					fps = 24;
+				buffer.SkipBytes(3);
 
-				if (spriteId != null && _sprites.TryGetValue(spriteId, out sprite))
+				int boundsX = 0;
+				int boundsY = 0;
+				int boundsWidth = 0;
+				int boundsHeight = 0;
+				if (version >= 102)
 				{
-					PackageItem atlasItem = _itemsById[sprite.atlas];
-					if (atlasItem != null)
-					{
-						if (item.texture == null)
-							item.texture = (NTexture)GetItemAsset(atlasItem);
-						frame.uvRect = new Rect(sprite.rect.x / item.texture.width * item.texture.uvRect.width,
-							1 - sprite.rect.yMax * item.texture.uvRect.height / item.texture.height,
-							sprite.rect.width * item.texture.uvRect.width / item.texture.width,
-							sprite.rect.height * item.texture.uvRect.height / item.texture.height);
-						frame.rotated = sprite.rotated;
-						if (frame.rotated)
-						{
-							float tmp = frame.uvRect.width;
-							frame.uvRect.width = frame.uvRect.height;
-							frame.uvRect.height = tmp;
-						}
-					}
+					boundsX = buffer.ReadUshort();
+					boundsY = buffer.ReadUshort();
+					boundsWidth = buffer.ReadUshort();
+					boundsHeight = buffer.ReadUshort();
 				}
-				item.frames[i] = frame;
-				i++;
+
+				int speed = buffer.ReadByte();
+				int repeatDelay = buffer.ReadByte();
+				item.swing = buffer.ReadByte() == 1;
+				item.interval = Mathf.Max(speed, 1) / (float)fps;
+				item.repeatDelay = repeatDelay / (float)fps;
+
+				int frameCount = buffer.ReadShort();
+				if (frameCount < 0)
+					frameCount = 0;
+
+				MovieClip.Frame[] frames = new MovieClip.Frame[frameCount];
+				int[] textureIndices = new int[frameCount];
+				int computedWidth = 0;
+				int computedHeight = 0;
+
+				for (int i = 0; i < frameCount; i++)
+				{
+					MovieClip.Frame frame = new MovieClip.Frame();
+					frame.addDelay = buffer.ReadShort() / (float)fps;
+					frame.rect = new Rect(
+						buffer.ReadShort() - boundsX,
+						buffer.ReadShort() - boundsY,
+						buffer.ReadShort(),
+						buffer.ReadShort());
+					textureIndices[i] = buffer.ReadShort();
+					frames[i] = frame;
+
+					computedWidth = Mathf.Max(computedWidth, Mathf.RoundToInt(frame.rect.x + frame.rect.width));
+					computedHeight = Mathf.Max(computedHeight, Mathf.RoundToInt(frame.rect.y + frame.rect.height));
+				}
+
+				int textureCount = buffer.ReadShort();
+				if (textureCount < 0)
+					textureCount = 0;
+
+				NTexture[] textures = new NTexture[textureCount];
+				for (int i = 0; i < textureCount; i++)
+				{
+					int rawLength = buffer.ReadInt();
+					if (rawLength <= 0)
+						continue;
+					if (buffer.position + rawLength > buffer.length)
+						throw new Exception("Unexpected end of .jta texture data.");
+
+					byte[] raw = new byte[rawLength];
+					buffer.ReadBytes(ref raw, 0, rawLength);
+					Texture2D texture = LoadTextureFromBytes(raw);
+					if (texture == null)
+						continue;
+
+					textures[i] = new NTexture(texture);
+					textures[i].storedODisk = false;
+				}
+
+				NTexture firstTexture = null;
+				for (int i = 0; i < frameCount; i++)
+				{
+					int textureIndex = textureIndices[i];
+					if (textureIndex < 0 || textureIndex >= textures.Length)
+						continue;
+
+					MovieClip.Frame frame = frames[i];
+					frame.texture = textures[textureIndex];
+					if (frame.texture != null)
+					{
+						frame.uvRect = frame.texture.uvRect;
+						if (firstTexture == null)
+							firstTexture = frame.texture;
+					}
+					frames[i] = frame;
+				}
+
+				if (item.width <= 0)
+					item.width = boundsWidth > 0 ? boundsWidth : computedWidth;
+				if (item.height <= 0)
+					item.height = boundsHeight > 0 ? boundsHeight : computedHeight;
+
+				item.frames = frames;
+				item.movieClipTextures = textures;
+				item.texture = firstTexture ?? NTexture.Empty;
+				return true;
+			}
+			catch (Exception ex)
+			{
+				Debug.LogWarning("FairyGUI: failed to parse .jta movie clip '" + item.file + "' in " + this.name + ": " + ex.Message);
+				return false;
 			}
 		}
 
@@ -1997,7 +2079,14 @@ namespace FairyGUI
 			if (string.IsNullOrEmpty(absoluteFile) || !File.Exists(absoluteFile))
 				return null;
 
-			byte[] bytes = File.ReadAllBytes(absoluteFile);
+			return LoadTextureFromBytes(File.ReadAllBytes(absoluteFile));
+		}
+
+		Texture2D LoadTextureFromBytes(byte[] bytes)
+		{
+			if (bytes == null || bytes.Length == 0)
+				return null;
+
 			Texture2D texture = new Texture2D(2, 2, TextureFormat.ARGB32, false);
 			texture.hideFlags = DisplayOptions.hideFlags;
 			if (!texture.LoadImage(bytes))

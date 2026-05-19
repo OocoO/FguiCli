@@ -116,15 +116,6 @@ namespace FairyGUI
 			initWidth = sourceWidth;
 			initHeight = sourceHeight;
 
-			// MovieClip .jta binary data is not yet supported in the project-source loading path.
-			// When frames is null, skip SetData to avoid NullReferenceException.
-			if (packageItem.frames == null)
-			{
-				Debug.LogWarning("FairyGUI: MovieClip frames data not loaded for " + packageItem.id
-					+ " (package: " + packageItem.owner.name + "). .jta format is not yet supported.");
-				return;
-			}
-
 			_content.interval = packageItem.interval;
 			_content.swing = packageItem.swing;
 			_content.repeatDelay = packageItem.repeatDelay;

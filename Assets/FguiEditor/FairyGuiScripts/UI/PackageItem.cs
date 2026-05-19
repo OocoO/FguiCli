@@ -32,6 +32,7 @@ namespace FairyGUI
 		public float repeatDelay;
 		public bool swing;
 		public MovieClip.Frame[] frames;
+		public NTexture[] movieClipTextures;
 
 		//component
 		public XML componentData;
