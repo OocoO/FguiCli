@@ -355,6 +355,7 @@ namespace FairyGUI
 		public void Setup(XML xml)
 		{
 			string[] arr;
+			int defaultSelectedIndex = 0;
 
 			name = xml.GetAttribute("name");
 			autoRadioGroupDepth = xml.GetAttributeBool("autoRadioGroupDepth");
@@ -368,6 +369,13 @@ namespace FairyGUI
 					_pageIds.Add(arr[i]);
 					_pageNames.Add(arr[i + 1]);
 				}
+			}
+
+			if (xml.HasAttribute("selected"))
+			{
+				defaultSelectedIndex = xml.GetAttributeInt("selected", 0);
+				if (defaultSelectedIndex < 0 || defaultSelectedIndex >= _pageIds.Count)
+					defaultSelectedIndex = 0;
 			}
 
 			XMLList.Enumerator et = xml.GetEnumerator("action");
@@ -414,7 +422,7 @@ namespace FairyGUI
 			}
 
 			if (parent != null && _pageIds.Count > 0)
-				_selectedIndex = 0;
+				_selectedIndex = defaultSelectedIndex;
 			else
 				_selectedIndex = -1;
 		}

@@ -14,7 +14,7 @@ namespace FguiRenderServer.Editor
 	{
 		const string DefaultProjectRoot = @"D:\ProjectGit\AirLegion\fgui_airLegion";
 		const string DefaultPackageName = "Soldier";
-		const string DefaultComponentName = "EquipmentSlotEnhancePanel.xml";
+		const string DefaultComponentName = "SoldierSkillUpgradePanel.xml";
 		const string DefaultBranchTag = "eng";
 		const string FullTestProjectRoot = @"D:\ProjectGit\fgui_idle_dev\FGUIProject";
 		const string FullTestOutputRoot = @"D:\Project\FguiCli\Temp\renderTest";
