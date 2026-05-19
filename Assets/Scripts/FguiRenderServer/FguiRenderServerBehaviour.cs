@@ -351,15 +351,13 @@ namespace FguiRenderServer
             };
             Exception error = null;
             string pngPath = null;
+            GObject panel = null;
 
             RenderRequest request = job.request;
+            int captureWidth = request.width > 0 ? request.width : DefaultRenderWidth;
+            int captureHeight = request.height > 0 ? request.height : DefaultRenderHeight;
             try
             {
-                if (request.width > 0 && request.height > 0)
-                {
-                    Screen.SetResolution(request.width, request.height, false);
-                }
-
                 UIPackage.RemoveAllPackages(true);
                 GRoot.inst.RemoveChildren(0, -1, true);
 
@@ -370,9 +368,9 @@ namespace FguiRenderServer
                     throw new InvalidOperationException("package not found: " + request.packageName);
                 }
 
-                GObject panel = CreatePanelFromRequest(request);
+                panel = CreatePanelFromRequest(request);
 
-                panel.MakeFullScreen();
+                PreparePanelForCapture(panel);
                 panel.position = Vector3.zero;
                 GRoot.inst.AddChild(panel);
             }
@@ -389,11 +387,14 @@ namespace FguiRenderServer
 
                 try
                 {
-                    Texture2D screenshot = CaptureUiTexture(Screen.width, Screen.height);
+                    RectInt cropRect = CalculateCaptureRect(panel, captureWidth, captureHeight);
+                    Texture2D screenshot = CaptureUiTexture(captureWidth, captureHeight);
                     if (screenshot == null)
                     {
                         throw new InvalidOperationException("capture failed: screenshot texture is null");
                     }
+
+                    Texture2D outputTexture = CropTexture(screenshot, cropRect);
 
                     pngPath = Path.GetFullPath(request.outPng);
                     string pngDirectory = Path.GetDirectoryName(pngPath);
@@ -402,7 +403,15 @@ namespace FguiRenderServer
                         Directory.CreateDirectory(pngDirectory);
                     }
 
-                    byte[] pngBytes = screenshot.EncodeToPNG();
+                    byte[] pngBytes = outputTexture.EncodeToPNG();
+                    result.width = outputTexture.width;
+                    result.height = outputTexture.height;
+
+                    if (!ReferenceEquals(outputTexture, screenshot))
+                    {
+                        Destroy(outputTexture);
+                    }
+
                     Destroy(screenshot);
                     File.WriteAllBytes(pngPath, pngBytes);
                 }
@@ -420,8 +429,6 @@ namespace FguiRenderServer
                 result.ok = true;
                 result.message = "ok";
                 result.pngPath = pngPath;
-                result.width = Screen.width;
-                result.height = Screen.height;
             }
             else
             {
@@ -616,6 +623,129 @@ namespace FguiRenderServer
             context.Response.ContentEncoding = Encoding.UTF8;
             context.Response.ContentLength64 = bytes.Length;
             await context.Response.OutputStream.WriteAsync(bytes, 0, bytes.Length);
+        }
+
+        static RectInt CalculateCaptureRect(GObject panel, int captureWidth, int captureHeight)
+        {
+            if (panel == null || panel.displayObject == null)
+            {
+                return new RectInt(0, 0, captureWidth, captureHeight);
+            }
+
+            Rect stageBounds = panel.displayObject.GetBounds(Stage.inst);
+            if (!IsFiniteRect(stageBounds) || stageBounds.width <= 0 || stageBounds.height <= 0)
+            {
+                return new RectInt(0, 0, captureWidth, captureHeight);
+            }
+
+            float screenWidth = Mathf.Max(1, Screen.width);
+            float screenHeight = Mathf.Max(1, Screen.height);
+            float scaleX = captureWidth / screenWidth;
+            float scaleY = captureHeight / screenHeight;
+
+            int minX = Mathf.Clamp(Mathf.FloorToInt(stageBounds.xMin * scaleX), 0, captureWidth);
+            int maxX = Mathf.Clamp(Mathf.CeilToInt(stageBounds.xMax * scaleX), 0, captureWidth);
+            int minY = Mathf.Clamp(Mathf.FloorToInt((screenHeight - stageBounds.yMax) * scaleY), 0, captureHeight);
+            int maxY = Mathf.Clamp(Mathf.CeilToInt((screenHeight - stageBounds.yMin) * scaleY), 0, captureHeight);
+
+            int width = maxX - minX;
+            int height = maxY - minY;
+            if (width <= 0 || height <= 0)
+            {
+                return new RectInt(0, 0, captureWidth, captureHeight);
+            }
+
+            return new RectInt(minX, minY, width, height);
+        }
+
+        static void PreparePanelForCapture(GObject panel)
+        {
+            if (panel == null)
+            {
+                return;
+            }
+
+            if (ShouldMakeFullScreen(panel))
+            {
+                panel.MakeFullScreen();
+            }
+        }
+
+        static bool ShouldMakeFullScreen(GObject panel)
+        {
+            if (panel == null)
+            {
+                return false;
+            }
+
+            float panelWidth = panel.initWidth > 0 ? panel.initWidth : panel.width;
+            float panelHeight = panel.initHeight > 0 ? panel.initHeight : panel.height;
+            float rootWidth = GRoot.inst.width;
+            float rootHeight = GRoot.inst.height;
+
+            if (panelWidth <= 0 || panelHeight <= 0 || rootWidth <= 0 || rootHeight <= 0)
+            {
+                return false;
+            }
+
+            float widthRatio = panelWidth / rootWidth;
+            float heightRatio = panelHeight / rootHeight;
+            return widthRatio >= 0.85f && heightRatio >= 0.85f;
+        }
+
+        static bool IsFiniteRect(Rect rect)
+        {
+            return IsFinite(rect.xMin)
+                   && IsFinite(rect.xMax)
+                   && IsFinite(rect.yMin)
+                   && IsFinite(rect.yMax);
+        }
+
+        static bool IsFinite(float value)
+        {
+            return !float.IsNaN(value) && !float.IsInfinity(value);
+        }
+
+        static Texture2D CropTexture(Texture2D source, RectInt cropRect)
+        {
+            if (source == null)
+            {
+                return null;
+            }
+
+            RectInt clamped = new RectInt(
+                Mathf.Clamp(cropRect.x, 0, source.width),
+                Mathf.Clamp(cropRect.y, 0, source.height),
+                Mathf.Clamp(cropRect.width, 0, source.width),
+                Mathf.Clamp(cropRect.height, 0, source.height));
+
+            if (clamped.x + clamped.width > source.width)
+            {
+                clamped.width = source.width - clamped.x;
+            }
+
+            if (clamped.y + clamped.height > source.height)
+            {
+                clamped.height = source.height - clamped.y;
+            }
+
+            if (clamped.width <= 0 || clamped.height <= 0)
+            {
+                return source;
+            }
+
+            if (clamped.x == 0
+                && clamped.y == 0
+                && clamped.width == source.width
+                && clamped.height == source.height)
+            {
+                return source;
+            }
+
+            Texture2D cropped = new Texture2D(clamped.width, clamped.height, source.format, false);
+            cropped.SetPixels(source.GetPixels(clamped.x, clamped.y, clamped.width, clamped.height));
+            cropped.Apply();
+            return cropped;
         }
 
         [Serializable]
