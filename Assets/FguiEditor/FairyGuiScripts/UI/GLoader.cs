@@ -21,13 +21,10 @@ namespace FairyGUI
 		FillType _fill;
 		bool _updatingLayout;
 		PackageItem _contentItem;
-		float _contentWidth;
-		float _contentHeight;
-		float _contentSourceWidth;
-		float _contentSourceHeight;
 
 		MovieClip _content;
 		GObject _errorSign;
+		GComponent _content2;
 
 		static GObjectPool errorSignPool;
 
@@ -57,6 +54,8 @@ namespace FairyGUI
 			}
 			if (_errorSign != null)
 				_errorSign.Dispose();
+			if (_content2 != null)
+				_content2.Dispose();
 			_content.Dispose();
 			base.Dispose();
 		}
@@ -72,6 +71,7 @@ namespace FairyGUI
 				if (_url == value)
 					return;
 
+				ClearContent();
 				_url = value;
 				LoadContent();
 				UpdateGear(7);
@@ -260,6 +260,14 @@ namespace FairyGUI
 		/// <summary>
 		/// 
 		/// </summary>
+		public GComponent component
+		{
+			get { return _content2; }
+		}
+
+		/// <summary>
+		/// 
+		/// </summary>
 		public NTexture texture
 		{
 			get
@@ -274,12 +282,12 @@ namespace FairyGUI
 				_content.texture = value;
 				if (value != null)
 				{
-					_contentSourceWidth = value.width;
-					_contentSourceHeight = value.height;
+					sourceWidth = value.width;
+					sourceHeight = value.height;
 				}
 				else
 				{
-					_contentSourceWidth = _contentHeight = 0;
+					sourceWidth = sourceHeight = 0;
 				}
 
 				UpdateLayout();
@@ -324,26 +332,44 @@ namespace FairyGUI
 
 				if (_contentItem.type == PackageItemType.Image)
 				{
+					sourceWidth = _contentItem.width;
+					sourceHeight = _contentItem.height;
 					_content.texture = _contentItem.texture;
 					_content.scale9Grid = _contentItem.scale9Grid;
 					_content.scaleByTile = _contentItem.scaleByTile;
 					_content.tileGridIndice = _contentItem.tileGridIndice;
 
-					_contentSourceWidth = _contentItem.width;
-					_contentSourceHeight = _contentItem.height;
 					UpdateLayout();
 				}
 				else if (_contentItem.type == PackageItemType.MovieClip)
 				{
-					_contentSourceWidth = _contentItem.width;
-					_contentSourceHeight = _contentItem.height;
-
+					sourceWidth = _contentItem.width;
+					sourceHeight = _contentItem.height;
 					_content.interval = _contentItem.interval;
 					_content.swing = _contentItem.swing;
 					_content.repeatDelay = _contentItem.repeatDelay;
-					_content.SetData(_contentItem.texture, _contentItem.frames, new Rect(0, 0, _contentSourceWidth, _contentSourceHeight));
+					_content.SetData(_contentItem.texture, _contentItem.frames, new Rect(0, 0, sourceWidth, sourceHeight));
 
 					UpdateLayout();
+				}
+				else if (_contentItem.type == PackageItemType.Component)
+				{
+					sourceWidth = _contentItem.width;
+					sourceHeight = _contentItem.height;
+					GObject obj = UIPackage.CreateObjectFromURL(itemURL);
+					if (obj == null)
+						SetErrorState();
+					else if (!(obj is GComponent))
+					{
+						obj.Dispose();
+						SetErrorState();
+					}
+					else
+					{
+						_content2 = (GComponent)obj;
+						((Container)displayObject).AddChild(_content2.displayObject);
+						UpdateLayout();
+					}
 				}
 				else
 				{
@@ -351,6 +377,7 @@ namespace FairyGUI
 						this.SetSize(_contentItem.width, _contentItem.height);
 
 					SetErrorState();
+					Debug.LogWarning("Unsupported type of GLoader: " + _contentItem.type);
 				}
 			}
 			else
@@ -373,8 +400,8 @@ namespace FairyGUI
 		protected void onExternalLoadSuccess(NTexture texture)
 		{
 			_content.texture = texture;
-			_contentSourceWidth = texture.width;
-			_contentSourceHeight = texture.height;
+			sourceWidth = texture.width;
+			sourceHeight = texture.height;
 			_content.scale9Grid = null;
 			_content.scaleByTile = false;
 			UpdateLayout();
@@ -422,7 +449,7 @@ namespace FairyGUI
 
 		private void UpdateLayout()
 		{
-			if (_content.texture == null && _content.frameCount == 0)
+			if (_content2 == null && _content.texture == null && _content.frameCount == 0)
 			{
 				if (_autoSize)
 				{
@@ -433,24 +460,31 @@ namespace FairyGUI
 				return;
 			}
 
-			_contentWidth = _contentSourceWidth;
-			_contentHeight = _contentSourceHeight;
+			float contentWidth = sourceWidth;
+			float contentHeight = sourceHeight;
 
 			if (_autoSize)
 			{
 				_updatingLayout = true;
-				if (_contentWidth == 0)
-					_contentWidth = 50;
-				if (_contentHeight == 0)
-					_contentHeight = 30;
-				this.SetSize(_contentWidth, _contentHeight);
+				if (contentWidth == 0)
+					contentWidth = 50;
+				if (contentHeight == 0)
+					contentHeight = 30;
+				this.SetSize(contentWidth, contentHeight);
 				_updatingLayout = false;
 
-				if (_width == _contentWidth && _height == _contentHeight)
+				if (_width == contentWidth && _height == contentHeight)
 				{
-					_content.SetScale(1, 1);
-					if (_content.texture != null)
+					if (_content2 != null)
+					{
+						_content2.SetXY(0, 0);
+						_content2.SetScale(1, 1);
+					}
+					else
+					{
+						_content.SetScale(1, 1);
 						_content.SetNativeSize();
+					}
 					return;
 				}
 				//如果不相等，可能是由于大小限制造成的，要后续处理
@@ -459,8 +493,8 @@ namespace FairyGUI
 			float sx = 1, sy = 1;
 			if (_fill != FillType.None)
 			{
-				sx = this.width / _contentSourceWidth;
-				sy = this.height / _contentSourceHeight;
+				sx = this.width / sourceWidth;
+				sy = this.height / sourceHeight;
 
 				if (sx != 1 || sy != 1)
 				{
@@ -482,34 +516,34 @@ namespace FairyGUI
 						else
 							sx = sy;
 					}
-					_contentWidth = Mathf.FloorToInt(_contentSourceWidth * sx);
-					_contentHeight = Mathf.FloorToInt(_contentSourceHeight * sy);
+					contentWidth = sourceWidth * sx;
+					contentHeight = sourceHeight * sy;
 				}
 			}
 
-			if (_content.texture != null)
-			{
-				_content.SetScale(1, 1);
-				_content.size = new Vector2(_contentWidth, _contentHeight);
-			}
+			if (_content2 != null)
+				_content2.SetScale(sx, sy);
 			else
-				_content.SetScale(sx, sy);
+				_content.size = new Vector2(contentWidth, contentHeight);
 
 			float nx;
 			float ny;
 			if (_align == AlignType.Center)
-				nx = Mathf.FloorToInt((this.width - _contentWidth) / 2);
+				nx = (this.width - contentWidth) / 2;
 			else if (_align == AlignType.Right)
-				nx = Mathf.FloorToInt(this.width - _contentWidth);
+				nx = this.width - contentWidth;
 			else
 				nx = 0;
 			if (_verticalAlign == VertAlignType.Middle)
-				ny = Mathf.FloorToInt((this.height - _contentHeight) / 2);
+				ny = (this.height - contentHeight) / 2;
 			else if (_verticalAlign == VertAlignType.Bottom)
-				ny = Mathf.FloorToInt(this.height - _contentHeight);
+				ny = this.height - contentHeight;
 			else
 				ny = 0;
-			_content.SetXY(nx, ny);
+			if (_content2 != null)
+				_content2.SetXY(nx, ny);
+			else
+				_content.SetXY(nx, ny);
 		}
 
 		private void ClearContent()
@@ -524,6 +558,11 @@ namespace FairyGUI
 			}
 
 			_content.Clear();
+			if (_content2 != null)
+			{
+				_content2.Dispose();
+				_content2 = null;
+			}
 			_contentItem = null;
 		}
 

@@ -13,13 +13,11 @@ namespace FguiRenderServer.Editor
 	public static class FguiProjectLoaderTestMenu
 	{
 		const string DefaultProjectRoot = @"D:\ProjectGit\AirLegion\fgui_airLegion";
-		const string DefaultPackageName = "BattleUI";
-		const string DefaultComponentName = "jtaTest.xml";
+		const string DefaultPackageName = "Gear";
+		const string DefaultComponentName = "GearEnhancePanel.xml";
 		const string DefaultBranchTag = "eng";
 		const string FullTestProjectRoot = @"D:\ProjectGit\fgui_idle_dev\FGUIProject";
 		const string FullTestOutputRoot = @"D:\Project\FguiCli\Temp\renderTest";
-		const int MaxLogLinesPerComponent = 30;
-		const int MaxLogLineLength = 220;
 
 		[MenuItem("Tools/Fgui Render/Smoke Test")]
 		public static void LoadAirLegionBattleUi()
