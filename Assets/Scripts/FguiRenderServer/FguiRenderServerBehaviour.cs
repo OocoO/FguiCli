@@ -58,7 +58,6 @@ namespace FguiRenderServer
 
             // Server mode defaults: run in background, windowed, and start with a small window.
             Application.runInBackground = true;
-            Screen.fullScreenMode = FullScreenMode.Windowed;
             Screen.SetResolution(DefaultWindowWidth, DefaultWindowHeight, FullScreenMode.Windowed);
 
             if (args.ContainsKey("no-minimize"))
@@ -297,12 +296,7 @@ namespace FguiRenderServer
 
         RenderJob EnqueueJob(RenderRequest request)
         {
-            RenderJob job = new RenderJob
-            {
-                jobId = Guid.NewGuid().ToString("N"),
-                request = request,
-                Completion = new TaskCompletionSource<RenderResult>(),
-            };
+            RenderJob job = CreateRenderJob(request);
 
             lock (_pendingLock)
             {
@@ -310,6 +304,28 @@ namespace FguiRenderServer
             }
 
             return job;
+        }
+
+        public Coroutine StartRenderRequest(RenderRequest request, Action<RenderResult> onCompleted = null)
+        {
+            string validationError = ValidateRequest(request);
+            if (validationError != null)
+            {
+                throw new ArgumentException(validationError, nameof(request));
+            }
+
+            RenderJob job = EnqueueJob(request);
+            return StartCoroutine(WaitForRenderJob(job, onCompleted));
+        }
+
+        RenderJob CreateRenderJob(RenderRequest request)
+        {
+            return new RenderJob
+            {
+                jobId = Guid.NewGuid().ToString("N"),
+                request = request,
+                Completion = new TaskCompletionSource<RenderResult>(),
+            };
         }
 
         int GetPendingCount()
@@ -342,6 +358,24 @@ namespace FguiRenderServer
         }
 
         System.Collections.IEnumerator RunRenderJob(RenderJob job)
+        {
+            yield return ExecuteRenderJob(job, true, _oneShotMode);
+        }
+
+        System.Collections.IEnumerator WaitForRenderJob(RenderJob job, Action<RenderResult> onCompleted)
+        {
+            while (!job.Completion.Task.IsCompleted)
+            {
+                yield return null;
+            }
+
+            if (onCompleted != null)
+            {
+                onCompleted(job.Completion.Task.Result);
+            }
+        }
+
+        System.Collections.IEnumerator ExecuteRenderJob(RenderJob job, bool clearActiveJob, bool emitOneShotResult)
         {
             System.Diagnostics.Stopwatch stopwatch = System.Diagnostics.Stopwatch.StartNew();
             RenderResult result = new RenderResult
@@ -437,11 +471,14 @@ namespace FguiRenderServer
             }
 
             job.Completion.TrySetResult(result);
-            _activeJob = null;
-
-            if (_oneShotMode)
+            if (clearActiveJob)
             {
-                UnityEngine.Debug.Log(ResultPrefix + JsonUtility.ToJson(result));
+                _activeJob = null;
+            }
+
+            if (emitOneShotResult)
+            {
+                Debug.Log(ResultPrefix + JsonUtility.ToJson(result));
             }
         }
 
@@ -749,7 +786,7 @@ namespace FguiRenderServer
         }
 
         [Serializable]
-        sealed class RenderRequest
+        public sealed class RenderRequest
         {
             public string projectRootDir;
             public string packageName;
@@ -813,7 +850,7 @@ namespace FguiRenderServer
         }
 
         [Serializable]
-        sealed class RenderResult
+        public sealed class RenderResult
         {
             public bool ok;
             public string message;

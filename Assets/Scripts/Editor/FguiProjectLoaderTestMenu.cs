@@ -13,41 +13,68 @@ namespace FguiRenderServer.Editor
 	public static class FguiProjectLoaderTestMenu
 	{
 		const string DefaultProjectRoot = @"D:\ProjectGit\AirLegion\fgui_airLegion";
-		const string DefaultPackageName = "Gear";
-		const string DefaultComponentName = "GearEnhancePanel.xml";
+		const string DefaultPackageName = "Soldier";
+		const string DefaultComponentName = "GearAttributeItem.xml";
 		const string DefaultBranchTag = "eng";
+		const string SmokeTestOutputFolderName = "FguiSmokeTestOutput";
 		const string FullTestProjectRoot = @"D:\ProjectGit\fgui_idle_dev\FGUIProject";
 		const string FullTestOutputRoot = @"D:\Project\FguiCli\Temp\renderTest";
 
 		[MenuItem("Tools/Fgui Render/Smoke Test")]
-		public static void LoadAirLegionBattleUi()
+		public static void SmokeTest()
 		{
 			try
 			{
-				UIPackage.RemoveAllPackages(true);
-				FguiProjectLoader loader = FguiProjectLoader.LoadProject(DefaultProjectRoot, DefaultBranchTag);
-				UIPackage pkg = loader.GetPackage(DefaultPackageName);
-				if (pkg == null)
+				var component = Object.FindObjectOfType<FguiRenderServerBehaviour>();
+				if (component == null)
 				{
-					Debug.LogError("FairyGUI: smoke test failed, package not loaded - " + DefaultPackageName);
+					Debug.LogError("FairyGUI: smoke test failed, FguiRenderServerBehaviour not found in scene.");
 					return;
 				}
 
-				GObject panel = UIPackage.CreateObject(DefaultPackageName, DefaultComponentName);
-				Stage.Instantiate();
-				if (panel == null)
-				{
-					Debug.LogError("FairyGUI: smoke test failed, component not created - " + DefaultComponentName);
-					return;
-				}
-				
-				GRoot.inst.AddChild(panel);
-				Debug.Log(string.Format(
-					"FairyGUI: smoke test success. package={0}, packageId={1}, branch={2}, objectType={3}",
-					pkg.name,
-					pkg.id,
-					DefaultBranchTag,
-					panel.GetType().Name));
+				string outputDir = Path.Combine(Application.dataPath, SmokeTestOutputFolderName);
+				Directory.CreateDirectory(outputDir);
+
+				string pngName = string.Format(
+					"{0}_{1}_{2}.png",
+					SanitizeFileName(DefaultPackageName),
+					SanitizeFileName(Path.GetFileNameWithoutExtension(DefaultComponentName)),
+					DateTime.Now.ToString("yyyyMMdd_HHmmss"));
+				string pngPath = Path.Combine(outputDir, pngName);
+
+				component.StartRenderRequest(
+					new FguiRenderServerBehaviour.RenderRequest
+					{
+						projectRootDir = DefaultProjectRoot,
+						packageName = DefaultPackageName,
+						componentName = DefaultComponentName,
+						outPng = pngPath,
+						branchTag = DefaultBranchTag,
+					},
+					result =>
+					{
+						AssetDatabase.Refresh();
+						if (result == null)
+						{
+							Debug.LogError("FairyGUI: smoke test failed, render result is null");
+							return;
+						}
+
+						if (!result.ok)
+						{
+							Debug.LogError("FairyGUI: smoke test failed - " + result.message);
+							return;
+						}
+
+						Debug.Log(string.Format(
+							"FairyGUI: smoke test success. package={0}, branch={1}, png={2}, size={3}x{4}, durationMs={5}",
+							DefaultPackageName,
+							DefaultBranchTag,
+							result.pngPath,
+							result.width,
+							result.height,
+							result.durationMs));
+					});
 			}
 			catch (Exception ex)
 			{
@@ -132,7 +159,7 @@ namespace FguiRenderServer.Editor
 					yield return null;
 					yield return new WaitForEndOfFrame();
 	
-					screenshot = CaptureUiTexture(Screen.width, Screen.height);
+					screenshot = FguiProjectLoaderTestMenu.CaptureUiTexture(Screen.width, Screen.height);
 					if (screenshot == null)
 					{
 						failures.Add(FormatFailure(pkg.name, resourceName, "screenshot is null", componentLogs));
@@ -251,6 +278,7 @@ namespace FguiRenderServer.Editor
 
 			return tex;
 		}
+
 
 		static string Shorten(string value, int maxLength)
 		{
