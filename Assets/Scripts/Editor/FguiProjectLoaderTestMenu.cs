@@ -12,19 +12,50 @@ namespace FguiRenderServer.Editor
 {
 	public static class FguiProjectLoaderTestMenu
 	{
+		private readonly struct SmokeTestTarget
+		{
+			public SmokeTestTarget(string projectRoot, string packageName, string componentName)
+			{
+				ProjectRoot = projectRoot;
+				PackageName = packageName;
+				ComponentName = componentName;
+			}
+
+			public string ProjectRoot { get; }
+			public string PackageName { get; }
+			public string ComponentName { get; }
+		}
+
 		const string DefaultProjectRoot = @"D:\ProjectGit\AirLegion\fgui_airLegion";
-		const string DefaultPackageName = "Soldier";
-		const string DefaultComponentName = "GearAttributeItem.xml";
 		const string DefaultBranchTag = "eng";
 		const string SmokeTestOutputFolderName = "FguiSmokeTestOutput";
 		const string FullTestProjectRoot = @"D:\ProjectGit\fgui_idle_dev\FGUIProject";
 		const string FullTestOutputRoot = @"D:\Project\FguiCli\Temp\renderTest";
+		const string SmokeTestXmlPathPrefKey = "FguiRenderServer.Editor.FguiProjectLoaderTestMenu.SmokeTestXmlPath";
+		static readonly string[] KnownPackageRoots =
+		{
+			"assets",
+			"assets_eng",
+			"assets_hk",
+			"assets_mo",
+			"assets_tw",
+			"assets_zh_tc",
+		};
 
 		[MenuItem("Tools/Fgui Render/Smoke Test")]
 		public static void SmokeTest()
 		{
 			try
 			{
+				string xmlPath = PromptForSmokeTestXmlPath();
+				if (string.IsNullOrWhiteSpace(xmlPath))
+				{
+					Debug.Log("FairyGUI: smoke test cancelled, no XML selected.");
+					return;
+				}
+
+				SmokeTestTarget target = ResolveSmokeTestTarget(xmlPath);
+
 				var component = Object.FindObjectOfType<FguiRenderServerBehaviour>();
 				if (component == null)
 				{
@@ -37,17 +68,17 @@ namespace FguiRenderServer.Editor
 
 				string pngName = string.Format(
 					"{0}_{1}_{2}.png",
-					SanitizeFileName(DefaultPackageName),
-					SanitizeFileName(Path.GetFileNameWithoutExtension(DefaultComponentName)),
+								SanitizeFileName(target.PackageName),
+								SanitizeFileName(Path.GetFileNameWithoutExtension(target.ComponentName)),
 					DateTime.Now.ToString("yyyyMMdd_HHmmss"));
 				string pngPath = Path.Combine(outputDir, pngName);
 
 				component.StartRenderRequest(
 					new FguiRenderServerBehaviour.RenderRequest
 					{
-						projectRootDir = DefaultProjectRoot,
-						packageName = DefaultPackageName,
-						componentName = DefaultComponentName,
+								projectRootDir = target.ProjectRoot,
+								packageName = target.PackageName,
+								componentName = target.ComponentName,
 						outPng = pngPath,
 						branchTag = DefaultBranchTag,
 					},
@@ -68,13 +99,17 @@ namespace FguiRenderServer.Editor
 
 						Debug.Log(string.Format(
 							"FairyGUI: smoke test success. package={0}, branch={1}, png={2}, size={3}x{4}, durationMs={5}",
-							DefaultPackageName,
+											target.PackageName,
 							DefaultBranchTag,
 							result.pngPath,
 							result.width,
 							result.height,
 							result.durationMs));
 					});
+			}
+			catch (InvalidOperationException ex)
+			{
+				Debug.LogError("FairyGUI: smoke test failed - " + ex.Message);
 			}
 			catch (Exception ex)
 			{
@@ -87,6 +122,101 @@ namespace FguiRenderServer.Editor
 		{
 			var component = Object.FindObjectOfType<FguiRenderServerBehaviour>();
 			component.StartCoroutine(RunFullExportInEditor(FullTestProjectRoot, FullTestOutputRoot, null));
+		}
+
+		static string PromptForSmokeTestXmlPath()
+		{
+			string initialDirectory = EditorPrefs.GetString(SmokeTestXmlPathPrefKey, DefaultProjectRoot);
+			if (string.IsNullOrWhiteSpace(initialDirectory) || !Directory.Exists(initialDirectory))
+			{
+				initialDirectory = DefaultProjectRoot;
+			}
+
+			string selectedPath = EditorUtility.OpenFilePanel("Select FGUI XML for Smoke Test", initialDirectory, "xml");
+			if (string.IsNullOrWhiteSpace(selectedPath))
+			{
+				return null;
+			}
+
+			selectedPath = Path.GetFullPath(selectedPath);
+			EditorPrefs.SetString(SmokeTestXmlPathPrefKey, Path.GetDirectoryName(selectedPath));
+			return selectedPath;
+		}
+
+		static SmokeTestTarget ResolveSmokeTestTarget(string xmlPath)
+		{
+			if (string.IsNullOrWhiteSpace(xmlPath))
+			{
+				throw new InvalidOperationException("selected XML path is empty");
+			}
+
+			if (!File.Exists(xmlPath))
+			{
+				throw new InvalidOperationException("selected XML file not found - " + xmlPath);
+			}
+
+			string componentName = Path.GetFileName(xmlPath);
+			if (string.IsNullOrWhiteSpace(componentName))
+			{
+				throw new InvalidOperationException("selected XML file name is empty - " + xmlPath);
+			}
+
+			string selectedDirectory = Path.GetFullPath(Path.GetDirectoryName(xmlPath) ?? string.Empty);
+			string packageRootName = null;
+			string projectRoot = null;
+			foreach (string rootName in KnownPackageRoots)
+			{
+				string current = selectedDirectory;
+				while (!string.IsNullOrWhiteSpace(current))
+				{
+					string candidate = Path.Combine(current, rootName);
+					if (Directory.Exists(candidate) && xmlPath.StartsWith(candidate, StringComparison.OrdinalIgnoreCase))
+					{
+						projectRoot = current;
+						packageRootName = rootName;
+						break;
+					}
+
+					DirectoryInfo parent = Directory.GetParent(current);
+					if (parent == null)
+					{
+						break;
+					}
+
+					current = parent.FullName;
+				}
+
+				if (!string.IsNullOrWhiteSpace(projectRoot))
+				{
+					break;
+				}
+ 			}
+
+			if (string.IsNullOrWhiteSpace(projectRoot) || string.IsNullOrWhiteSpace(packageRootName))
+			{
+				throw new InvalidOperationException("could not determine FGUI project root from selected XML path - " + xmlPath);
+			}
+
+			string packageRootPath = Path.Combine(projectRoot, packageRootName);
+			if (!selectedDirectory.StartsWith(packageRootPath, StringComparison.OrdinalIgnoreCase))
+			{
+				throw new InvalidOperationException("selected XML is not inside a recognized package root - " + xmlPath);
+			}
+
+			string relativePath = selectedDirectory.Substring(packageRootPath.Length).TrimStart(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+			if (string.IsNullOrWhiteSpace(relativePath))
+			{
+				throw new InvalidOperationException("selected XML must be inside a package folder - " + xmlPath);
+			}
+
+			string[] parts = relativePath.Split(new[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }, StringSplitOptions.RemoveEmptyEntries);
+			if (parts.Length == 0)
+			{
+				throw new InvalidOperationException("could not determine package name from selected XML path - " + xmlPath);
+			}
+
+			string packageName = parts[0];
+			return new SmokeTestTarget(projectRoot, packageName, componentName);
 		}
 
 		private static IEnumerator RunFullExportInEditor(string projectRoot, string outputRoot, string branchTag)

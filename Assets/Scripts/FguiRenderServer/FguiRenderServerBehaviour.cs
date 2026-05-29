@@ -58,7 +58,6 @@ namespace FguiRenderServer
 
             // Server mode defaults: run in background, windowed, and start with a small window.
             Application.runInBackground = true;
-            Screen.SetResolution(DefaultWindowWidth, DefaultWindowHeight, FullScreenMode.Windowed);
 
             if (args.ContainsKey("no-minimize"))
             {
@@ -421,12 +420,15 @@ namespace FguiRenderServer
 
                 try
                 {
-                    RectInt cropRect = CalculateCaptureRect(panel, captureWidth, captureHeight);
                     Texture2D screenshot = CaptureUiTexture(captureWidth, captureHeight);
                     if (screenshot == null)
                     {
                         throw new InvalidOperationException("capture failed: screenshot texture is null");
                     }
+
+                    // Prefer actual rendered alpha bounds to avoid coordinate-space mismatch clipping.
+                    RectInt fallbackRect = CalculateCaptureRect(panel, captureWidth, captureHeight);
+                    RectInt cropRect = CalculateOpaqueBounds(screenshot, fallbackRect);
 
                     Texture2D outputTexture = CropTexture(screenshot, cropRect);
 
@@ -783,6 +785,56 @@ namespace FguiRenderServer
             cropped.SetPixels(source.GetPixels(clamped.x, clamped.y, clamped.width, clamped.height));
             cropped.Apply();
             return cropped;
+        }
+
+        static RectInt CalculateOpaqueBounds(Texture2D source, RectInt fallbackRect)
+        {
+            if (source == null)
+            {
+                return fallbackRect;
+            }
+
+            Color32[] pixels = source.GetPixels32();
+            int minX = source.width;
+            int minY = source.height;
+            int maxX = -1;
+            int maxY = -1;
+
+            for (int y = 0; y < source.height; y++)
+            {
+                int rowOffset = y * source.width;
+                for (int x = 0; x < source.width; x++)
+                {
+                    if (pixels[rowOffset + x].a == 0)
+                    {
+                        continue;
+                    }
+
+                    if (x < minX)
+                    {
+                        minX = x;
+                    }
+                    if (x > maxX)
+                    {
+                        maxX = x;
+                    }
+                    if (y < minY)
+                    {
+                        minY = y;
+                    }
+                    if (y > maxY)
+                    {
+                        maxY = y;
+                    }
+                }
+            }
+
+            if (maxX < minX || maxY < minY)
+            {
+                return fallbackRect;
+            }
+
+            return new RectInt(minX, minY, (maxX - minX) + 1, (maxY - minY) + 1);
         }
 
         [Serializable]
