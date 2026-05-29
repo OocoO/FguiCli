@@ -289,7 +289,7 @@ namespace FguiRenderServer.Editor
 					yield return null;
 					yield return new WaitForEndOfFrame();
 	
-					screenshot = FguiProjectLoaderTestMenu.CaptureUiTexture(Screen.width, Screen.height);
+					screenshot = FguiRenderServerBehaviour.CaptureUiTexture(Screen.width, Screen.height);
 					if (screenshot == null)
 					{
 						failures.Add(FormatFailure(pkg.name, resourceName, "screenshot is null", componentLogs));
@@ -382,32 +382,7 @@ namespace FguiRenderServer.Editor
 			return sb.ToString().TrimEnd();
 		}
 
-		static Texture2D CaptureUiTexture(int width, int height)
-		{
-			Camera camera = StageCamera.main;
-			if (camera == null)
-			{
-				Debug.LogError("FairyGUI: CaptureUiTexture failed, StageCamera.main is null");
-				return null;
-			}
-
-			RenderTexture rt = RenderTexture.GetTemporary(width, height, 24, RenderTextureFormat.ARGB32);
-			RenderTexture previousRT = camera.targetTexture;
-			RenderTexture previousActive = RenderTexture.active;
-
-			camera.targetTexture = rt;
-			camera.Render();
-			camera.targetTexture = previousRT;
-
-			RenderTexture.active = rt;
-			Texture2D tex = new Texture2D(width, height, TextureFormat.ARGB32, false);
-			tex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
-			tex.Apply();
-			RenderTexture.active = previousActive;
-			RenderTexture.ReleaseTemporary(rt);
-
-			return tex;
-		}
+		
 
 
 		static string Shorten(string value, int maxLength)

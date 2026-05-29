@@ -387,8 +387,6 @@ namespace FguiRenderServer
             GObject panel = null;
 
             RenderRequest request = job.request;
-            int captureWidth = request.width > 0 ? request.width : DefaultRenderWidth;
-            int captureHeight = request.height > 0 ? request.height : DefaultRenderHeight;
             try
             {
                 UIPackage.RemoveAllPackages(true);
@@ -416,21 +414,15 @@ namespace FguiRenderServer
             {
                 // Wait one frame so FairyGUI layout and textures are ready before capture.
                 yield return null;
-                yield return new WaitForEndOfFrame();
+                yield return null;
 
                 try
                 {
-                    Texture2D screenshot = CaptureUiTexture(captureWidth, captureHeight);
-                    if (screenshot == null)
+                    Texture2D outputTexture = CaptureUiTexture(DefaultRenderWidth, DefaultRenderHeight);
+                    if (outputTexture == null)
                     {
                         throw new InvalidOperationException("capture failed: screenshot texture is null");
                     }
-
-                    // Prefer actual rendered alpha bounds to avoid coordinate-space mismatch clipping.
-                    RectInt fallbackRect = CalculateCaptureRect(panel, captureWidth, captureHeight);
-                    RectInt cropRect = CalculateOpaqueBounds(screenshot, fallbackRect);
-
-                    Texture2D outputTexture = CropTexture(screenshot, cropRect);
 
                     pngPath = Path.GetFullPath(request.outPng);
                     string pngDirectory = Path.GetDirectoryName(pngPath);
@@ -443,12 +435,7 @@ namespace FguiRenderServer
                     result.width = outputTexture.width;
                     result.height = outputTexture.height;
 
-                    if (!ReferenceEquals(outputTexture, screenshot))
-                    {
-                        Destroy(outputTexture);
-                    }
-
-                    Destroy(screenshot);
+                    Destroy(outputTexture);
                     File.WriteAllBytes(pngPath, pngBytes);
                 }
                 catch (Exception ex)
@@ -922,7 +909,7 @@ namespace FguiRenderServer
             public bool hasActiveJob;
         }
 
-        static Texture2D CaptureUiTexture(int width, int height)
+        public static Texture2D CaptureUiTexture(int width, int height)
         {
             Camera camera = StageCamera.main;
             if (camera == null)
