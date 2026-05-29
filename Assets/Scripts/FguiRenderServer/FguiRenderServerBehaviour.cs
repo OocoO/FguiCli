@@ -418,7 +418,7 @@ namespace FguiRenderServer
 
                 try
                 {
-                    Texture2D outputTexture = CaptureUiTexture(DefaultRenderWidth, DefaultRenderHeight);
+                    Texture2D outputTexture = CaptureScreen();
                     if (outputTexture == null)
                     {
                         throw new InvalidOperationException("capture failed: screenshot texture is null");
@@ -431,11 +431,20 @@ namespace FguiRenderServer
                         Directory.CreateDirectory(pngDirectory);
                     }
 
-                    byte[] pngBytes = outputTexture.EncodeToPNG();
-                    result.width = outputTexture.width;
-                    result.height = outputTexture.height;
+                    // Trim transparent border pixels.
+                    RectInt opaqueBounds = CalculateOpaqueBounds(outputTexture,
+                        new RectInt(0, 0, outputTexture.width, outputTexture.height));
+                    Texture2D trimmedTexture = CropTexture(outputTexture, opaqueBounds);
+                    if (trimmedTexture != outputTexture)
+                    {
+                        Destroy(outputTexture);
+                    }
 
-                    Destroy(outputTexture);
+                    byte[] pngBytes = trimmedTexture.EncodeToPNG();
+                    result.width = trimmedTexture.width;
+                    result.height = trimmedTexture.height;
+
+                    Destroy(trimmedTexture);
                     File.WriteAllBytes(pngPath, pngBytes);
                 }
                 catch (Exception ex)
@@ -909,8 +918,11 @@ namespace FguiRenderServer
             public bool hasActiveJob;
         }
 
-        public static Texture2D CaptureUiTexture(int width, int height)
+        public static Texture2D CaptureScreen()
         {
+            int width = DefaultRenderWidth;
+            int height = DefaultRenderHeight;
+            
             Camera camera = StageCamera.main;
             if (camera == null)
             {

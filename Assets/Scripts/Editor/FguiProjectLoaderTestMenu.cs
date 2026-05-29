@@ -273,7 +273,6 @@ namespace FguiRenderServer.Editor
 					GRoot.inst.RemoveChildren(0, -1, true);
 					string resourceName = item.name;
 					GObject panel = null;
-					Texture2D screenshot = null;
 					List<string> componentLogs = new List<string>();
 
 					panel = UIPackage.CreateObject(pkg.name, resourceName);
@@ -289,7 +288,7 @@ namespace FguiRenderServer.Editor
 					yield return null;
 					yield return new WaitForEndOfFrame();
 	
-					screenshot = FguiRenderServerBehaviour.CaptureUiTexture(Screen.width, Screen.height);
+					var screenshot = FguiRenderServerBehaviour.CaptureScreen();
 					if (screenshot == null)
 					{
 						failures.Add(FormatFailure(pkg.name, resourceName, "screenshot is null", componentLogs));
@@ -301,6 +300,7 @@ namespace FguiRenderServer.Editor
 					byte[] pngBytes = screenshot.EncodeToPNG();
 					Debug.Log($"Export Png -- {pngPath}");
 					File.WriteAllBytes(pngPath, pngBytes);
+					Object.Destroy(screenshot);
 					successCount += 1;
 				}
 			}
