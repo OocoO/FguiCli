@@ -41,6 +41,8 @@ namespace FairyGUI
 
 		//font
 		public BitmapFont bitmapFont;
+		//font: ttf/otf loaded from the project directory (source-project mode only)
+		public BaseFont dynamicFont;
 
 		//sound
 		public AudioClip audioClip;

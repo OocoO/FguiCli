@@ -79,9 +79,41 @@ namespace FairyGUI
 				throw new DirectoryNotFoundException("FairyGUI project root not found: " + projectRootDirectory);
 
 			FguiProjectLoader loader = new FguiProjectLoader(projectRootDirectory, activeBranchTag);
+			loader.ApplyProjectDefaultFont();
 			loader.ScanPackages();
 			loader.LoadAllPackages();
 			return loader;
+		}
+
+		/// <summary>
+		/// settings/Common.json holds the project-wide default font (editor "默认字体" for texts without an
+		/// explicit font= attribute). UIConfig.defaultFont is static, so always reset it before applying the
+		/// current project's value — the render server may serve different projects in one process.
+		/// </summary>
+		void ApplyProjectDefaultFont()
+		{
+			UIConfig.defaultFont = "";
+
+			string settingsFile = Path.Combine(_projectRootDirectory, "settings", "Common.json");
+			if (!File.Exists(settingsFile))
+				return;
+
+			try
+			{
+				CommonSettings settings = JsonUtility.FromJson<CommonSettings>(File.ReadAllText(settingsFile));
+				if (settings != null && !string.IsNullOrEmpty(settings.font))
+					UIConfig.defaultFont = settings.font;
+			}
+			catch (Exception e)
+			{
+				Debug.LogWarning("Could not read project default font from " + settingsFile + " (" + e.Message + ")");
+			}
+		}
+
+		[Serializable]
+		sealed class CommonSettings
+		{
+			public string font;
 		}
 
 		public UIPackage GetPackage(string packageNameOrId)

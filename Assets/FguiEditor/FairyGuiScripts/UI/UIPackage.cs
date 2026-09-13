@@ -908,8 +908,10 @@ namespace FairyGUI
 				case PackageItemType.Font:
 					if (IsProjectDynamicFontResource(resourceData))
 					{
-						// For raw TTF/OTF project fonts, let FontManager fall back to dynamic fonts.
-						// This avoids forcing a bitmap-font decode path that depends on *.fnt.
+						// For raw TTF/OTF project fonts, build a Font from the ttf file on disk and
+						// register it under the package URL — project XML references fonts as ui://<pkg><item>.
+						// On failure keep falling back to dynamic fonts (never a *.fnt decode path).
+						TryRegisterProjectTtfFont(pi, resourceData);
 						pi.decoded = true;
 					}
 					else
@@ -941,6 +943,25 @@ namespace FairyGUI
 
 			ext = ext.ToLowerInvariant();
 			return ext == ".ttf" || ext == ".otf";
+		}
+
+		void TryRegisterProjectTtfFont(PackageItem pi, FguiProjectLoader.ProjectResourceData resourceData)
+		{
+			if (string.IsNullOrEmpty(resourceData.absoluteFile) || !File.Exists(resourceData.absoluteFile))
+			{
+				Debug.LogWarning("Font file not found for " + URL_PREFIX + id + pi.id + ", rendering will use the default font.");
+				return;
+			}
+
+			Font nativeFont = ProjectTtfFontLoader.GetOrAddFont(resourceData.absoluteFile);
+			if (nativeFont == null)
+				return; //ProjectTtfFontLoader already logged the reason
+
+			DynamicFont font = new DynamicFont(URL_PREFIX + id + pi.id, nativeFont);
+			//A previous request may have cached a fallback DynamicFont under the same URL; replace it.
+			FontManager.RemoveFont(font.name);
+			FontManager.RegisterFont(font, null);
+			pi.dynamicFont = font;
 		}
 
 		void RegisterItemByName(PackageItem item)
@@ -1103,6 +1124,11 @@ namespace FairyGUI
 				}
 				else if (pi.bitmapFont != null)
 					FontManager.UnregisterFont(pi.bitmapFont);
+				else if (pi.dynamicFont != null)
+				{
+					FontManager.RemoveFont(pi.dynamicFont.name);
+					pi.dynamicFont = null;
+				}
 			}
 			_items.Clear();
 

@@ -28,6 +28,26 @@ namespace FairyGUI
 
 		public DynamicFont(string name)
 		{
+			Setup(name);
+			LoadFont();
+		}
+
+		/// <summary>
+		/// Wraps an already-created UnityEngine.Font (e.g. one built from a ttf file on disk by
+		/// ProjectTtfFontLoader) instead of probing Resources/OS fonts by name.
+		/// </summary>
+		public DynamicFont(string name, Font loadedFont)
+		{
+			Setup(name);
+			_font = loadedFont;
+			_font.hideFlags = DisplayOptions.hideFlags;
+			_font.material.hideFlags = DisplayOptions.hideFlags;
+			_font.material.mainTexture.hideFlags = DisplayOptions.hideFlags;
+			BindFont();
+		}
+
+		void Setup(string name)
+		{
 			this.name = name;
 			this.canTint = true;
 			this.canOutline = true;
@@ -48,8 +68,6 @@ namespace FairyGUI
 				this.customBold = Application.isMobilePlatform;
 
 			_renderInfo = new Dictionary<int, RenderInfo>();
-
-			LoadFont();
 		}
 
 		void LoadFont()
@@ -100,6 +118,11 @@ namespace FairyGUI
 				_font.material.mainTexture.hideFlags = DisplayOptions.hideFlags;
 			}
 
+			BindFont();
+		}
+
+		void BindFont()
+		{
 #if (UNITY_4_7 || UNITY_5 || UNITY_5_3_OR_NEWER)
 			Font.textureRebuilt += textureRebuildCallback;
 #else

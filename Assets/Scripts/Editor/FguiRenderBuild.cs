@@ -72,7 +72,29 @@ namespace FguiRenderServer.Editor
                 throw new InvalidOperationException("Build failed: " + summary.result + ", output=" + outputExePath);
             }
 
+            CleanStaleManagedDlls(outputExePath);
+
             UnityEngine.Debug.Log("FGUI Render Server build success: " + outputExePath);
+        }
+
+        //The asmdefs were removed (everything compiles into Assembly-CSharp now), but BuildPlayer does not
+        //prune extra dlls already in Managed/. A leftover FairyGUI.dll from older builds holds duplicate
+        //types and misleads debugging, so remove any such stale assembly after each successful build.
+        static void CleanStaleManagedDlls(string outputExePath)
+        {
+            string outputDirectory = Path.GetDirectoryName(outputExePath);
+            if (string.IsNullOrEmpty(outputDirectory))
+                return;
+
+            string managedDirectory = Path.Combine(outputDirectory, Path.GetFileNameWithoutExtension(outputExePath) + "_Data", "Managed");
+            if (!Directory.Exists(managedDirectory))
+                return;
+
+            foreach (string dll in Directory.GetFiles(managedDirectory, "FairyGUI*.dll"))
+            {
+                File.Delete(dll);
+                UnityEngine.Debug.Log("Removed stale managed dll: " + dll);
+            }
         }
 
         static string GetProjectRoot()

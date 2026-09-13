@@ -35,6 +35,14 @@ namespace FairyGUI
 		}
 
 		/// <summary>
+		/// Removes the font registered under <paramref name="name"/>, whatever its type.
+		/// </summary>
+		static public void RemoveFont(string name)
+		{
+			sFontFactory.Remove(name);
+		}
+
+		/// <summary>
 		/// 
 		/// </summary>
 		/// <param name="name"></param>

@@ -32,6 +32,20 @@ namespace FguiRenderServer.Editor
 		const string FullTestProjectRoot = @"D:\ProjectGit\fgui_idle_dev\FGUIProject";
 		const string FullTestOutputRoot = @"D:\Project\FguiCli\Temp\renderTest";
 		const string SmokeTestXmlPathPrefKey = "FguiRenderServer.Editor.FguiProjectLoaderTestMenu.SmokeTestXmlPath";
+		const string FontAlignProjectRoot = @"D:\ProjectGit\Mainland\fgui_idle_dev_2022\FGUIProject";
+		const string FontAlignEditorOutputRoot = @"D:\Project\FguiCli\Temp\fontAlignEditor";
+		// 与 CLI 打包渲染输出 (Temp\fontAlignCli) 文件名保持一致，方便左右并排对比
+		static readonly string[][] FontAlignTargets =
+		{
+			// { packageName, componentName, outFileName }
+			new[] { "Tips", "confirmBtn.xml", "Tips__confirmBtn.png" },
+			new[] { "Tips", "YesBtnText.xml", "Tips__YesBtnText.png" },
+			new[] { "Tips", "YesBtn.xml", "Tips__YesBtn.png" },
+			new[] { "Tips", "YesBtn_Large.xml", "Tips__YesBtn_Large.png" },
+			new[] { "AccountInfo", "confirmBtn.xml", "AccountInfo__confirmBtn_richtext.png" },
+			new[] { "Lottery", "ConfirmBtn.xml", "Lottery__ConfirmBtn_defaultFont.png" },
+			new[] { "SoldierCultivate", "confirmBtn.xml", "SoldierCultivate__confirmBtn.png" },
+		};
 		static readonly string[] KnownPackageRoots =
 		{
 			"assets",
@@ -41,6 +55,73 @@ namespace FguiRenderServer.Editor
 			"assets_tw",
 			"assets_zh_tc",
 		};
+
+		// 一次性诊断:Unity 侧 OS 字体枚举与 CreateDynamicFontFromOSFont 对思源黑体各名字的解析行为
+		[MenuItem("Tools/Fgui Render/TTF Font Probe")]
+		public static void TtfFontProbe()
+		{
+			var sb = new StringBuilder();
+			const string heavyPath = FontAlignProjectRoot + @"\assets\PublicResources\NewStyle\DiyFont\SourceHanSansCN-Heavy.ttf";
+			const string boldPath = FontAlignProjectRoot + @"\assets\PublicResources\NewStyle\DiyFont\SourceHanSansCN-Bold.ttf";
+
+			string[] osNames = Font.GetOSInstalledFontNames();
+			sb.AppendLine("GetOSInstalledFontNames total=" + (osNames == null ? -1 : osNames.Length));
+			if (osNames != null)
+			{
+				foreach (string n in osNames)
+				{
+					if (n.IndexOf("Source", StringComparison.OrdinalIgnoreCase) >= 0
+						|| n.IndexOf("思源", StringComparison.Ordinal) >= 0
+						|| n.IndexOf("Han", StringComparison.OrdinalIgnoreCase) >= 0)
+						sb.AppendLine("  os> [" + n + "]");
+				}
+			}
+
+			foreach (string path in new[] { heavyPath, boldPath })
+			{
+				sb.AppendLine("---- " + Path.GetFileName(path));
+				List<string> fams = ProjectTtfFontLoader.ParseFamilyNames(path);
+				sb.AppendLine("  parsed families> " + string.Join(" / ", fams.ConvertAll(f => "[" + f + "]").ToArray()));
+				foreach (string fam in fams)
+					ProbeOneFont(sb, fam);
+			}
+			ProbeOneFont(sb, "Microsoft YaHei");
+			//对照:系统回退链路最终用的内置字体基线
+			ProbeFont(sb, "builtinArial", Resources.GetBuiltinResource<Font>("Arial.ttf"));
+
+			string outTxt = Path.Combine(Application.dataPath, "../Temp/fontProbe.txt");
+			File.WriteAllText(outTxt, sb.ToString());
+			Debug.Log("TTF Font Probe written to " + outTxt + "\n" + sb);
+		}
+
+		static void ProbeOneFont(StringBuilder sb, string familyName)
+		{
+			Font f = Font.CreateDynamicFontFromOSFont(familyName, 33);
+			if (f == null)
+			{
+				sb.AppendLine("  Create(" + familyName + ") = null");
+				return;
+			}
+			ProbeFont(sb, familyName, f);
+		}
+
+		static void ProbeFont(StringBuilder sb, string label, Font f)
+		{
+			// 拉丁字符在思源/雅黑/系统回退字体下度量差异明显，全角汉字无法区分
+			const string probe = "Wi@0确认";
+			f.RequestCharactersInTexture(probe, 33, FontStyle.Normal);
+			var line = new StringBuilder("  [" + label + "] name='" + f.name + "'");
+			for (int i = 0; i < probe.Length; i++)
+			{
+				char ch = probe[i];
+				CharacterInfo ci;
+				if (f.GetCharacterInfo(ch, out ci, 33, FontStyle.Normal))
+					line.Append(" '" + ch + "'=" + ci.advance + "/" + ci.glyphWidth + "x" + ci.glyphHeight);
+				else
+					line.Append(" '" + ch + "'=missing");
+			}
+			sb.AppendLine(line.ToString());
+		}
 
 		[MenuItem("Tools/Fgui Render/Smoke Test")]
 		public static void SmokeTest()
@@ -122,6 +203,78 @@ namespace FguiRenderServer.Editor
 		{
 			var component = Object.FindObjectOfType<FguiRenderServerBehaviour>();
 			component.StartCoroutine(RunFullExportInEditor(FullTestProjectRoot, FullTestOutputRoot, null));
+		}
+
+		// 排查字体居中 bug：走与 CLI 打包版完全相同的 StartRenderRequest 管线，
+		// 在 Editor 内批量渲染 Mainland 项目的确认类按钮。
+		// 输出到 Temp\fontAlignEditor，文件名与 Temp\fontAlignCli（打包版输出）一一对应，直接并排对比。
+		[MenuItem("Tools/Fgui Render/Font Align Compare (Mainland Buttons)")]
+		public static void FontAlignCompareMenu()
+		{
+			var component = Object.FindObjectOfType<FguiRenderServerBehaviour>();
+			if (component == null)
+			{
+				Debug.LogError("FairyGUI: font align compare failed, FguiRenderServerBehaviour not found in scene.");
+				return;
+			}
+
+			component.StartCoroutine(RunFontAlignCompare(component));
+		}
+
+		static System.Collections.IEnumerator RunFontAlignCompare(FguiRenderServerBehaviour component)
+		{
+			if (!Directory.Exists(FontAlignProjectRoot))
+			{
+				Debug.LogError("FairyGUI: project root not found - " + FontAlignProjectRoot);
+				yield break;
+			}
+
+			Directory.CreateDirectory(FontAlignEditorOutputRoot);
+
+			int successCount = 0;
+			foreach (string[] target in FontAlignTargets)
+			{
+				string packageName = target[0];
+				string componentName = target[1];
+				string pngPath = Path.Combine(FontAlignEditorOutputRoot, target[2]);
+
+				FguiRenderServerBehaviour.RenderResult result = null;
+				component.StartRenderRequest(
+					new FguiRenderServerBehaviour.RenderRequest
+					{
+						projectRootDir = FontAlignProjectRoot,
+						packageName = packageName,
+						componentName = componentName,
+						outPng = pngPath,
+						branchTag = string.Empty,
+					},
+					r => result = r);
+
+				while (result == null)
+				{
+					yield return null;
+				}
+
+				if (result.ok)
+				{
+					successCount += 1;
+					Debug.Log(string.Format(
+						"FairyGUI: font align render ok. {0}/{1} -> {2} ({3}x{4}, {5}ms)",
+						packageName, componentName, pngPath, result.width, result.height, result.durationMs));
+				}
+				else
+				{
+					Debug.LogError(string.Format(
+						"FairyGUI: font align render failed. {0}/{1} - {2}",
+						packageName, componentName, result.message));
+				}
+			}
+
+			AssetDatabase.Refresh();
+			Debug.Log(string.Format(
+				"FairyGUI: font align compare finished. success={0}/{1}, editorOutput={2}, cliOutput={3}",
+				successCount, FontAlignTargets.Length, FontAlignEditorOutputRoot,
+				Path.Combine(Path.GetDirectoryName(FullTestOutputRoot), "fontAlignCli")));
 		}
 
 		static string PromptForSmokeTestXmlPath()
