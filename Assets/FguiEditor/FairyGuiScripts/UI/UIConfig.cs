@@ -21,8 +21,16 @@ namespace FairyGUI
 		/// When using chinese fonts on desktop, I found that the display effect is not very clear. So I wrote shaders to light up their outline.
 		/// If you dont use chinese fonts, or dont like the new effect, just set to false here.
 		/// The switch is meaningless on mobile platforms.
+		/// FguiCli: disabled to stay pixel-identical with the game client, which always uses the plain Text shader.
 		/// </summary>
-		public static bool renderingTextBrighterOnDesktop = true;
+		public static bool renderingTextBrighterOnDesktop = false;
+
+		/// <summary>
+		/// Indicates whether to draw extra 4 or 8 times to achieve stroke effect for textfield.
+		/// If it is true, that is the 8 times, otherwise it is the 4 times.
+		/// Keep the same default as the game client's UIConfig.
+		/// </summary>
+		public static bool enhancedTextOutlineEffect = false;
 
 		/// <summary>
 		/// Resource using in Window.ShowModalWait for locking the window.

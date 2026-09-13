@@ -21,8 +21,9 @@ namespace FairyGUI
 		bool _html;
 		bool _rtl;
 
-		int _stroke;
+		float _stroke;
 		Color _strokeColor;
+		Color _shadowColor;
 		Vector2 _shadowOffset;
 
 		List<HtmlElement> _elements;
@@ -46,7 +47,9 @@ namespace FairyGUI
 		static float[] STROKE_OFFSET = new float[]
 		{
 			 -1f, 0f, 1f, 0f,
-			0f, -1f, 0f, 1f
+			0f, -1f, 0f, 1f,
+			-1f, -1f, 1f, -1f,
+			-1f, 1f, 1f, 1f
 		};
 		static float[] BOLD_OFFSET = new float[]
 		{
@@ -60,6 +63,7 @@ namespace FairyGUI
 
 			_textFormat = new TextFormat();
 			_strokeColor = Color.black;
+			_shadowColor = Color.black;
 			_fontSizeScale = 1;
 			_renderScale = UIContentScaler.scaleFactor;
 
@@ -230,7 +234,7 @@ namespace FairyGUI
 		/// <summary>
 		/// 
 		/// </summary>
-		public int stroke
+		public float stroke
 		{
 			get
 			{
@@ -278,6 +282,25 @@ namespace FairyGUI
 			{
 				_shadowOffset = value;
 				_requireUpdateMesh = true;
+			}
+		}
+
+		/// <summary>
+		///
+		/// </summary>
+		public Color shadowColor
+		{
+			get
+			{
+				return _shadowColor;
+			}
+			set
+			{
+				if (_shadowColor != value)
+				{
+					_shadowColor = value;
+					_requireUpdateMesh = true;
+				}
 			}
 		}
 
@@ -1365,12 +1388,13 @@ namespace FairyGUI
 			}
 
 			bool hasShadow = _shadowOffset.x != 0 || _shadowOffset.y != 0;
+			int strokeDirs = UIConfig.enhancedTextOutlineEffect ? 8 : 4;
 			if ((_stroke != 0 || hasShadow) && _font.canOutline)
 			{
 				int count = vertList.Count;
 				int allocCount = count;
 				if (_stroke != 0)
-					allocCount += count * 4;
+					allocCount += count * strokeDirs;
 				if (hasShadow)
 					allocCount += count;
 				graphics.Alloc(allocCount);
@@ -1396,8 +1420,8 @@ namespace FairyGUI
 				Color32 strokeColor = _strokeColor;
 				if (_stroke != 0)
 				{
-					start = allocCount - count * 5;
-					for (int j = 0; j < 4; j++)
+					start = allocCount - count * (strokeDirs + 1);
+					for (int j = 0; j < strokeDirs; j++)
 					{
 						for (int i = 0; i < count; i++)
 						{
@@ -1417,6 +1441,7 @@ namespace FairyGUI
 
 				if (hasShadow)
 				{
+					Color32 shadowColor = _shadowColor;
 					for (int i = 0; i < count; i++)
 					{
 						Vector3 vert = vertList[i];
@@ -1427,7 +1452,7 @@ namespace FairyGUI
 							u.y = 10 + u.y;
 						uvBuf[i] = u;
 						vertBuf[i] = new Vector3(vert.x + _shadowOffset.x, vert.y - _shadowOffset.y, 0);
-						colBuf[i] = strokeColor;
+						colBuf[i] = shadowColor;
 					}
 				}
 			}

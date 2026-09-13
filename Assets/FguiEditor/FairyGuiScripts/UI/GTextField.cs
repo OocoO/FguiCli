@@ -138,7 +138,7 @@ namespace FairyGUI
 		/// <summary>
 		/// 
 		/// </summary>
-		public int stroke
+		public float stroke
 		{
 			get { return _textField.stroke; }
 			set { _textField.stroke = value; }
@@ -164,6 +164,15 @@ namespace FairyGUI
 		{
 			get { return _textField.shadowOffset; }
 			set { _textField.shadowOffset = value; }
+		}
+
+		/// <summary>
+		///
+		/// </summary>
+		public Color shadowColor
+		{
+			get { return _textField.shadowColor; }
+			set { _textField.shadowColor = value; }
 		}
 
 		/// <summary>
@@ -306,13 +315,13 @@ namespace FairyGUI
 			if (str != null)
 			{
 				this.strokeColor = ToolSet.ConvertFromHtmlColor(str);
-				this.stroke = xml.GetAttributeInt("strokeSize", 1);
+				this.stroke = xml.GetAttributeFloat("strokeSize", 1);
 			}
 
 			str = xml.GetAttribute("shadowColor");
 			if (str != null)
 			{
-				this.strokeColor = ToolSet.ConvertFromHtmlColor(str);
+				this.shadowColor = ToolSet.ConvertFromHtmlColor(str);
 				this.shadowOffset = xml.GetAttributeVector("shadowOffset");
 			}
 
