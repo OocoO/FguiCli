@@ -56,6 +56,9 @@ namespace FguiRenderServer.Editor
                 Directory.CreateDirectory(outputDirectory);
             }
 
+            //Project ttf/otf files are rasterized from disk at runtime by ExternalFont, so the build
+            //no longer needs to pack font assets into Resources.
+
             BuildPlayerOptions options = new BuildPlayerOptions
             {
                 scenes = scenes,

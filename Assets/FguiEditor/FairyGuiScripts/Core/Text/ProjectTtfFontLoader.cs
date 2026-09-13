@@ -102,10 +102,12 @@ namespace FairyGUI
 			return name;
 		}
 
-		static void RegisterWithOS(string absPath)
+		//Returns the AddFontResourceEx face count, or -1 when this process registered the file before.
+		//Public for the editor diagnostic menu.
+		static public int RegisterWithOS(string absPath)
 		{
 			if (sRegisteredFiles.Contains(absPath))
-				return;
+				return -1;
 
 			//Flag 0 (not FRHDWNT_PRIVATE): the font must be enumerable by GDI/DirectWrite for
 			//CreateDynamicFontFromOSFont to see it. It stays registered for the session only.
@@ -119,6 +121,7 @@ namespace FairyGUI
 
 			IntPtr result;
 			SendMessageTimeoutW(HWND_BROADCAST, WM_FONTCHANGE, IntPtr.Zero, IntPtr.Zero, SMTO_ABORTIFHUNG, 1000, out result);
+			return added;
 		}
 
 		static void EnsureQuitHook()

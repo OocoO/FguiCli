@@ -56,7 +56,8 @@ namespace FguiRenderServer.Editor
 			"assets_zh_tc",
 		};
 
-		// 一次性诊断:Unity 侧 OS 字体枚举与 CreateDynamicFontFromOSFont 对思源黑体各名字的解析行为
+		// 一次性诊断:本机其实未安装思源黑体;验证进程内 GDI 注册的字体能否被 Unity
+		// CreateDynamicFontFromOSFont 解析,以及"文件路径/文件名作 name"是否可直接命中(若是则整个注册+枚举环节都可省)。
 		[MenuItem("Tools/Fgui Render/TTF Font Probe")]
 		public static void TtfFontProbe()
 		{
@@ -65,44 +66,55 @@ namespace FguiRenderServer.Editor
 			const string boldPath = FontAlignProjectRoot + @"\assets\PublicResources\NewStyle\DiyFont\SourceHanSansCN-Bold.ttf";
 
 			string[] osNames = Font.GetOSInstalledFontNames();
-			sb.AppendLine("GetOSInstalledFontNames total=" + (osNames == null ? -1 : osNames.Length));
-			if (osNames != null)
-			{
-				foreach (string n in osNames)
-				{
-					if (n.IndexOf("Source", StringComparison.OrdinalIgnoreCase) >= 0
-						|| n.IndexOf("思源", StringComparison.Ordinal) >= 0
-						|| n.IndexOf("Han", StringComparison.OrdinalIgnoreCase) >= 0)
-						sb.AppendLine("  os> [" + n + "]");
-				}
-			}
+			sb.AppendLine("unityEnum total=" + (osNames == null ? -1 : osNames.Length) + " hasSourceHan=" + EnumHasSourceHan(osNames));
 
-			foreach (string path in new[] { heavyPath, boldPath })
-			{
-				sb.AppendLine("---- " + Path.GetFileName(path));
-				List<string> fams = ProjectTtfFontLoader.ParseFamilyNames(path);
-				sb.AppendLine("  parsed families> " + string.Join(" / ", fams.ConvertAll(f => "[" + f + "]").ToArray()));
-				foreach (string fam in fams)
-					ProbeOneFont(sb, fam);
-			}
-			ProbeOneFont(sb, "Microsoft YaHei");
-			//对照:系统回退链路最终用的内置字体基线
-			ProbeFont(sb, "builtinArial", Resources.GetBuiltinResource<Font>("Arial.ttf"));
+			// A. 注册前(本机未安装,预期全部静默回退,指纹 = legacy)
+			ProbeCreate(sb, "PRE name[Source Han Sans CN]", "Source Han Sans CN");
+			ProbeCreate(sb, "PRE path[boldFile]", boldPath);
+			ProbeCreate(sb, "PRE file[boldFileName]", Path.GetFileName(boldPath));
+
+			// B. GDI 注册两个 ttf(flag 0,登录会话内全系统可见)
+			sb.AppendLine("RegisterWithOS bold=" + ProjectTtfFontLoader.RegisterWithOS(boldPath)
+				+ " heavy=" + ProjectTtfFontLoader.RegisterWithOS(heavyPath));
+			sb.AppendLine("unityEnumAfter hasSourceHan=" + EnumHasSourceHan(Font.GetOSInstalledFontNames()));
+
+			// C. 注册后按 family name 解析
+			ProbeCreate(sb, "POST name[Source Han Sans CN]", "Source Han Sans CN");
+			ProbeCreate(sb, "POST name[Source Han Sans CN Heavy]", "Source Han Sans CN Heavy");
+			ProbeCreate(sb, "POST name[siyuanCN]", "思源黑体 CN");
+			ProbeCreate(sb, "POST path[boldFile]", boldPath);
+
+			// 基线:YaHei(真实字体,度量不同) + legacy(回退指纹)
+			ProbeCreate(sb, "BASE YaHei", "Microsoft YaHei");
+			ProbeFont(sb, "BASE legacy", Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf"));
 
 			string outTxt = Path.Combine(Application.dataPath, "../Temp/fontProbe.txt");
 			File.WriteAllText(outTxt, sb.ToString());
 			Debug.Log("TTF Font Probe written to " + outTxt + "\n" + sb);
 		}
 
-		static void ProbeOneFont(StringBuilder sb, string familyName)
+		static void ProbeCreate(StringBuilder sb, string label, string nameOrPath)
 		{
-			Font f = Font.CreateDynamicFontFromOSFont(familyName, 33);
+			Font f = Font.CreateDynamicFontFromOSFont(nameOrPath, 33);
 			if (f == null)
 			{
-				sb.AppendLine("  Create(" + familyName + ") = null");
+				sb.AppendLine("  " + label + " -> null");
 				return;
 			}
-			ProbeFont(sb, familyName, f);
+			ProbeFont(sb, label, f);
+		}
+
+		static bool EnumHasSourceHan(string[] names)
+		{
+			if (names == null)
+				return false;
+			foreach (string n in names)
+			{
+				if (n.IndexOf("Source Han", StringComparison.OrdinalIgnoreCase) >= 0
+					|| n.IndexOf("思源", StringComparison.Ordinal) >= 0)
+					return true;
+			}
+			return false;
 		}
 
 		static void ProbeFont(StringBuilder sb, string label, Font f)

@@ -908,8 +908,8 @@ namespace FairyGUI
 				case PackageItemType.Font:
 					if (IsProjectDynamicFontResource(resourceData))
 					{
-						// For raw TTF/OTF project fonts, build a Font from the ttf file on disk and
-						// register it under the package URL — project XML references fonts as ui://<pkg><item>.
+						// For raw TTF/OTF project fonts, resolve a Font and register it under the
+						// package URL — project XML references fonts as ui://<pkg><item>.
 						// On failure keep falling back to dynamic fonts (never a *.fnt decode path).
 						TryRegisterProjectTtfFont(pi, resourceData);
 						pi.decoded = true;
@@ -953,13 +953,31 @@ namespace FairyGUI
 				return;
 			}
 
-			Font nativeFont = ProjectTtfFontLoader.GetOrAddFont(resourceData.absoluteFile);
-			if (nativeFont == null)
-				return; //ProjectTtfFontLoader already logged the reason
+			string fontName = URL_PREFIX + id + pi.id;
 
-			DynamicFont font = new DynamicFont(URL_PREFIX + id + pi.id, nativeFont);
-			//A previous request may have cached a fallback DynamicFont under the same URL; replace it.
-			FontManager.RemoveFont(font.name);
+			//Rasterize the ttf/otf straight from disk with the font engine — the same mechanism the
+			//FairyGUI editor uses to draw project fonts, so no build step and no OS registration are
+			//involved. The fallback keeps players working where the font is really installed (Unity's
+			//OS-font resolution does not see AddFontResourceEx fonts).
+			BaseFont font = ExternalFont.TryCreate(fontName, resourceData.absoluteFile, 0);
+			if (font == null)
+			{
+				Font nativeFont = ProjectTtfFontLoader.GetOrAddFont(resourceData.absoluteFile);
+				if (nativeFont == null)
+					return; //The loader already logged a neutral reason
+
+				font = new DynamicFont(fontName, nativeFont);
+			}
+
+			//A previous request may have cached a fallback font under the same URL; replace it.
+			BaseFont previous = FontManager.GetFont(fontName);
+			if (previous != null)
+			{
+				FontManager.RemoveFont(fontName);
+				ExternalFont staleAtlas = previous as ExternalFont;
+				if (staleAtlas != null)
+					staleAtlas.Dispose();
+			}
 			FontManager.RegisterFont(font, null);
 			pi.dynamicFont = font;
 		}
@@ -1127,6 +1145,10 @@ namespace FairyGUI
 				else if (pi.dynamicFont != null)
 				{
 					FontManager.RemoveFont(pi.dynamicFont.name);
+					//Fonts rasterized from disk own their atlas texture; release it with the package.
+					ExternalFont external = pi.dynamicFont as ExternalFont;
+					if (external != null)
+						external.Dispose();
 					pi.dynamicFont = null;
 				}
 			}
