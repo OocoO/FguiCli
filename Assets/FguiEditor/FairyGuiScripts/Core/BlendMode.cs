@@ -92,8 +92,30 @@ namespace FairyGUI
 		public static void Apply(Material mat, BlendMode blendMode)
 		{
 			int index = (int)blendMode * 2;
-			mat.SetFloat("_BlendSrcFactor", Factors[index]);
-			mat.SetFloat("_BlendDstFactor", Factors[index + 1]);
+			float srcFactor = Factors[index];
+			float dstFactor = Factors[index + 1];
+			mat.SetFloat("_BlendSrcFactor", srcFactor);
+			mat.SetFloat("_BlendDstFactor", dstFactor);
+
+			//alpha 通道的混合因子。Normal 等模式下源因子用 One(而不是 SrcAlpha)，
+			//这样半透明图层(如字体描边、阴影)相互叠加时，目标 alpha 按标准 over 计算
+			//(1*srcA + dstA*(1-srcA))，不会被反算成 1-srcA+srcA*srcA 而变小，
+			//从而消除描边与阴影之间出现的透明缝隙；其他模式保持原有语义。
+			mat.SetFloat("_BlendSrcFactorA", ToAlphaFactor(srcFactor, true));
+			mat.SetFloat("_BlendDstFactorA", ToAlphaFactor(dstFactor, false));
+		}
+
+		static float ToAlphaFactor(float rgbFactor, bool isSrc)
+		{
+			if (rgbFactor == (float)UnityEngine.Rendering.BlendMode.SrcAlpha)
+				return isSrc ? (float)UnityEngine.Rendering.BlendMode.One : rgbFactor;
+			else if (rgbFactor == (float)UnityEngine.Rendering.BlendMode.SrcColor)
+				return (float)UnityEngine.Rendering.BlendMode.SrcAlpha;
+			else if (rgbFactor == (float)UnityEngine.Rendering.BlendMode.DstColor)
+				return (float)UnityEngine.Rendering.BlendMode.DstAlpha;
+			else if (rgbFactor == (float)UnityEngine.Rendering.BlendMode.OneMinusSrcColor)
+				return (float)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha;
+			return rgbFactor;
 		}
 
 		/// <summary>

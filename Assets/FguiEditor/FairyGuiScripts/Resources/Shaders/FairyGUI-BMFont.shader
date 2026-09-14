@@ -17,6 +17,10 @@ Shader "FairyGUI/BMFont"
 
 		_BlendSrcFactor ("Blend SrcFactor", Float) = 5
 		_BlendDstFactor ("Blend DstFactor", Float) = 10
+		//描边/阴影等半透明图层叠加时，alpha 通道按正确的 over 叠加(1*srcA + dstA*(1-srcA))计算，
+		//而不再把已被覆盖为不透明的目标 alpha 反算变小，避免描边与阴影之间出现透明缝隙
+		_BlendSrcFactorA ("Blend SrcFactorAlpha", Float) = 1
+		_BlendDstFactorA ("Blend DstFactorAlpha", Float) = 10
 	}
 
 	SubShader
@@ -43,7 +47,7 @@ Shader "FairyGUI/BMFont"
 		Lighting Off
 		ZWrite Off
 		Fog { Mode Off }
-		Blend [_BlendSrcFactor] [_BlendDstFactor]
+		Blend [_BlendSrcFactor] [_BlendDstFactor], [_BlendSrcFactorA] [_BlendDstFactorA]
 		ColorMask [_ColorMask]
 
 		Pass

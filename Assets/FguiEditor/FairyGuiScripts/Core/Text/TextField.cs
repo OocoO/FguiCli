@@ -1396,7 +1396,7 @@ namespace FairyGUI
 				if (_stroke != 0)
 					allocCount += count * strokeDirs;
 				if (hasShadow)
-					allocCount += count;
+					allocCount += (_stroke != 0) ? (count * (strokeDirs + 1)) : count; // 阴影 = 描边副本 + 字身副本（两次渲染语义）
 				graphics.Alloc(allocCount);
 
 				Vector3[] vertBuf = graphics.vertices;
@@ -1441,18 +1441,44 @@ namespace FairyGUI
 
 				if (hasShadow)
 				{
+					// 阴影 = 第一遍字体渲染（含描边）：整体偏移 shadowOffset，全部使用 shadowColor。
+					// 结构与正文层一致：先 strokeDirs 方向描边副本，再字身副本，所有顶点都用 uv.y+10 标记，
+					// 让着色器把整个阴影层当描边层处理（不参与半透明混合），
+					// 正文作为第二遍渲染直接覆盖其上。对齐官方 GenerateShadow 在 GenerateOutline
+					// 之后复制“描边+字身”完整顶点的语义。
 					Color32 shadowColor = _shadowColor;
+					float shadowX = _shadowOffset.x;
+					float shadowY = _shadowOffset.y;
+					int s = 0;
+					if (_stroke != 0)
+					{
+						for (int j = 0; j < strokeDirs; j++)
+						{
+							for (int i = 0; i < count; i++)
+							{
+								Vector3 vert = vertList[i];
+								Vector2 u = uvList[i];
+
+								//使用这个特殊的设置告诉着色器这个是描边
+								u.y = 10 + u.y;
+								uvBuf[s] = u;
+								vertBuf[s] = new Vector3(vert.x + STROKE_OFFSET[j * 2] * _stroke + shadowX, vert.y + STROKE_OFFSET[j * 2 + 1] * _stroke - shadowY, 0);
+								colBuf[s] = shadowColor;
+								s++;
+							}
+						}
+					}
 					for (int i = 0; i < count; i++)
 					{
 						Vector3 vert = vertList[i];
 						Vector2 u = uvList[i];
 
-						//使用这个特殊的设置告诉着色器这个是描边
-						if (_font.canOutline)
-							u.y = 10 + u.y;
-						uvBuf[i] = u;
-						vertBuf[i] = new Vector3(vert.x + _shadowOffset.x, vert.y - _shadowOffset.y, 0);
-						colBuf[i] = shadowColor;
+						//使用这个特殊的设置告诉着色器这是阴影层
+						u.y = 10 + u.y;
+						uvBuf[s] = u;
+						vertBuf[s] = new Vector3(vert.x + shadowX, vert.y - shadowY, 0);
+						colBuf[s] = shadowColor;
+						s++;
 					}
 				}
 			}

@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fgui-render-client"
+version = "1.0.0"
+description = "FairyGUI render client and MCP server - wraps Unity FguiRenderServer over HTTP"
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.0.0,<2",
+]
+
+[project.scripts]
+fgui-render-mcp = "fgui_render_mcp_server:main"
+
+[tool.setuptools]
+py-modules = ["_client", "fgui_render_mcp_server"]

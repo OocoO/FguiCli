@@ -9,7 +9,7 @@ from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
 
-from fgui_render_client import DEFAULT_SERVER, RenderRequest, health, render_page
+from _client import DEFAULT_SERVER, RenderRequest, health, render_page
 
 _EXE_DIR = Path(__file__).parent / "FguiRenderServer"
 _EXE_PATH = _EXE_DIR / "FguiRenderServer.exe"
