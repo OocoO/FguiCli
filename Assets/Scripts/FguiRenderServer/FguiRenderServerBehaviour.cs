@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -50,6 +50,9 @@ namespace FguiRenderServer
         void Awake()
         {
             DontDestroyOnLoad(gameObject);
+            // 设置窗口分辨率与渲染输出分辨率一致，避免字体缩放导致的模糊
+            Screen.SetResolution(DefaultRenderWidth, DefaultRenderHeight, false);
+                        UIConfig.renderingTextBrighterOnDesktop = false;
             Stage.Instantiate();
             GRoot.inst.SetContentScaleFactor(1920, 1080);
 
@@ -400,6 +403,7 @@ namespace FguiRenderServer
                 }
 
                 panel = CreatePanelFromRequest(request);
+                ApplyDisplayOverrides(panel, request.overrides);
 
                 PreparePanelForCapture(panel);
                 panel.position = Vector3.zero;
@@ -846,8 +850,84 @@ namespace FguiRenderServer
             public int width = DefaultRenderWidth;
             public int height = DefaultRenderHeight;
             public int timeoutSec = 120;
+            public List<DisplayOverride> overrides;
         }
 
+        [Serializable]
+        public sealed class DisplayOverride
+        {
+            public List<string> path;
+            public string controller;
+            public int page = -1;
+            public bool forceVisible;
+        }
+
+        static void ApplyDisplayOverrides(GObject panel, List<DisplayOverride> overrides)
+        {
+            if (panel == null || overrides == null || overrides.Count == 0)
+            {
+                return;
+            }
+
+            foreach (DisplayOverride ov in overrides)
+            {
+                if (ov == null)
+                {
+                    continue;
+                }
+
+                List<string> path = ov.path ?? new List<string>();
+                int containerDepth = path.Count;
+                if (ov.forceVisible && containerDepth > 0)
+                {
+                    containerDepth -= 1;
+                }
+
+                GComponent container = panel as GComponent;
+                bool ok = container != null;
+                for (int i = 0; ok && i < containerDepth; i++)
+                {
+                    GObject child = container.GetChild(path[i]);
+                    container = child as GComponent;
+                    ok = container != null;
+                    if (!ok)
+                    {
+                        Debug.LogWarning(string.Format("override skipped: path segment not a component: {0}", path[i]));
+                    }
+                }
+
+                if (!ok)
+                {
+                    continue;
+                }
+
+                if (!string.IsNullOrEmpty(ov.controller))
+                {
+                    Controller ctrl = container.GetController(ov.controller);
+                    if (ctrl != null && ov.page >= 0 && ov.page < ctrl.pageCount)
+                    {
+                        ctrl.selectedIndex = ov.page;
+                    }
+                    else
+                    {
+                        Debug.LogWarning(string.Format("override skipped: controller/page invalid: {0} page={1}", ov.controller, ov.page));
+                    }
+                }
+
+                if (ov.forceVisible && path.Count > 0)
+                {
+                    GObject target = container.GetChild(path[path.Count - 1]);
+                    if (target != null)
+                    {
+                        target.visible = true;
+                    }
+                    else
+                    {
+                        Debug.LogWarning(string.Format("override skipped: child not found: {0}", path[path.Count - 1]));
+                    }
+                }
+            }
+        }
         static GObject CreatePanelFromRequest(RenderRequest request)
         {
             if (!string.IsNullOrWhiteSpace(request.componentId))

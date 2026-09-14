@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from fgui_render_client import RenderRequest, health, render_page
+from fgui_render_client._client import RenderRequest, health, render_page
 
 
 class _MockHandler(BaseHTTPRequestHandler):
