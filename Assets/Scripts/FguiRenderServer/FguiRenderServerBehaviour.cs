@@ -406,7 +406,18 @@ namespace FguiRenderServer
                 ApplyDisplayOverrides(panel, request.overrides);
 
                 PreparePanelForCapture(panel);
-                panel.position = Vector3.zero;
+                //XML anchor="true" sets pivotAsAnchor, which makes the object's own pivot (0.5,0.5)
+                //the position reference. With position=zero the object's *center* lands on the stage
+                //origin, so its top-left quadrant falls outside the screen and the capture only
+                //contained the bottom-right quadrant (a 200x82 button came out as 100x41).
+                //The editor canvas shows a component with its top-left corner at the origin, so
+                //clear the anchor-as-position flag (pivotX/pivotY are kept).
+                //Order matters: clear the flag, then move 1px and back, because SetPosition skips
+                //the update when the value is unchanged and HandlePositionChanged is what re-derives
+                //displayObject.location (adding width*pivotX when pivotAsAnchor is false).
+                panel.pivotAsAnchor = false;
+                panel.SetXY(1, 1);
+                panel.SetXY(0, 0);
                 GRoot.inst.AddChild(panel);
             }
             catch (Exception ex)
