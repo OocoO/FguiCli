@@ -555,34 +555,53 @@ namespace FairyGUI
 
 			EnsureFace(size);
 
+			//The probe string contains glyphs whose ink reaches far outside the face's own
+			//ascent/descent band ('|' descends to -10 at size 32). Those outliers must not decide
+			//the line box: DynamicFont - what the editor renders with - derives line.height from
+			//the drawn character's metrics and the face ascent/descent, so a plain CJK label ended
+			//up ~4px higher here than in the editor when '|' stretched the box from 32 to 38.
+			FaceInfo face = FontEngine.GetFaceInfo();
+			int faceAscent = Mathf.CeilToInt(face.ascentLine);
+			int faceDescent = Mathf.FloorToInt(face.descentLine);
+			int faceLineHeight = Mathf.RoundToInt(face.lineHeight);
+
 			float y0 = float.MinValue;
 			float y1 = float.MaxValue;
-			int glyphHeight = size;
+			List<int> inBandHeights = new List<int>();
 			int cnt = TEST_STRING.Length;
 			for (int i = 0; i < cnt; i++)
 			{
 				GlyphData gd = EnsureGlyph(se, TEST_STRING[i]);
 				if (gd == null)
 					continue;
-				float top = Mathf.RoundToInt(gd.bearingY);
-				float bottom = Mathf.RoundToInt(gd.bearingY) - gd.h;
+				int top = Mathf.RoundToInt(gd.bearingY);
+				int bottom = top - gd.h;
+				if (top > faceAscent || bottom < faceDescent)
+					continue;   //outlier: leave it out of the line box
 				y0 = Mathf.Max(y0, top);
 				y1 = Mathf.Min(y1, bottom);
-				glyphHeight = Mathf.Max(glyphHeight, gd.h);
+				inBandHeights.Add(gd.h);
 			}
 			FlushAtlas();
 
-			if (y0 == float.MinValue) //the test string has no glyphs at all in this face
+			if (inBandHeights.Count == 0) //no usable glyph in this face
 			{
-				se.yIndent = size;
-				se.height = size;
+				se.yIndent = faceAscent;
+				se.height = faceLineHeight > 0 ? faceLineHeight : size;
 				return se;
 			}
 
-			int displayHeight = (int)(y0 - y1);
-			se.height = Mathf.Max(glyphHeight, displayHeight);
+			//Line box used by TextField.VertAlignType.Middle. DynamicFont (the editor) sizes the
+			//box from the glyph actually being drawn. The probe string is not representative -
+			//besides CJK it carries 'j' (h=35) and '|' (h=38) whose long descenders would inflate
+			//the box and shift the text up - so take the median in-band height instead of the max.
+			inBandHeights.Sort();
+			int repHeight = inBandHeights[inBandHeights.Count / 2];
+			int glyphHeight = inBandHeights[inBandHeights.Count - 1];
+			int inkHeight = (int)(y0 - y1);
+			se.height = repHeight;
 			se.yIndent = (int)y0;
-			if (displayHeight < glyphHeight)
+			if (inkHeight < glyphHeight)
 				se.yIndent++;
 			return se;
 		}
