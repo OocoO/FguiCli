@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
@@ -392,8 +392,14 @@ namespace FguiRenderServer
             RenderRequest request = job.request;
             try
             {
-                UIPackage.RemoveAllPackages(true);
+                //Teardown order matters: detach and dispose the previous panel *before* releasing the
+                //packages. A text that never got laid out (typically a richtext hidden by a controller
+                //gear) builds its lines lazily from RichTextField.Dispose -> CleanupObjects, and that
+                //build rasterizes glyphs. If the packages are gone first, UIPackage.Dispose has already
+                //destroyed the ExternalFont atlas and the rasterizer is called with a dead texture,
+                //which is a native crash inside FontEngine.TryAddGlyphToTexture_Internal.
                 GRoot.inst.RemoveChildren(0, -1, true);
+                UIPackage.RemoveAllPackages(true);
 
                 FguiProjectLoader loader = FguiProjectLoader.LoadProject(request.projectRootDir, request.branchTag);
                 UIPackage package = loader.GetPackage(request.packageName);

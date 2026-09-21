@@ -25,7 +25,6 @@ namespace FairyGUI
 		const int PADDING = 0;
 		const int PACKING_MODIFIER = 1;   //see CreateAtlas
 		const GlyphRenderMode RENDER_MODE = GlyphRenderMode.SMOOTH_HINTED;
-		const string TEST_STRING = "fj|_我案愛爱";
 
 		static bool sEngineInited;
 		static readonly HashSet<string> sLoggedPaths = new HashSet<string>();
@@ -98,8 +97,8 @@ namespace FairyGUI
 			public int size;   //the raster size this entry caches, for face (re)loading
 			public Dictionary<uint, GlyphData> glyphs = new Dictionary<uint, GlyphData>();
 			public HashSet<uint> missing = new HashSet<uint>();
-			public int yIndent;
-			public int height;
+			public int yIndent;   //baseline distance from the line top (= point size), see Measure
+			public int height;    //line height (= 1.25 * point size), see Measure
 			public bool measured;
 		}
 
@@ -385,6 +384,16 @@ namespace FairyGUI
 			if (se.missing.Contains(ch))
 				return null;
 
+			//The atlas is owned by the package and destroyed with it (UIPackage.Dispose). Anything
+			//still holding this font afterwards - a UI tree being torn down, for instance - must not
+			//reach the native rasterizer with a dead texture: that is a hard crash inside
+			//FontEngine.TryAddGlyphToTexture_Internal, not a managed exception.
+			if (_atlasTex == null)
+			{
+				se.missing.Add(ch);
+				return null;
+			}
+
 			uint glyphIndex;
 			if (!FontEngine.TryGetGlyphIndex(ch, out glyphIndex) || glyphIndex == 0)
 			{
@@ -513,7 +522,8 @@ namespace FairyGUI
 			if (!_dirty)
 				return;
 			_dirty = false;
-			_atlasTex.Apply(false, false);
+			if (_atlasTex != null)
+				_atlasTex.Apply(false, false);
 		}
 
 		void AssignUV(GlyphData gd, GlyphInfo glyph)
@@ -544,7 +554,9 @@ namespace FairyGUI
 		}
 
 		/// <summary>
-		/// Same line box convention as DynamicFont.GetRenderInfo, computed from our glyph rects.
+		/// Same line box convention as DynamicFont.GetRenderInfo: baseline = em size, line height = 1.25 em.
+		/// Kept in sync with FairyGUI-unity 5.2.0's DynamicFont (_ascent = font size, _lineHeight = 1.25 * font size),
+		/// so text sits on the same baseline the editor/game builds produce.
 		/// </summary>
 		SizeEntry Measure(int size)
 		{
@@ -553,37 +565,8 @@ namespace FairyGUI
 				return se;
 			se.measured = true;
 
-			EnsureFace(size);
-
-			float y0 = float.MinValue;
-			float y1 = float.MaxValue;
-			int glyphHeight = size;
-			int cnt = TEST_STRING.Length;
-			for (int i = 0; i < cnt; i++)
-			{
-				GlyphData gd = EnsureGlyph(se, TEST_STRING[i]);
-				if (gd == null)
-					continue;
-				float top = Mathf.RoundToInt(gd.bearingY);
-				float bottom = Mathf.RoundToInt(gd.bearingY) - gd.h;
-				y0 = Mathf.Max(y0, top);
-				y1 = Mathf.Min(y1, bottom);
-				glyphHeight = Mathf.Max(glyphHeight, gd.h);
-			}
-			FlushAtlas();
-
-			if (y0 == float.MinValue) //the test string has no glyphs at all in this face
-			{
-				se.yIndent = size;
-				se.height = size;
-				return se;
-			}
-
-			int displayHeight = (int)(y0 - y1);
-			se.height = Mathf.Max(glyphHeight, displayHeight);
-			se.yIndent = (int)y0;
-			if (displayHeight < glyphHeight)
-				se.yIndent++;
+			se.yIndent = size;
+			se.height = Mathf.RoundToInt(size * DynamicFont.LINE_HEIGHT_RATIO);
 			return se;
 		}
 	}

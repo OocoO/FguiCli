@@ -12,8 +12,8 @@ namespace FairyGUI
 		protected Font _font;
 		protected class RenderInfo
 		{
-			public int yIndent;//越大，字显示越偏下
-			public int height;
+			public int yIndent;//基线到行顶的距离（=字号），越大字显示越偏下
+			public int height;   //行高
 		}
 		protected Dictionary<int, RenderInfo> _renderInfo;
 
@@ -309,44 +309,22 @@ namespace FairyGUI
 		}
 #endif
 
-		const string TEST_STRING = "fj|_我案愛爱";
+		//行盒度量。对齐 FairyGUI-unity 5.2.0 的 DynamicFont：基线取 em 尺寸，行高固定为 1.25 em。
+		//    upstream: _ascent = _font.fontSize; _lineHeight = _font.fontSize * 1.25f; _scale = size / _font.fontSize;
+		//              baseline = _ascent * _scale; height = _lineHeight * _scale;
+		//等价于 baseline = size，height = round(size * 1.25f)，与字体实际的 ascent/descent 无关。
+		//旧实现用探测字符串的字形包围盒（max maxY）近似基线，比 em 尺寸小一成多，整行文字会被顶高：
+		//字号 40 时约偏上 6px，带 \n 的多行文本因为行高同样偏小，偏差还会随行数放大。
+		internal const float LINE_HEIGHT_RATIO = 1.25f;
+
 		RenderInfo GetRenderInfo(int size)
 		{
 			RenderInfo result;
 			if (!_renderInfo.TryGetValue(size, out result))
 			{
 				result = new RenderInfo();
-
-				CharacterInfo charInfo;
-				_font.RequestCharactersInTexture(TEST_STRING, size, FontStyle.Normal);
-
-				float y0 = float.MinValue;
-				float y1 = float.MaxValue;
-				int glyphHeight = size;
-				int cnt = TEST_STRING.Length;
-
-				for (int i = 0; i < cnt; i++)
-				{
-					char ch = TEST_STRING[i];
-					if (_font.GetCharacterInfo(ch, out charInfo, size, FontStyle.Normal))
-					{
-#if (UNITY_5 || UNITY_5_3_OR_NEWER)
-						y0 = Mathf.Max(y0, charInfo.maxY);
-						y1 = Mathf.Min(y1, charInfo.minY);
-						glyphHeight = Math.Max(glyphHeight, charInfo.glyphHeight);
-#else
-						y0 = Mathf.Max(y0, charInfo.vert.yMin);
-						y1 = Mathf.Min(y1, charInfo.vert.yMax);
-#endif
-					}
-				}
-
-				int displayHeight = (int)(y0 - y1);
-				result.height = Math.Max(glyphHeight, displayHeight);
-				result.yIndent = (int)y0;
-				if (displayHeight < glyphHeight)
-					result.yIndent++;
-
+				result.yIndent = size;
+				result.height = Mathf.RoundToInt(size * LINE_HEIGHT_RATIO);
 				_renderInfo.Add(size, result);
 			}
 
