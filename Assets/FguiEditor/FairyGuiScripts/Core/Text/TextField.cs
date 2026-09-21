@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
@@ -683,7 +683,10 @@ namespace FairyGUI
 					line.width += glyphWidth;
 				}
 
-				if (ch == '\n' || wrap && line.width > rectWidth && format.specialStyle == TextFormat.SpecialStyle.None)
+				//singleLine 下 \n 不换行（与 FairyGUI-unity 官方 SDK 一致）：
+				//否则文本会多出一条空行，自动高度变大，再叠加 pivot 的尺寸补偿就会把整段文字顶高。
+				if (ch == '\n' && !_singleLine
+					|| wrap && line.width > rectWidth && format.specialStyle == TextFormat.SpecialStyle.None)
 				{
 					if (line.textHeight == 0)
 					{

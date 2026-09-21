@@ -67,3 +67,5 @@ tools/fgui_render_client/__pycache__
 tools/fgui_render_client/tests/__pycache__
 Assets/FguiSmokeTestOutput
 Assets/FguiSmokeTestOutput.meta
+_debug
+Packages/packages-lock.json
