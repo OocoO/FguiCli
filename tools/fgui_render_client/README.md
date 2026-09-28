@@ -28,9 +28,34 @@ Component selector params (exactly one must be set, never multiple):
 Optional params:
 
 - `branchTag`: defaults to `""`
-- `width`: defaults to `1920`
-- `height`: defaults to `1080`
+- `width` / `height`: output PNG size, defaults to `0` (= follow `screenWidth`/`screenHeight`)
+- `screenWidth` / `screenHeight`: simulated device screen (game resolution) used for UI adaptation,
+  defaults to `0` (= follow `width`/`height`, then `1920x1080`). This is the only knob that changes
+  the UI layout, so any resolution can be tested on any monitor.
+- `designResolutionX` / `designResolutionY`: defaults to `0` (= read the project's `settings/Adaptation.json`)
+- `scaleMode`: `ConstantPixelSize` / `ScaleWithScreenSize` / `ConstantPhysicalSize`, `""` = project config
+- `screenMatchMode`: `MatchWidthOrHeight` / `MatchWidth` / `MatchHeight`, `""` = project config
+- `ignoreOrientation`: defaults to `false`
+- `windowHeight` / `windowWidth`: the renderer's own window, defaults to `0` = auto. It keeps a
+  constant height (720) and derives its width from the simulated screen aspect ratio, so the visible
+  window has the same shape as the rendered frame (1707x720 for 2560x1080, 405x720 for portrait).
+- `keepWindowSize`: defaults to `false`; `true` leaves the window alone
+- `keepFullFrame`: defaults to `false`; `true` keeps the full capture frame instead of trimming
+  transparent borders
 - `timeoutSec`: defaults to `120`
+
+Example: render the same page as a 21:9 ultrawide screenshot.
+
+```python
+RenderRequest(
+	project_root_dir="D:/ProjectGit/AirLegion/fgui_airLegion",
+	package_name="BattleUI",
+	out_png="D:/render/ultrawide.png",
+	component_name="main_FormationSelect.xml",
+	screen_width=2560,
+	screen_height=1080,
+)
+```
 
 ## Quick test
 

@@ -16,12 +16,15 @@ namespace FguiRenderServer
         const string ResultPrefix = "[FGUI_RENDER_RESULT]";
         const string DefaultHost = "127.0.0.1";
         const int DefaultPort = 18765;
+
+        // 渲染器自身窗口的默认尺寸，可用 --window-width / --window-height 覆盖。
+        // 保持小窗口：渲染输出走离屏贴图，与窗口尺寸无关；需要测什么分辨率请用 screenWidth/screenHeight。
         const int DefaultWindowWidth = 1280;
         const int DefaultWindowHeight = 720;
 
-        // Keep capture defaults at 1080p while runtime window can stay smaller.
-        const int DefaultRenderWidth = 1920;
-        const int DefaultRenderHeight = 1080;
+        // 默认模拟屏幕（游戏分辨率）与默认输出 PNG 尺寸。
+        const int DefaultScreenWidth = 1920;
+        const int DefaultScreenHeight = 1080;
 
         const string UiUrlPrefix = "ui://";
 
@@ -47,19 +50,40 @@ namespace FguiRenderServer
         string _host = DefaultHost;
         int _port = DefaultPort;
 
+        // 启动时的窗口尺寸，作为不指定 windowHeight 时的恒定窗口高度基准。
+        int _bootWindowHeight = DefaultWindowHeight;
+
         void Awake()
         {
             DontDestroyOnLoad(gameObject);
-            // 设置窗口分辨率与渲染输出分辨率一致，避免字体缩放导致的模糊
-            Screen.SetResolution(DefaultRenderWidth, DefaultRenderHeight, false);
-                        UIConfig.renderingTextBrighterOnDesktop = false;
-            Stage.Instantiate();
-            GRoot.inst.SetContentScaleFactor(1920, 1080);
 
             Dictionary<string, string> args = ParseCommandLineArguments(Environment.GetCommandLineArgs());
+
+            int windowWidth = DefaultWindowWidth;
+            int windowHeight = DefaultWindowHeight;
+            if (TryReadInt(args, "window-width", out int argWindowWidth) && argWindowWidth > 0)
+            {
+                windowWidth = argWindowWidth;
+            }
+            if (TryReadInt(args, "window-height", out int argWindowHeight) && argWindowHeight > 0)
+            {
+                windowHeight = argWindowHeight;
+            }
+
+            _bootWindowHeight = windowHeight;
+            Screen.SetResolution(windowWidth, windowHeight, false);
+            UIConfig.renderingTextBrighterOnDesktop = false;
+            Stage.Instantiate();
+            // 基准缩放；每次渲染会按请求里的模拟屏幕重新计算。
+            GRoot.inst.SetContentScaleFactor(
+                FguiAdaptationSettings.DefaultDesignResolutionX,
+                FguiAdaptationSettings.DefaultDesignResolutionY);
+
             _oneShotMode = args.ContainsKey("render-once");
 
-            // Server mode defaults: run in background, windowed, and start with a small window.
+            // Server mode defaults: run in background, windowed. The window stays small
+            // (--window-width / --window-height, default 1280x720) and may be minimized; the
+            // rendered resolution comes from the simulated screen, not from this window.
             Application.runInBackground = true;
 
             if (args.ContainsKey("no-minimize"))
@@ -390,6 +414,41 @@ namespace FguiRenderServer
             GObject panel = null;
 
             RenderRequest request = job.request;
+            ScreenSetup setup = ScreenSetup.Default;
+
+            // Resolve the simulated screen first: the player window has to be reshaped before the
+            // packages are torn down and the panel is built.
+            try
+            {
+                FguiAdaptationSettings adaptation = FguiAdaptationSettings.Load(request.projectRootDir);
+                setup = ScreenSetup.Resolve(request, adaptation);
+            }
+            catch (Exception ex)
+            {
+                error = ex;
+            }
+
+            // Keep the player window in step with the simulated screen so what you see has the same
+            // shape as what gets rendered: constant height, width derived from the screen aspect.
+            // This stays outside the try block below because C# forbids yielding from a try block
+            // that has a catch clause.
+            if (error == null && !request.keepWindowSize)
+            {
+                int targetWindowHeight = request.windowHeight > 0 ? request.windowHeight : _bootWindowHeight;
+                int targetWindowWidth = request.windowWidth > 0
+                    ? request.windowWidth
+                    : Mathf.Max(1, Mathf.RoundToInt((float)targetWindowHeight * setup.screenWidth / setup.screenHeight));
+
+                if (targetWindowWidth != Screen.width || targetWindowHeight != Screen.height)
+                {
+                    Screen.SetResolution(targetWindowWidth, targetWindowHeight, false);
+                    // Let the player actually apply the new window size; the screen simulation is
+                    // re-asserted after this and again right before capture.
+                    yield return null;
+                    yield return null;
+                }
+            }
+
             try
             {
                 //Teardown order matters: detach and dispose the previous panel *before* releasing the
@@ -401,6 +460,8 @@ namespace FguiRenderServer
                 GRoot.inst.RemoveChildren(0, -1, true);
                 UIPackage.RemoveAllPackages(true);
 
+                ApplyScreenSimulation(setup);
+
                 FguiProjectLoader loader = FguiProjectLoader.LoadProject(request.projectRootDir, request.branchTag);
                 UIPackage package = loader.GetPackage(request.packageName);
                 if (package == null)
@@ -411,7 +472,7 @@ namespace FguiRenderServer
                 panel = CreatePanelFromRequest(request);
                 ApplyDisplayOverrides(panel, request.overrides);
 
-                PreparePanelForCapture(panel);
+                PreparePanelForCapture(panel, setup.designResolutionX, setup.designResolutionY);
                 panel.position = Vector3.zero;
                 GRoot.inst.AddChild(panel);
             }
@@ -428,7 +489,12 @@ namespace FguiRenderServer
 
                 try
                 {
-                    Texture2D outputTexture = CaptureScreen();
+                    // Re-assert the simulation right before capture: StageCamera resets the stage
+                    // scale/camera whenever it observes a real screen size change, and that must
+                    // never leak into the simulated screen we are about to shoot.
+                    ApplyScreenSimulation(setup);
+
+                    Texture2D outputTexture = CaptureScreen(setup.captureWidth, setup.captureHeight, setup);
                     if (outputTexture == null)
                     {
                         throw new InvalidOperationException("capture failed: screenshot texture is null");
@@ -441,20 +507,24 @@ namespace FguiRenderServer
                         Directory.CreateDirectory(pngDirectory);
                     }
 
-                    // Trim transparent border pixels.
-                    RectInt opaqueBounds = CalculateOpaqueBounds(outputTexture,
-                        new RectInt(0, 0, outputTexture.width, outputTexture.height));
-                    Texture2D trimmedTexture = CropTexture(outputTexture, opaqueBounds);
-                    if (trimmedTexture != outputTexture)
+                    Texture2D finalTexture = outputTexture;
+                    if (!request.keepFullFrame)
                     {
-                        Destroy(outputTexture);
+                        // Trim transparent border pixels.
+                        RectInt opaqueBounds = CalculateOpaqueBounds(outputTexture,
+                            new RectInt(0, 0, outputTexture.width, outputTexture.height));
+                        finalTexture = CropTexture(outputTexture, opaqueBounds);
+                        if (finalTexture != outputTexture)
+                        {
+                            Destroy(outputTexture);
+                        }
                     }
 
-                    byte[] pngBytes = trimmedTexture.EncodeToPNG();
-                    result.width = trimmedTexture.width;
-                    result.height = trimmedTexture.height;
+                    byte[] pngBytes = finalTexture.EncodeToPNG();
+                    result.width = finalTexture.width;
+                    result.height = finalTexture.height;
 
-                    Destroy(trimmedTexture);
+                    Destroy(finalTexture);
                     File.WriteAllBytes(pngPath, pngBytes);
                 }
                 catch (Exception ex)
@@ -465,6 +535,16 @@ namespace FguiRenderServer
 
             stopwatch.Stop();
             result.durationMs = (int)stopwatch.ElapsedMilliseconds;
+            result.screenWidth = setup.screenWidth;
+            result.screenHeight = setup.screenHeight;
+            result.logicalWidth = setup.logicalWidth;
+            result.logicalHeight = setup.logicalHeight;
+            result.contentScaleFactor = setup.contentScaleFactor;
+            result.designResolutionX = setup.designResolutionX;
+            result.designResolutionY = setup.designResolutionY;
+            result.screenMatchMode = setup.screenMatchMode.ToString();
+            result.windowWidth = Screen.width;
+            result.windowHeight = Screen.height;
 
             if (error == null)
             {
@@ -516,14 +596,59 @@ namespace FguiRenderServer
             args.TryGetValue("out-png", out request.outPng);
             args.TryGetValue("branch", out request.branchTag);
 
+            // 0 表示自动：输出尺寸跟随模拟屏幕，模拟屏幕跟随内置默认值。
             if (!TryReadInt(args, "width", out request.width))
             {
-                request.width = DefaultRenderWidth;
+                request.width = 0;
             }
 
             if (!TryReadInt(args, "height", out request.height))
             {
-                request.height = DefaultRenderHeight;
+                request.height = 0;
+            }
+
+            if (!TryReadInt(args, "screen-width", out request.screenWidth))
+            {
+                request.screenWidth = 0;
+            }
+
+            if (!TryReadInt(args, "screen-height", out request.screenHeight))
+            {
+                request.screenHeight = 0;
+            }
+
+            if (!TryReadInt(args, "design-width", out request.designResolutionX))
+            {
+                request.designResolutionX = 0;
+            }
+
+            if (!TryReadInt(args, "design-height", out request.designResolutionY))
+            {
+                request.designResolutionY = 0;
+            }
+
+            if (args.TryGetValue("match", out string matchMode))
+            {
+                request.screenMatchMode = matchMode;
+            }
+
+            if (args.TryGetValue("scale-mode", out string scaleMode))
+            {
+                request.scaleMode = scaleMode;
+            }
+
+            request.ignoreOrientation = args.ContainsKey("ignore-orientation");
+            request.keepFullFrame = args.ContainsKey("keep-full-frame");
+            request.keepWindowSize = args.ContainsKey("keep-window-size");
+
+            if (!TryReadInt(args, "window-height", out request.windowHeight))
+            {
+                request.windowHeight = 0;
+            }
+
+            if (!TryReadInt(args, "window-width", out request.windowWidth))
+            {
+                request.windowWidth = 0;
             }
 
             if (!TryReadInt(args, "timeout", out request.timeoutSec))
@@ -647,6 +772,45 @@ namespace FguiRenderServer
                 return "outPng is required";
             }
 
+            if (request.width < 0 || request.height < 0)
+            {
+                return "width / height must not be negative (0 means auto)";
+            }
+
+            if (request.screenWidth < 0 || request.screenHeight < 0)
+            {
+                return "screenWidth / screenHeight must not be negative (0 means auto)";
+            }
+
+            if (request.designResolutionX < 0 || request.designResolutionY < 0)
+            {
+                return "designResolutionX / designResolutionY must not be negative (0 means auto)";
+            }
+
+            if (request.windowWidth < 0 || request.windowHeight < 0)
+            {
+                return "windowWidth / windowHeight must not be negative (0 means auto)";
+            }
+
+            int effectiveScreenWidth = request.screenWidth > 0
+                ? request.screenWidth
+                : (request.width > 0 ? request.width : DefaultScreenWidth);
+            int effectiveScreenHeight = request.screenHeight > 0
+                ? request.screenHeight
+                : (request.height > 0 ? request.height : DefaultScreenHeight);
+
+            if (effectiveScreenWidth < 16 || effectiveScreenHeight < 16)
+            {
+                return "screen resolution is too small: " + effectiveScreenWidth + "x" + effectiveScreenHeight;
+            }
+
+            // 越界的分辨率会先尝试分配一张巨大的 RenderTexture，直接给出可读的错误更友好。
+            long pixelCount = (long)effectiveScreenWidth * effectiveScreenHeight;
+            if (pixelCount > 8192L * 8192L)
+            {
+                return "screen resolution is too large: " + effectiveScreenWidth + "x" + effectiveScreenHeight;
+            }
+
             return null;
         }
 
@@ -703,20 +867,183 @@ namespace FguiRenderServer
             return new RectInt(minX, minY, width, height);
         }
 
-        static void PreparePanelForCapture(GObject panel)
+        /// <summary>
+        /// 一次渲染使用的模拟屏幕参数：既决定 FGUI 的自适应缩放（游戏分辨率），
+        /// 也决定离屏渲染的输出尺寸。渲染期间真实窗口尺寸不参与计算，
+        /// 因此可以在 1080p 显示器上直接预览 4K / 带鱼屏 / 竖屏等分辨率。
+        /// </summary>
+        public struct ScreenSetup
+        {
+            public int screenWidth;
+            public int screenHeight;
+            public int captureWidth;
+            public int captureHeight;
+            public int logicalWidth;
+            public int logicalHeight;
+            public int designResolutionX;
+            public int designResolutionY;
+            public float contentScaleFactor;
+            public UIContentScaler.ScaleMode scaleMode;
+            public UIContentScaler.ScreenMatchMode screenMatchMode;
+            public bool ignoreOrientation;
+            public float constantScaleFactor;
+
+            public static ScreenSetup Default
+            {
+                get
+                {
+                    return new ScreenSetup
+                    {
+                        screenWidth = DefaultScreenWidth,
+                        screenHeight = DefaultScreenHeight,
+                        captureWidth = DefaultScreenWidth,
+                        captureHeight = DefaultScreenHeight,
+                        logicalWidth = DefaultScreenWidth,
+                        logicalHeight = DefaultScreenHeight,
+                        designResolutionX = FguiAdaptationSettings.DefaultDesignResolutionX,
+                        designResolutionY = FguiAdaptationSettings.DefaultDesignResolutionY,
+                        contentScaleFactor = 1,
+                        scaleMode = UIContentScaler.ScaleMode.ScaleWithScreenSize,
+                        screenMatchMode = UIContentScaler.ScreenMatchMode.MatchWidthOrHeight,
+                        ignoreOrientation = false,
+                        constantScaleFactor = 1,
+                    };
+                }
+            }
+
+            /// <summary>
+            /// 合并请求参数与项目 settings/Adaptation.json：请求里显式给出的值优先，
+            /// 其余取项目配置，项目配置缺失时回退到内置默认值。
+            /// </summary>
+            public static ScreenSetup Resolve(RenderRequest request, FguiAdaptationSettings adaptation)
+            {
+                if (adaptation == null)
+                {
+                    adaptation = FguiAdaptationSettings.CreateDefault();
+                }
+
+                ScreenSetup setup = Default;
+
+                // 模拟屏幕分辨率：显式 screenWidth/Height > 输出尺寸 > 内置默认。
+                setup.screenWidth = request.screenWidth > 0
+                    ? request.screenWidth
+                    : (request.width > 0 ? request.width : DefaultScreenWidth);
+                setup.screenHeight = request.screenHeight > 0
+                    ? request.screenHeight
+                    : (request.height > 0 ? request.height : DefaultScreenHeight);
+
+                // 输出 PNG 尺寸：未指定时跟随模拟屏幕，保证 1:1 的“设备截图”。
+                setup.captureWidth = request.width > 0 ? request.width : setup.screenWidth;
+                setup.captureHeight = request.height > 0 ? request.height : setup.screenHeight;
+
+                setup.designResolutionX = request.designResolutionX > 0
+                    ? request.designResolutionX
+                    : adaptation.designResolutionX;
+                setup.designResolutionY = request.designResolutionY > 0
+                    ? request.designResolutionY
+                    : adaptation.designResolutionY;
+
+                setup.scaleMode = FguiAdaptationSettings.ParseScaleMode(request.scaleMode, adaptation.scaleMode);
+                setup.screenMatchMode = FguiAdaptationSettings.ParseScreenMatchMode(
+                    request.screenMatchMode, adaptation.screenMatchMode);
+                setup.ignoreOrientation = request.ignoreOrientation || adaptation.ignoreOrientation;
+                setup.constantScaleFactor = adaptation.constantScaleFactor;
+
+                FguiAdaptationSettings probe = new FguiAdaptationSettings
+                {
+                    scaleMode = setup.scaleMode,
+                    screenMatchMode = setup.screenMatchMode,
+                    designResolutionX = setup.designResolutionX,
+                    designResolutionY = setup.designResolutionY,
+                    ignoreOrientation = setup.ignoreOrientation,
+                    constantScaleFactor = setup.constantScaleFactor,
+                };
+                setup.contentScaleFactor = probe.ComputeScaleFactor(setup.screenWidth, setup.screenHeight);
+
+                // GRoot 的逻辑尺寸 = 屏幕尺寸 / 缩放系数，即 UI 实际能用的“设计像素”画布。
+                setup.logicalWidth = Mathf.Max(1, Mathf.CeilToInt(setup.screenWidth / setup.contentScaleFactor));
+                setup.logicalHeight = Mathf.Max(1, Mathf.CeilToInt(setup.screenHeight / setup.contentScaleFactor));
+
+                return setup;
+            }
+        }
+
+        /// <summary>
+        /// 按模拟屏幕重算 FGUI 的缩放链路：内容缩放系数、Stage 的世界单位、
+        /// GRoot 的逻辑尺寸。全部用显式数值驱动，不依赖真实窗口的 Screen.width/height。
+        /// </summary>
+        static void ApplyScreenSimulation(ScreenSetup setup)
+        {
+            // 与 UIContentScaler.ApplyChange / GRoot.ApplyContentScaleFactor 保持一致，
+            // 但屏幕尺寸来自请求参数而不是真实窗口。
+            UIContentScaler scaler = Stage.inst.gameObject.GetComponent<UIContentScaler>();
+            if (scaler != null)
+            {
+                scaler.scaleMode = setup.scaleMode;
+                scaler.designResolutionX = setup.designResolutionX;
+                scaler.designResolutionY = setup.designResolutionY;
+                scaler.screenMatchMode = setup.screenMatchMode;
+                scaler.ignoreOrientation = setup.ignoreOrientation;
+                scaler.constantScaleFactor = setup.constantScaleFactor;
+            }
+
+            UIContentScaler.scaleFactor = setup.contentScaleFactor;
+
+            // 世界单位/屏幕像素：StageCamera 在 constantSize 下固定显示 10 个世界单位的高度，
+            // 因此按模拟屏幕高度换算，整个模拟屏幕正好铺满相机视野。
+            StageCamera.UnitsPerPixel = StageCamera.DefaultCameraSize * 2f / setup.screenHeight;
+
+            if (Stage.inst != null && Stage.inst.cachedTransform != null)
+            {
+                Stage.inst.cachedTransform.localScale = new Vector3(
+                    StageCamera.UnitsPerPixel, StageCamera.UnitsPerPixel, StageCamera.UnitsPerPixel);
+            }
+
+            ConfigureStageCamera(setup.screenWidth, setup.screenHeight, StageCamera.DefaultCameraSize);
+            StageCamera.screenSizeVer++;
+
+            GRoot.inst.SetSize(setup.logicalWidth, setup.logicalHeight);
+            GRoot.inst.SetScale(setup.contentScaleFactor, setup.contentScaleFactor);
+        }
+
+        /// <summary>
+        /// 把 Stage 相机摆到“左下角对齐世界原点”的位置，并让它覆盖 viewWidth:viewHeight 比例、
+        /// 半高为 halfHeight 的世界范围。StageCamera 原生逻辑等价于 halfHeight = DefaultCameraSize。
+        /// </summary>
+        static void ConfigureStageCamera(int viewWidth, int viewHeight, float halfHeight)
+        {
+            Camera camera = StageCamera.main;
+            if (camera == null || viewHeight <= 0 || viewWidth <= 0)
+            {
+                return;
+            }
+
+            float aspect = (float)viewWidth / viewHeight;
+            camera.orthographicSize = halfHeight;
+            camera.transform.localPosition = new Vector3(
+                halfHeight * aspect,
+                -halfHeight,
+                camera.transform.localPosition.z);
+        }
+
+        static void PreparePanelForCapture(GObject panel, int designResolutionX, int designResolutionY)
         {
             if (panel == null)
             {
                 return;
             }
 
-            if (ShouldMakeFullScreen(panel))
+            if (ShouldMakeFullScreen(panel, designResolutionX, designResolutionY))
             {
                 panel.MakeFullScreen();
             }
         }
 
-        static bool ShouldMakeFullScreen(GObject panel)
+        /// <summary>
+        /// 与设计分辨率比较，而不是与当前屏幕的逻辑尺寸比较：一个按 1920x1080 设计的全屏页面
+        /// 在任何模拟分辨率下都应该铺满屏幕，否则换分辨率后它会缩成一块，测不出自适应的真实表现。
+        /// </summary>
+        static bool ShouldMakeFullScreen(GObject panel, int designResolutionX, int designResolutionY)
         {
             if (panel == null)
             {
@@ -725,16 +1052,14 @@ namespace FguiRenderServer
 
             float panelWidth = panel.initWidth > 0 ? panel.initWidth : panel.width;
             float panelHeight = panel.initHeight > 0 ? panel.initHeight : panel.height;
-            float rootWidth = GRoot.inst.width;
-            float rootHeight = GRoot.inst.height;
 
-            if (panelWidth <= 0 || panelHeight <= 0 || rootWidth <= 0 || rootHeight <= 0)
+            if (panelWidth <= 0 || panelHeight <= 0 || designResolutionX <= 0 || designResolutionY <= 0)
             {
                 return false;
             }
 
-            float widthRatio = panelWidth / rootWidth;
-            float heightRatio = panelHeight / rootHeight;
+            float widthRatio = panelWidth / designResolutionX;
+            float heightRatio = panelHeight / designResolutionY;
             return widthRatio >= 0.85f && heightRatio >= 0.85f;
         }
 
@@ -853,8 +1178,44 @@ namespace FguiRenderServer
             public string componentId;
             public string outPng;
             public string branchTag;
-            public int width = DefaultRenderWidth;
-            public int height = DefaultRenderHeight;
+
+            /// <summary>输出 PNG 尺寸；0 = 跟随模拟屏幕分辨率。</summary>
+            public int width;
+            /// <summary>输出 PNG 尺寸；0 = 跟随模拟屏幕分辨率。</summary>
+            public int height;
+
+            /// <summary>模拟屏幕宽（游戏分辨率）。0 = 跟随 width，width 也为 0 时用 1920。</summary>
+            public int screenWidth;
+            /// <summary>模拟屏幕高（游戏分辨率）。0 = 跟随 height，height 也为 0 时用 1080。</summary>
+            public int screenHeight;
+
+            /// <summary>设计分辨率 X。0 = 取项目 settings/Adaptation.json。</summary>
+            public int designResolutionX;
+            /// <summary>设计分辨率 Y。0 = 取项目 settings/Adaptation.json。</summary>
+            public int designResolutionY;
+
+            /// <summary>ConstantPixelSize / ScaleWithScreenSize / ConstantPhysicalSize。空 = 取项目配置。</summary>
+            public string scaleMode;
+            /// <summary>MatchWidthOrHeight / MatchWidth / MatchHeight。空 = 取项目配置。</summary>
+            public string screenMatchMode;
+            /// <summary>true 时忽略设计分辨率的横竖屏方向修正。</summary>
+            public bool ignoreOrientation;
+
+            /// <summary>
+            /// 渲染器窗口高度；0 = 用启动时的高度（默认 720）。
+            /// 窗口宽度默认按模拟屏幕比例算出，保证“看到的窗口”和“渲染结果”是同一个形状。
+            /// </summary>
+            public int windowHeight;
+
+            /// <summary>渲染器窗口宽度；0 = 按模拟屏幕比例自动计算 = windowHeight * screenWidth / screenHeight。</summary>
+            public int windowWidth;
+
+            /// <summary>true 时完全不动窗口，保持启动尺寸。</summary>
+            public bool keepWindowSize;
+
+            /// <summary>true 时保留完整画面，不裁掉四周透明像素（默认 false = 裁掉）。</summary>
+            public bool keepFullFrame;
+
             public int timeoutSec = 120;
             public List<DisplayOverride> overrides;
         }
@@ -993,6 +1354,20 @@ namespace FguiRenderServer
             public int width;
             public int height;
             public int durationMs;
+
+            // 本次渲染实际使用的自适应参数，便于确认测试条件。
+            public int screenWidth;
+            public int screenHeight;
+            public int logicalWidth;
+            public int logicalHeight;
+            public float contentScaleFactor;
+            public int designResolutionX;
+            public int designResolutionY;
+            public string screenMatchMode;
+
+            /// <summary>渲染器真实窗口尺寸（不参与自适应计算，仅供确认窗口没被改动）。</summary>
+            public int windowWidth;
+            public int windowHeight;
         }
 
         [Serializable]
@@ -1004,11 +1379,41 @@ namespace FguiRenderServer
             public bool hasActiveJob;
         }
 
+        /// <summary>
+        /// 把模拟屏幕离屏渲染到一张 captureWidth x captureHeight 的贴图上。
+        /// 若输出比例与模拟屏幕比例不同，则整体缩小到完整可见（多出来的透明边随后会被裁掉），
+        /// 保证不会因为比例不一致而裁掉 UI 内容。
+        /// </summary>
+        public static Texture2D CaptureScreen(int captureWidth, int captureHeight, ScreenSetup setup)
+        {
+            int width = Mathf.Max(1, captureWidth);
+            int height = Mathf.Max(1, captureHeight);
+
+            float unitsPerPixel = StageCamera.UnitsPerPixel > 0
+                ? StageCamera.UnitsPerPixel
+                : StageCamera.DefaultCameraSize * 2f / Mathf.Max(1, setup.screenHeight);
+            float screenWorldWidth = Mathf.Max(1, setup.screenWidth) * unitsPerPixel;
+            float screenWorldHeight = Mathf.Max(1, setup.screenHeight) * unitsPerPixel;
+            float captureAspect = (float)width / height;
+
+            // 完整覆盖模拟屏幕所需的最小正交半高（其中一个方向正好贴边）。
+            float halfHeight = Mathf.Max(screenWorldHeight * 0.5f, screenWorldWidth * 0.5f / captureAspect);
+            ConfigureStageCamera(width, height, halfHeight);
+
+            return CaptureToTexture(width, height);
+        }
+
+        /// <summary>
+        /// 兼容旧用法：不改变相机取景，按默认 1920x1080 直接截图。
+        /// 编辑器里的整包导出（FguiProjectLoaderTestMenu）依赖这个行为。
+        /// </summary>
         public static Texture2D CaptureScreen()
         {
-            int width = DefaultRenderWidth;
-            int height = DefaultRenderHeight;
-            
+            return CaptureToTexture(DefaultScreenWidth, DefaultScreenHeight);
+        }
+
+        static Texture2D CaptureToTexture(int width, int height)
+        {
             Camera camera = StageCamera.main;
             if (camera == null)
             {
@@ -1020,14 +1425,17 @@ namespace FguiRenderServer
             RenderTexture previousActive = RenderTexture.active;
 
             camera.targetTexture = rt;
+            RenderTexture.active = rt;
+            camera.ResetAspect();
             GL.Clear(true, true, Color.clear);
             camera.Render();
-            camera.targetTexture = previousRT;
 
-            RenderTexture.active = rt;
             Texture2D tex = new Texture2D(width, height, TextureFormat.ARGB32, false);
             tex.ReadPixels(new Rect(0, 0, width, height), 0, 0);
             tex.Apply();
+
+            camera.targetTexture = previousRT;
+            camera.ResetAspect();
             RenderTexture.active = previousActive;
             RenderTexture.ReleaseTemporary(rt);
 

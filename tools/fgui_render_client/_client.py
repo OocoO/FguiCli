@@ -17,8 +17,27 @@ class RenderRequest:
     component_path: str = ""
     component_id: str = ""
     branch_tag: str = ""
-    width: int = 1920
-    height: int = 1080
+    # Output PNG size. 0 = follow the simulated screen resolution.
+    width: int = 0
+    height: int = 0
+    # Simulated device screen (game resolution) used for UI adaptation.
+    # 0 = follow width/height, falling back to 1920x1080.
+    screen_width: int = 0
+    screen_height: int = 0
+    # Design resolution. 0 = read settings/Adaptation.json from the project.
+    design_resolution_x: int = 0
+    design_resolution_y: int = 0
+    # Adaptation mode. Empty = read settings/Adaptation.json from the project.
+    scale_mode: str = ""
+    screen_match_mode: str = ""
+    ignore_orientation: bool = False
+    # Renderer window. 0 = auto: constant height (720 by default) with the width derived from the
+    # simulated screen aspect ratio, so the visible window matches the rendered frame.
+    window_height: int = 0
+    window_width: int = 0
+    keep_window_size: bool = False
+    # Keep the full capture frame instead of trimming transparent borders.
+    keep_full_frame: bool = False
     timeout_sec: int = 120
 
 
@@ -31,6 +50,16 @@ class RenderResult:
     width: int
     height: int
     duration_ms: int
+    screen_width: int = 0
+    screen_height: int = 0
+    logical_width: int = 0
+    logical_height: int = 0
+    content_scale_factor: float = 0.0
+    design_resolution_x: int = 0
+    design_resolution_y: int = 0
+    screen_match_mode: str = ""
+    window_width: int = 0
+    window_height: int = 0
 
 
 @dataclasses.dataclass
@@ -53,6 +82,17 @@ def render_page(server_url: str, req: RenderRequest, timeout_sec: int | None = N
         "branchTag": req.branch_tag,
         "width": req.width,
         "height": req.height,
+        "screenWidth": req.screen_width,
+        "screenHeight": req.screen_height,
+        "designResolutionX": req.design_resolution_x,
+        "designResolutionY": req.design_resolution_y,
+        "scaleMode": req.scale_mode,
+        "screenMatchMode": req.screen_match_mode,
+        "ignoreOrientation": req.ignore_orientation,
+        "windowHeight": req.window_height,
+        "windowWidth": req.window_width,
+        "keepWindowSize": req.keep_window_size,
+        "keepFullFrame": req.keep_full_frame,
         "timeoutSec": req.timeout_sec,
     }
     data = _post_json(server_url.rstrip("/") + "/render_page", payload, timeout_sec=timeout_sec)
@@ -64,6 +104,16 @@ def render_page(server_url: str, req: RenderRequest, timeout_sec: int | None = N
         width=int(data.get("width", 0)),
         height=int(data.get("height", 0)),
         duration_ms=int(data.get("durationMs", 0)),
+        screen_width=int(data.get("screenWidth", 0)),
+        screen_height=int(data.get("screenHeight", 0)),
+        logical_width=int(data.get("logicalWidth", 0)),
+        logical_height=int(data.get("logicalHeight", 0)),
+        content_scale_factor=float(data.get("contentScaleFactor", 0.0)),
+        design_resolution_x=int(data.get("designResolutionX", 0)),
+        design_resolution_y=int(data.get("designResolutionY", 0)),
+        screen_match_mode=str(data.get("screenMatchMode", "")),
+        window_width=int(data.get("windowWidth", 0)),
+        window_height=int(data.get("windowHeight", 0)),
     )
 
 

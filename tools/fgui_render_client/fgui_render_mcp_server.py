@@ -112,8 +112,19 @@ def render_page_tool(
     componentPath: str = "",
     componentId: str = "",
     branchTag: str = "",
-    width: int = 1920,
-    height: int = 1080,
+    width: int = 0,
+    height: int = 0,
+    screenWidth: int = 0,
+    screenHeight: int = 0,
+    designResolutionX: int = 0,
+    designResolutionY: int = 0,
+    scaleMode: str = "",
+    screenMatchMode: str = "",
+    ignoreOrientation: bool = False,
+    windowHeight: int = 0,
+    windowWidth: int = 0,
+    keepWindowSize: bool = False,
+    keepFullFrame: bool = False,
     timeoutSec: int = 120,
 ) -> str:
     """Render one component.
@@ -122,6 +133,24 @@ def render_page_tool(
     - componentName: e.g. SoldierSkillUpgradePanel
     - componentPath: e.g. Main/SoldierListPanel.xml
     - componentId: e.g. ui://3qbfu3hkscr325
+
+    Screen adaptation testing:
+    - screenWidth/screenHeight: simulated device screen (the game resolution the UI adapts
+      to). This is the only thing that changes the UI layout. 0 = follow width/height, then
+      1920x1080.
+    - width/height: output PNG size. 0 = follow screenWidth/screenHeight (a native-resolution
+      device screenshot). When the aspect ratio differs from the screen, the whole screen is
+      scaled to fit and the leftover transparent border is trimmed.
+    - designResolutionX/Y, scaleMode, screenMatchMode, ignoreOrientation: adaptation settings.
+      Left at 0/empty they are read from the project's settings/Adaptation.json.
+    - windowHeight/windowWidth: the renderer's own window. By default it keeps a constant height
+      (720) and derives its width from the simulated screen aspect ratio, so the visible window
+      has the same shape as the rendered frame (1707x720 for 2560x1080, 405x720 for portrait).
+      Pass keepWindowSize=True to leave the window alone.
+    - keepFullFrame: keep the full capture frame instead of trimming transparent borders.
+
+    Examples: 2560x1080 ultrawide -> screenWidth=2560, screenHeight=1080;
+    1080x1920 portrait -> screenWidth=1080, screenHeight=1920.
     """
     _validate_component_selector(componentName, componentPath, componentId)
     _start_render_server()
@@ -136,12 +165,29 @@ def render_page_tool(
         branch_tag=branchTag,
         width=width,
         height=height,
+        screen_width=screenWidth,
+        screen_height=screenHeight,
+        design_resolution_x=designResolutionX,
+        design_resolution_y=designResolutionY,
+        scale_mode=scaleMode,
+        screen_match_mode=screenMatchMode,
+        ignore_orientation=ignoreOrientation,
+        window_height=windowHeight,
+        window_width=windowWidth,
+        keep_window_size=keepWindowSize,
+        keep_full_frame=keepFullFrame,
         timeout_sec=timeoutSec,
     )
     result = render_page(_get_server_url(), req, timeout_sec=timeoutSec + 5)
     return (
         f"ok={result.ok}, message={result.message}, jobId={result.job_id}, "
         f"pngPath={result.png_path}, width={result.width}, height={result.height}, "
+        f"screen={result.screen_width}x{result.screen_height}, "
+        f"logical={result.logical_width}x{result.logical_height}, "
+        f"contentScaleFactor={result.content_scale_factor}, "
+        f"design={result.design_resolution_x}x{result.design_resolution_y}, "
+        f"matchMode={result.screen_match_mode}, "
+        f"window={result.window_width}x{result.window_height}, "
         f"durationMs={result.duration_ms}"
     )
 
