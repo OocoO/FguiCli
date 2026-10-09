@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
@@ -1586,6 +1586,26 @@ namespace FairyGUI
 					str = File.ReadAllText(projectResource.absoluteFile, Encoding.UTF8);
 			}
 			item.componentData = new XML(str);
+
+			// 项目源码目录里的 package.xml 只给组件记 id/name/path，没有 size；组件真实尺寸写在组件 XML
+			// 根节点的 size 上（组件对象自己靠 Setup_BeforeAdd 读它，所以普通引用看不出问题）。
+			// 但 GLoader 用 url 指向组件时拿 PackageItem.width/height 当 sourceWidth/Height：
+			// 为 0 时 UpdateLayout 算出的对齐偏移变成 (loaderW-0)/2、(loaderH-0)/2 —— 内容整体偏半个 loader
+			// （fill 不是 None 时更会 width/0 得到 Infinity/NaN）。与 LoadAtlas 对图片回填宽高同一套路。
+			if (item.componentData != null && (item.width <= 0 || item.height <= 0))
+			{
+				string[] size = item.componentData.GetAttributeArray("size");
+				int componentWidth;
+				int componentHeight;
+				if (size != null && size.Length >= 2
+					&& int.TryParse(size[0], out componentWidth) && int.TryParse(size[1], out componentHeight))
+				{
+					if (item.width <= 0)
+						item.width = componentWidth;
+					if (item.height <= 0)
+						item.height = componentHeight;
+				}
+			}
 		}
 
 		void LoadComponentChildren(PackageItem item)
