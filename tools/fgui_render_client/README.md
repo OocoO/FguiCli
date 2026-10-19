@@ -42,6 +42,11 @@ Optional params:
 - `keepWindowSize`: defaults to `false`; `true` leaves the window alone
 - `keepFullFrame`: defaults to `false`; `true` keeps the full capture frame instead of trimming
   transparent borders
+- `fullScreen`: panel sizing strategy, `""` = `auto`. Values: `auto` (legacy heuristic: a panel close
+  to the design resolution is made full screen), `none` (keep the packaged design size), `full`
+  (`MakeFullScreen()`), `verticalCenter` (copy of `PanelManager.MakeFullScreenVerticalCenter()`).
+  Use it to reproduce the game's layout: the game resizes the panel to the screen, and that
+  `SetSize` is what triggers relation / `GGroup` movement — rendering the design size never shows it.
 - `timeoutSec`: defaults to `120`
 
 Example: render the same page as a 21:9 ultrawide screenshot.

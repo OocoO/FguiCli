@@ -47,6 +47,7 @@ Unity 内置常驻渲染服务，程序启动后监听本地端口并响应渲�
   "height": 0,
   "screenWidth": 2560,
   "screenHeight": 1080,
+  "fullScreen": "verticalCenter",
   "timeoutSec": 120
 }
 ```
@@ -69,7 +70,10 @@ Unity 内置常驻渲染服务，程序启动后监听本地端口并响应渲�
   "contentScaleFactor": 1,
   "designResolutionX": 1920,
   "designResolutionY": 1080,
-  "screenMatchMode": "MatchWidthOrHeight"
+  "screenMatchMode": "MatchWidthOrHeight",
+  "fullScreen": "verticalCenter",
+  "panelWidth": 2560,
+  "panelHeight": 1080
 }
 ```
 
@@ -110,6 +114,28 @@ Unity 内置常驻渲染服务，程序启动后监听本地端口并响应渲�
 | `windowWidth` | 0 | 渲染器窗口宽度；0 = 按模拟屏幕比例自动计算 |
 | `keepWindowSize` | `false` | `true` = 完全不动窗口，保持启动尺寸 |
 | `keepFullFrame` | `false` | `true` = 不裁掉四周透明像素 |
+| `fullScreen` | `""`（= `auto`） | 面板尺寸策略，见下节 |
+
+### 模拟屏幕 vs 面板尺寸（`fullScreen`）
+
+模拟屏幕（`screenWidth` / `screenHeight`）只决定 FGUI 的内容缩放系数和 `GRoot` 逻辑画布，
+**组件本身默认仍按包内设计尺寸渲染**。而客户端打开面板时 `PanelManager` 会先把面板按屏幕
+重设一次（`MakeFullScreenVerticalCenter`），这个 `SetSize` 会触发子件的 relation ——
+所以带 `right-right` / `center-center` 或 `GGroup` relation 的页面，只按设计尺寸渲染
+是永远看不到问题的（编辑器里也一样）。
+
+`fullScreen` 用来把这一步补上：
+
+| 取值 | 行为 |
+|------|------|
+| `auto`（默认） | 旧行为：组件尺寸 ≥ 设计分辨率的 85% 时按 `full` 处理，否则不动 |
+| `none` | 完全不动组件，渲染包内设计尺寸（= 编辑器设计态；relation 不触发） |
+| `full` | `panel.MakeFullScreen()`：宽高都铺满 `GRoot` 逻辑画布 |
+| `verticalCenter` | 复刻 `PanelManager.MakeFullScreenVerticalCenter()`：宽铺满、按设计比例收高度、垂直居中，并挂三条跟随 `GRoot` 的关系 |
+
+响应里的 `fullScreen` 是**实际生效**的策略（`auto` 会解析成 `full` 或 `none`），
+`panelWidth` / `panelHeight` 是定尺寸之后面板的逻辑尺寸，用来核对自适应结果。
+想看“关系有没有把内容带偏”，同一分辨率分别用 `none` 和 `verticalCenter` 各渲一张对比即可。
 
 ### 自适应链路说明
 
@@ -165,6 +191,7 @@ Set-Location -LiteralPath 'D:\Project\FguiCli'
 
 一次性模式可用参数：`--width` / `--height`（输出尺寸）、`--screen-width` / `--screen-height`（模拟屏幕）、
 `--design-width` / `--design-height`、`--match`、`--scale-mode`、`--ignore-orientation`、
+`--full-screen <auto|none|full|vertical-center>`（不带值等于 `full`）、
 `--keep-full-frame`、`--window-height` / `--window-width` / `--keep-window-size`（窗口尺寸，默认按比例自适应）。
 
 > 玩家设置里 `forceSingleInstance = 1`，所以 `--render-once` 只能在**没有常驻渲染服务在跑**的时候使用，
@@ -200,7 +227,10 @@ Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:18765/render_page' -Conten
 
 ## Build & packaging helper
 
-- `tools/fgui_render_client/package_fgui_render_server.ps1`
+- `tools/fgui_render_client/rebuild_render_server.ps1`：停掉常驻服务 → Unity 批量构建 → 重新拉起服务。
+  **必须先关掉 FguiCli 的 Unity 编辑器**（批量构建打不开被占用的工程），脚本会自己检查锁文件。
+  编辑器开着时也可以直接用菜单 `Tools/Fgui Render/Build Windows Player To Render Client`（要先停掉常驻服务，
+  否则运行中的 exe 被锁定、构建写不进去）。
 - Unity build entry: `Assets/Scripts/Editor/FguiRenderBuild.cs`
 
 ## Python wrapper

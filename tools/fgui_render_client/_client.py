@@ -38,6 +38,13 @@ class RenderRequest:
     keep_window_size: bool = False
     # Keep the full capture frame instead of trimming transparent borders.
     keep_full_frame: bool = False
+    # Panel sizing strategy (what the game's PanelManager does to the panel before showing it):
+    #   "auto"           - legacy heuristic: panels close to the design resolution go full screen
+    #   "none"           - keep the packaged design size (relations never fire)
+    #   "full"           - MakeFullScreen(): fill the GRoot logical canvas
+    #   "verticalCenter" - copy of PanelManager.MakeFullScreenVerticalCenter():
+    #                      full width, letterboxed height, vertically centered
+    full_screen: str = ""
     timeout_sec: int = 120
 
 
@@ -60,6 +67,10 @@ class RenderResult:
     screen_match_mode: str = ""
     window_width: int = 0
     window_height: int = 0
+    # Panel sizing actually applied (auto / none / full / verticalCenter) and the resulting size.
+    full_screen: str = ""
+    panel_width: int = 0
+    panel_height: int = 0
 
 
 @dataclasses.dataclass
@@ -93,6 +104,7 @@ def render_page(server_url: str, req: RenderRequest, timeout_sec: int | None = N
         "windowWidth": req.window_width,
         "keepWindowSize": req.keep_window_size,
         "keepFullFrame": req.keep_full_frame,
+        "fullScreen": req.full_screen,
         "timeoutSec": req.timeout_sec,
     }
     data = _post_json(server_url.rstrip("/") + "/render_page", payload, timeout_sec=timeout_sec)
@@ -114,6 +126,9 @@ def render_page(server_url: str, req: RenderRequest, timeout_sec: int | None = N
         screen_match_mode=str(data.get("screenMatchMode", "")),
         window_width=int(data.get("windowWidth", 0)),
         window_height=int(data.get("windowHeight", 0)),
+        full_screen=str(data.get("fullScreen", "")),
+        panel_width=int(data.get("panelWidth", 0)),
+        panel_height=int(data.get("panelHeight", 0)),
     )
 
 

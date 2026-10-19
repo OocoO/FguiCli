@@ -125,6 +125,7 @@ def render_page_tool(
     windowWidth: int = 0,
     keepWindowSize: bool = False,
     keepFullFrame: bool = False,
+    fullScreen: str = "",
     timeoutSec: int = 120,
 ) -> str:
     """Render one component.
@@ -148,6 +149,16 @@ def render_page_tool(
       has the same shape as the rendered frame (1707x720 for 2560x1080, 405x720 for portrait).
       Pass keepWindowSize=True to leave the window alone.
     - keepFullFrame: keep the full capture frame instead of trimming transparent borders.
+
+    Panel sizing (what the game does to the panel before showing it):
+    - fullScreen: "auto" (default) / "none" / "full" / "verticalCenter".
+      * "auto"           - legacy: a panel close to the design resolution is made full screen.
+      * "none"           - keep the packaged design size, so no relation fires (pure design state).
+      * "full"           - MakeFullScreen(): fill the GRoot logical canvas.
+      * "verticalCenter" - copy of PanelManager.MakeFullScreenVerticalCenter(): full width,
+        letterboxed height, vertically centered, plus the GRoot relations.
+      Use "verticalCenter" to reproduce the game's layout when the panel has right/bottom
+      relations or GGroup relations: those only move when the panel is resized.
 
     Examples: 2560x1080 ultrawide -> screenWidth=2560, screenHeight=1080;
     1080x1920 portrait -> screenWidth=1080, screenHeight=1920.
@@ -176,6 +187,7 @@ def render_page_tool(
         window_width=windowWidth,
         keep_window_size=keepWindowSize,
         keep_full_frame=keepFullFrame,
+        full_screen=fullScreen,
         timeout_sec=timeoutSec,
     )
     result = render_page(_get_server_url(), req, timeout_sec=timeoutSec + 5)
@@ -187,6 +199,8 @@ def render_page_tool(
         f"contentScaleFactor={result.content_scale_factor}, "
         f"design={result.design_resolution_x}x{result.design_resolution_y}, "
         f"matchMode={result.screen_match_mode}, "
+        f"fullScreen={result.full_screen}, "
+        f"panel={result.panel_width}x{result.panel_height}, "
         f"window={result.window_width}x{result.window_height}, "
         f"durationMs={result.duration_ms}"
     )

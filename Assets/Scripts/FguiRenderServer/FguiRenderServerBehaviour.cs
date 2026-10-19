@@ -415,6 +415,7 @@ namespace FguiRenderServer
 
             RenderRequest request = job.request;
             ScreenSetup setup = ScreenSetup.Default;
+            FullScreenMode appliedFullScreenMode = FullScreenMode.Auto;
 
             // Resolve the simulated screen first: the player window has to be reshaped before the
             // packages are torn down and the panel is built.
@@ -472,8 +473,9 @@ namespace FguiRenderServer
                 panel = CreatePanelFromRequest(request);
                 ApplyDisplayOverrides(panel, request.overrides);
 
-                PreparePanelForCapture(panel, setup.designResolutionX, setup.designResolutionY);
+                // 先归零再定尺寸：verticalCenter 会在定尺寸之后写 letterbox 的 y，不能被这行冲掉。
                 panel.position = Vector3.zero;
+                appliedFullScreenMode = PreparePanelForCapture(panel, request, setup);
                 GRoot.inst.AddChild(panel);
             }
             catch (Exception ex)
@@ -545,6 +547,12 @@ namespace FguiRenderServer
             result.screenMatchMode = setup.screenMatchMode.ToString();
             result.windowWidth = Screen.width;
             result.windowHeight = Screen.height;
+            result.fullScreen = GetFullScreenModeName(appliedFullScreenMode);
+            if (panel != null)
+            {
+                result.panelWidth = Mathf.RoundToInt(panel.width);
+                result.panelHeight = Mathf.RoundToInt(panel.height);
+            }
 
             if (error == null)
             {
@@ -640,6 +648,12 @@ namespace FguiRenderServer
             request.ignoreOrientation = args.ContainsKey("ignore-orientation");
             request.keepFullFrame = args.ContainsKey("keep-full-frame");
             request.keepWindowSize = args.ContainsKey("keep-window-size");
+
+            // --full-screen 不带值时解析成 "true"，即 full。
+            if (args.TryGetValue("full-screen", out string fullScreenMode))
+            {
+                request.fullScreen = fullScreenMode;
+            }
 
             if (!TryReadInt(args, "window-height", out request.windowHeight))
             {
@@ -790,6 +804,11 @@ namespace FguiRenderServer
             if (request.windowWidth < 0 || request.windowHeight < 0)
             {
                 return "windowWidth / windowHeight must not be negative (0 means auto)";
+            }
+
+            if (!IsKnownFullScreenValue(request.fullScreen))
+            {
+                return "fullScreen must be one of: auto, none, full, verticalCenter";
             }
 
             int effectiveScreenWidth = request.screenWidth > 0
@@ -1026,16 +1045,143 @@ namespace FguiRenderServer
                 camera.transform.localPosition.z);
         }
 
-        static void PreparePanelForCapture(GObject panel, int designResolutionX, int designResolutionY)
+        /// <summary>
+        /// 面板尺寸策略。渲染器默认只把模拟屏幕用在缩放/画布上，组件本身保持包内设计尺寸；
+        /// 但游戏里 `PanelManager` 会先把面板按屏幕尺寸重设（`MakeFullScreenVerticalCenter`），
+        /// 而 `GObject.SetSize` 会触发子件的 relation —— 只靠设计尺寸渲染，relation 驱动的布局
+        /// （尤其是 GGroup 的平移）根本不会发生，看起来就“渲染图和游戏不一致”。
+        /// </summary>
+        enum FullScreenMode
         {
+            /// <summary>原有启发式：接近设计分辨率的页面按全屏处理。</summary>
+            Auto,
+            /// <summary>不动组件，保留包内设计尺寸。</summary>
+            None,
+            /// <summary>MakeFullScreen()：铺满 GRoot 逻辑画布。</summary>
+            Full,
+            /// <summary>复刻 PanelManager.MakeFullScreenVerticalCenter()。</summary>
+            VerticalCenter,
+        }
+
+        static FullScreenMode PreparePanelForCapture(GObject panel, RenderRequest request, ScreenSetup setup)
+        {
+            FullScreenMode appliedMode = ParseFullScreenMode(request.fullScreen);
+
             if (panel == null)
             {
-                return;
+                return appliedMode;
             }
 
-            if (ShouldMakeFullScreen(panel, designResolutionX, designResolutionY))
+            if (appliedMode == FullScreenMode.Auto)
+            {
+                if (!ShouldMakeFullScreen(panel, setup.designResolutionX, setup.designResolutionY))
+                {
+                    appliedMode = FullScreenMode.None;
+                    return appliedMode;
+                }
+
+                panel.MakeFullScreen();
+                appliedMode = FullScreenMode.Full;
+                return appliedMode;
+            }
+
+            if (appliedMode == FullScreenMode.Full)
             {
                 panel.MakeFullScreen();
+                return appliedMode;
+            }
+
+            if (appliedMode == FullScreenMode.VerticalCenter)
+            {
+                ApplyFullScreenVerticalCenter(panel, setup);
+            }
+
+            return appliedMode;
+        }
+
+        /// <summary>
+        /// 复刻客户端 `PanelManager.MakeFullScreenVerticalCenter`：宽度铺满逻辑画布；屏幕比设计比例
+        /// 更“高”（宽高比更小）时把高度收成设计比例并垂直居中，上下留黑边；最后挂三条跟随 GRoot 的关系。
+        /// 关系在静态截图里不改布局，但和游戏一致 —— 后续再改窗口/画布尺寸时行为相同。
+        /// </summary>
+        static void ApplyFullScreenVerticalCenter(GObject panel, ScreenSetup setup)
+        {
+            float screenWidth = GRoot.inst.width;
+            float screenHeight = GRoot.inst.height;
+
+            float designAspect = setup.designResolutionX > 0 && setup.designResolutionY > 0
+                ? (float)setup.designResolutionX / setup.designResolutionY
+                : 16f / 9f;
+
+            float targetHeight = screenHeight;
+            if (screenWidth / screenHeight < designAspect)
+            {
+                targetHeight = screenWidth / designAspect;
+            }
+
+            panel.SetSize(screenWidth, targetHeight);
+            panel.y = (screenHeight - targetHeight) / 2f;
+
+            panel.AddRelation(GRoot.inst, RelationType.Width);
+            panel.AddRelation(GRoot.inst, RelationType.Height);
+            panel.AddRelation(GRoot.inst, RelationType.Center_Center);
+        }
+
+        static FullScreenMode ParseFullScreenMode(string raw)
+        {
+            return TryParseFullScreenMode(raw, out FullScreenMode mode) ? mode : FullScreenMode.Auto;
+        }
+
+        static bool IsKnownFullScreenValue(string raw)
+        {
+            return TryParseFullScreenMode(raw, out _);
+        }
+
+        static bool TryParseFullScreenMode(string raw, out FullScreenMode mode)
+        {
+            string value = string.IsNullOrEmpty(raw) ? string.Empty : raw.Trim().ToLowerInvariant();
+            switch (value)
+            {
+                case "":
+                case "auto":
+                    mode = FullScreenMode.Auto;
+                    return true;
+                case "none":
+                case "off":
+                case "false":
+                case "0":
+                    mode = FullScreenMode.None;
+                    return true;
+                case "full":
+                case "screen":
+                case "true":
+                case "1":
+                    mode = FullScreenMode.Full;
+                    return true;
+                case "verticalcenter":
+                case "vertical-center":
+                case "verticalcentered":
+                case "letterbox":
+                    mode = FullScreenMode.VerticalCenter;
+                    return true;
+                default:
+                    mode = FullScreenMode.Auto;
+                    return false;
+            }
+        }
+
+        static string GetFullScreenModeName(FullScreenMode mode)
+        {
+            switch (mode)
+            {
+                case FullScreenMode.None:
+                    return "none";
+                case FullScreenMode.Full:
+                    return "full";
+                case FullScreenMode.VerticalCenter:
+                    return "verticalCenter";
+                default:
+                    return "auto";
             }
         }
 
@@ -1216,6 +1362,16 @@ namespace FguiRenderServer
             /// <summary>true 时保留完整画面，不裁掉四周透明像素（默认 false = 裁掉）。</summary>
             public bool keepFullFrame;
 
+            /// <summary>
+            /// 面板尺寸策略，决定“模拟屏幕”要不要作用到被渲染的组件上（游戏里由 PanelManager 干这事）：
+            /// auto = 保持原有启发式（接近设计分辨率的页面按全屏处理）；
+            /// none = 不动组件，渲染包内设计尺寸（关系/自适应完全不触发）；
+            /// full = MakeFullScreen()，宽高铺满 GRoot 逻辑画布；
+            /// verticalCenter = 复刻 PanelManager.MakeFullScreenVerticalCenter()（窄屏竖向 letterbox 居中 + 跟随 GRoot 的关系）。
+            /// 空 = auto。
+            /// </summary>
+            public string fullScreen;
+
             public int timeoutSec = 120;
             public List<DisplayOverride> overrides;
         }
@@ -1368,6 +1524,13 @@ namespace FguiRenderServer
             /// <summary>渲染器真实窗口尺寸（不参与自适应计算，仅供确认窗口没被改动）。</summary>
             public int windowWidth;
             public int windowHeight;
+
+            /// <summary>本次实际应用的面板尺寸策略（auto / none / full / verticalCenter）。</summary>
+            public string fullScreen;
+
+            /// <summary>策略应用后的面板逻辑尺寸，便于核对自适应/关系是否按预期生效。</summary>
+            public int panelWidth;
+            public int panelHeight;
         }
 
         [Serializable]
