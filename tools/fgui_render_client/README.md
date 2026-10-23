@@ -47,7 +47,23 @@ Optional params:
   (`MakeFullScreen()`), `verticalCenter` (copy of `PanelManager.MakeFullScreenVerticalCenter()`).
   Use it to reproduce the game's layout: the game resizes the panel to the screen, and that
   `SetSize` is what triggers relation / `GGroup` movement — rendering the design size never shows it.
+- `controllers`: controller pages to switch before the capture, defaults to `[]`. Each entry is
+  `{name, page, path}`:
+  - `name` (required): controller name from the component XML (`<controller name="...">`).
+  - `page`: page index (`"1"`) or page name (`"可升星"`); empty keeps the current page.
+  - `path`: child name chain from the panel root; empty means the panel itself.
+  Switching happens after the panel is on stage, so controller actions (`play_transition`) run too.
+  An unknown controller or page fails the render instead of returning an unchanged screenshot.
+- `transitionMode`: `settle` (default) jumps every playing transition to its end state and completes
+  gear tweens before the capture, so a capture never lands in the middle of an opening animation
+  (MovieClips that animate on their own still advance, so they can differ slightly between renders);
+  `raw` keeps the old behaviour where the captured frame depends on frame timing. There is no
+  frame-accurate animation sampling.
 - `timeoutSec`: defaults to `120`
+
+The result also reports `availableControllers` (every controller on the panel root, with its pages
+and current page), `appliedControllers` (what this render switched), `transitionMode` and
+`settledTransitions`.
 
 Example: render the same page as a 21:9 ultrawide screenshot.
 
@@ -59,6 +75,19 @@ RenderRequest(
 	component_name="main_FormationSelect.xml",
 	screen_width=2560,
 	screen_height=1080,
+)
+```
+
+Example: render a controller's other page (the "可升星" tab of the dark lord talent panel).
+
+```python
+RenderRequest(
+	project_root_dir="D:/ProjectGit/AirLegion/fgui_airLegion",
+	package_name="DarkLord",
+	out_png="D:/render/talent_starable.png",
+	component_name="DarkLordTalentPanel.xml",
+	full_screen="verticalCenter",
+	controllers=[{"name": "StateFilter", "page": "可升星"}],
 )
 ```
 

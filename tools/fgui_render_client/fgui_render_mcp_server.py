@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import atexit
+import json
 import os
 import subprocess
 import sys
@@ -8,8 +9,23 @@ import time
 from pathlib import Path
 
 from mcp.server.fastmcp import FastMCP
+from pydantic import BaseModel, Field
 
 from _client import DEFAULT_SERVER, RenderRequest, health, render_page
+
+
+class ControllerSelection(BaseModel):
+    """One controller page switch applied before the capture."""
+
+    name: str = Field(description="Controller name on the target component")
+    page: str = Field(
+        default="",
+        description='Page index ("1") or page name ("可升星"); empty = keep the current page',
+    )
+    path: list[str] = Field(
+        default_factory=list,
+        description="Child name chain from the panel root; empty = the panel itself",
+    )
 
 _EXE_DIR = Path(__file__).parent / "FguiRenderServer"
 _EXE_PATH = _EXE_DIR / "FguiRenderServer.exe"
@@ -126,6 +142,8 @@ def render_page_tool(
     keepWindowSize: bool = False,
     keepFullFrame: bool = False,
     fullScreen: str = "",
+    controllers: list[ControllerSelection] | None = None,
+    transitionMode: str = "",
     timeoutSec: int = 120,
 ) -> str:
     """Render one component.
@@ -134,6 +152,30 @@ def render_page_tool(
     - componentName: e.g. SoldierSkillUpgradePanel
     - componentPath: e.g. Main/SoldierListPanel.xml
     - componentId: e.g. ui://3qbfu3hkscr325
+
+    Controller variants (how to see the other states of the same component):
+    - controllers: switch controller pages before the capture, e.g.
+      [{"name": "StateFilter", "page": "1"}] or [{"name": "StateFilter", "page": "可升星"}].
+      * "page" accepts a page index or a page name; omit it to keep the current page.
+      * "path" optionally points at a nested component (child name chain from the panel root);
+        omit it to target the panel itself.
+      * An unknown controller / page fails the render with a message naming it, so a typo never
+        silently produces an unchanged screenshot.
+    - The response lists "availableControllers" (every controller on the panel root with its pages
+      and current page) and "appliedControllers" (what this render switched), so render once to
+      discover the names, then re-render per page.
+    - Components hide/show through controller gears, so switching pages is how you see the other
+      tabs / empty states / level variants of the same panel.
+
+    Transitions and animations:
+    - FairyGUI transitions do run, but a still capture lands on whatever frame the render loop
+      happens to reach, so the same request can produce different images (an autoPlay opening
+      animation fades the panel in).
+    - transitionMode="settle" (default) jumps every playing transition to its end state and
+      completes gear tweens before the capture, so a capture never lands in the middle of an
+      opening animation. MovieClips that animate on their own still advance between renders.
+      Use "raw" to keep the old racing behaviour. There is no frame-accurate animation sampling:
+      this renders one still frame per call.
 
     Screen adaptation testing:
     - screenWidth/screenHeight: simulated device screen (the game resolution the UI adapts
@@ -188,21 +230,26 @@ def render_page_tool(
         keep_window_size=keepWindowSize,
         keep_full_frame=keepFullFrame,
         full_screen=fullScreen,
+        controllers=[selection.model_dump() for selection in controllers] if controllers else [],
+        transition_mode=transitionMode,
         timeout_sec=timeoutSec,
     )
     result = render_page(_get_server_url(), req, timeout_sec=timeoutSec + 5)
     return (
         f"ok={result.ok}, message={result.message}, jobId={result.job_id}, "
-        f"pngPath={result.png_path}, width={result.width}, height={result.height}, "
+        f"pngPath={result.png_path}, width={result.width}, height={result.height}\n"
         f"screen={result.screen_width}x{result.screen_height}, "
         f"logical={result.logical_width}x{result.logical_height}, "
         f"contentScaleFactor={result.content_scale_factor}, "
         f"design={result.design_resolution_x}x{result.design_resolution_y}, "
-        f"matchMode={result.screen_match_mode}, "
+        f"matchMode={result.screen_match_mode}\n"
         f"fullScreen={result.full_screen}, "
         f"panel={result.panel_width}x{result.panel_height}, "
         f"window={result.window_width}x{result.window_height}, "
-        f"durationMs={result.duration_ms}"
+        f"durationMs={result.duration_ms}\n"
+        f"transitionMode={result.transition_mode}, settledTransitions={result.settled_transitions}\n"
+        f"availableControllers={json.dumps(result.available_controllers, ensure_ascii=False)}\n"
+        f"appliedControllers={json.dumps(result.applied_controllers, ensure_ascii=False)}"
     )
 
 

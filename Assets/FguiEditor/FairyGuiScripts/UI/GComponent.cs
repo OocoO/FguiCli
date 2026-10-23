@@ -665,6 +665,14 @@ namespace FairyGUI
 		}
 
 		/// <summary>
+		/// Number of transitions defined on this component.
+		/// </summary>
+		public int numTransitions
+		{
+			get { return _transitions.Count; }
+		}
+
+		/// <summary>
 		/// Returns a transition object  at a certain index.
 		/// </summary>
 		/// <param name="index">Index</param>

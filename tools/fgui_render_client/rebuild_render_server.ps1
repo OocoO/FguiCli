@@ -38,14 +38,14 @@ if (Test-Path $pidFile) {
     if ($rawPid -match '^\d+$') {
         $proc = Get-Process -Id ([int]$rawPid) -ErrorAction SilentlyContinue
         if ($proc -and $proc.ProcessName -like 'FguiRenderServer*') {
-            Stop-Process -Id $proc.Id -Force
+            Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue
             $stopped += $proc.Id
         }
     }
     Remove-Item -LiteralPath $pidFile -Force -ErrorAction SilentlyContinue
 }
 Get-Process -Name 'FguiRenderServer' -ErrorAction SilentlyContinue | ForEach-Object {
-    Stop-Process -Id $_.Id -Force
+    Stop-Process -Id $_.Id -Force -ErrorAction SilentlyContinue
     $stopped += $_.Id
 }
 if ($stopped.Count -gt 0) {
@@ -59,7 +59,9 @@ if ($StopServerOnly) {
 }
 
 # 2. 批量构建（构建入口见 Assets/Scripts/Editor/FguiRenderBuild.cs）。
+$managedAssembly = Join-Path $serverDir 'FguiRenderServer_Data\Managed\Assembly-CSharp.dll'
 $previousExeTime = if (Test-Path $serverExe) { (Get-Item $serverExe).LastWriteTimeUtc } else { [datetime]::MinValue }
+$previousAssemblyTime = if (Test-Path $managedAssembly) { (Get-Item $managedAssembly).LastWriteTimeUtc } else { [datetime]::MinValue }
 $logFile = Join-Path $env:TEMP 'fgui_render_server_build.log'
 
 # Unity.exe 是 GUI 子系统程序，直接 & 调用不会等待，必须 Start-Process -Wait。
@@ -78,11 +80,15 @@ if ($build.ExitCode -ne 0) {
     throw 'FguiRenderServer 构建失败'
 }
 
-if (-not (Test-Path $serverExe) -or (Get-Item $serverExe).LastWriteTimeUtc -le $previousExeTime) {
-    throw "构建没有产出新的 exe：$serverExe（看日志 $logFile）"
+# 增量构建只重写变了的产物：脚本改动只更新 Managed/Assembly-CSharp.dll，exe 启动器还是旧的，
+# 所以两个产物任意一个变新都算这次构建产出了新内容。
+$exeUpdated = (Get-Item $serverExe -ErrorAction SilentlyContinue) -and (Get-Item $serverExe).LastWriteTimeUtc -gt $previousExeTime
+$assemblyUpdated = (Test-Path $managedAssembly) -and (Get-Item $managedAssembly).LastWriteTimeUtc -gt $previousAssemblyTime
+if (-not $exeUpdated -and -not $assemblyUpdated) {
+    throw "构建没有产出新的产物：$serverExe / $managedAssembly（看日志 $logFile）"
 }
 
-"构建完成：$serverExe（$((Get-Item $serverExe).LastWriteTime)）"
+"构建完成：$serverExe（$((Get-Item $serverExe).LastWriteTime)），Assembly-CSharp.dll（$((Get-Item $managedAssembly).LastWriteTime)）"
 
 # 3. 重新拉起常驻服务，和 MCP server 的启动方式保持一致（隐藏窗口 + 写 pid 文件）。
 if (-not $NoRestart) {

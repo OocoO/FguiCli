@@ -45,6 +45,16 @@ class RenderRequest:
     #   "verticalCenter" - copy of PanelManager.MakeFullScreenVerticalCenter():
     #                      full width, letterboxed height, vertically centered
     full_screen: str = ""
+    # Controller pages to switch before the capture, e.g.
+    #   [{"name": "StateFilter", "page": "1"}]
+    #   [{"path": ["main"], "name": "Tab", "page": "可升星"}]
+    # `path` is the child name chain from the panel root (empty = the panel itself);
+    # `page` is a page index ("1") or a page name ("可升星"); empty keeps the current page.
+    controllers: list[dict[str, Any]] = dataclasses.field(default_factory=list)
+    # How transitions are handled before the capture:
+    #   "settle" (default) - jump every playing transition to its end state and complete tweens
+    #   "raw"              - leave them running, so the captured frame depends on frame timing
+    transition_mode: str = ""
     timeout_sec: int = 120
 
 
@@ -71,6 +81,12 @@ class RenderResult:
     full_screen: str = ""
     panel_width: int = 0
     panel_height: int = 0
+    # Controllers found on the panel root (with their pages) and the switches this render applied.
+    available_controllers: list[dict[str, Any]] = dataclasses.field(default_factory=list)
+    applied_controllers: list[dict[str, Any]] = dataclasses.field(default_factory=list)
+    # Transition handling actually applied (settle / raw) and how many transitions were settled.
+    transition_mode: str = ""
+    settled_transitions: int = 0
 
 
 @dataclasses.dataclass
@@ -105,6 +121,8 @@ def render_page(server_url: str, req: RenderRequest, timeout_sec: int | None = N
         "keepWindowSize": req.keep_window_size,
         "keepFullFrame": req.keep_full_frame,
         "fullScreen": req.full_screen,
+        "controllers": req.controllers,
+        "transitionMode": req.transition_mode,
         "timeoutSec": req.timeout_sec,
     }
     data = _post_json(server_url.rstrip("/") + "/render_page", payload, timeout_sec=timeout_sec)
@@ -129,6 +147,10 @@ def render_page(server_url: str, req: RenderRequest, timeout_sec: int | None = N
         full_screen=str(data.get("fullScreen", "")),
         panel_width=int(data.get("panelWidth", 0)),
         panel_height=int(data.get("panelHeight", 0)),
+        available_controllers=list(data.get("availableControllers") or []),
+        applied_controllers=list(data.get("appliedControllers") or []),
+        transition_mode=str(data.get("transitionMode", "")),
+        settled_transitions=int(data.get("settledTransitions", 0)),
     )
 
 

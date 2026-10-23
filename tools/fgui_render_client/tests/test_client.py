@@ -11,7 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from fgui_render_client._client import RenderRequest, health, render_page
+from _client import RenderRequest, health, render_page
 
 
 class _MockHandler(BaseHTTPRequestHandler):
@@ -47,6 +47,17 @@ class _MockHandler(BaseHTTPRequestHandler):
                     "width": req.get("width", 0),
                     "height": req.get("height", 0),
                     "durationMs": 6,
+                    "transitionMode": req.get("transitionMode") or "settle",
+                    "settledTransitions": 1,
+                    "availableControllers": [
+                        {
+                            "name": "StateFilter",
+                            "selectedIndex": 0,
+                            "selectedPage": "全部",
+                            "pages": ["全部", "可升星", "可升级"],
+                        }
+                    ],
+                    "appliedControllers": req.get("controllers", []),
                 },
             )
             return
@@ -126,6 +137,52 @@ class RenderClientTests(unittest.TestCase):
                 ),
                 timeout_sec=10,
             )
+
+    def test_controllers_and_transition_mode_are_forwarded(self) -> None:
+        render_page(
+            self.base_url,
+            RenderRequest(
+                project_root_dir="D:/ProjectGit/AirLegion/fgui_airLegion",
+                package_name="DarkLord",
+                component_name="DarkLordTalentPanel.xml",
+                out_png="D:/render/state.png",
+                controllers=[
+                    {"name": "StateFilter", "page": "1"},
+                    {"path": ["main"], "name": "Tab", "page": "可升星"},
+                ],
+                transition_mode="raw",
+            ),
+            timeout_sec=10,
+        )
+        payload = _MockHandler.last_render_request
+        self.assertIsNotNone(payload)
+        self.assertEqual(
+            payload["controllers"],
+            [
+                {"name": "StateFilter", "page": "1"},
+                {"path": ["main"], "name": "Tab", "page": "可升星"},
+            ],
+        )
+        self.assertEqual(payload["transitionMode"], "raw")
+
+    def test_result_parses_controller_inventory(self) -> None:
+        result = render_page(
+            self.base_url,
+            RenderRequest(
+                project_root_dir="D:/ProjectGit/AirLegion/fgui_airLegion",
+                package_name="DarkLord",
+                component_name="DarkLordTalentPanel.xml",
+                out_png="D:/render/state.png",
+            ),
+            timeout_sec=10,
+        )
+        self.assertEqual(result.available_controllers[0]["name"], "StateFilter")
+        self.assertEqual(result.available_controllers[0]["pages"], ["全部", "可升星", "可升级"])
+        self.assertEqual(result.transition_mode, "settle")
+        self.assertEqual(result.settled_transitions, 1)
+        payload = _MockHandler.last_render_request
+        self.assertIsNotNone(payload)
+        self.assertEqual(payload["controllers"], [])
 
 
 if __name__ == "__main__":

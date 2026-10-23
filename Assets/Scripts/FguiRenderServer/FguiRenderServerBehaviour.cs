@@ -6,6 +6,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DG.Tweening;
 using FairyGUI;
 using UnityEngine;
 
@@ -408,6 +409,8 @@ namespace FguiRenderServer
             {
                 ok = false,
                 jobId = job.jobId,
+                availableControllers = new List<ControllerState>(),
+                appliedControllers = new List<AppliedController>(),
             };
             Exception error = null;
             string pngPath = null;
@@ -471,12 +474,21 @@ namespace FguiRenderServer
                 }
 
                 panel = CreatePanelFromRequest(request);
-                ApplyDisplayOverrides(panel, request.overrides);
 
                 // 先归零再定尺寸：verticalCenter 会在定尺寸之后写 letterbox 的 y，不能被这行冲掉。
                 panel.position = Vector3.zero;
                 appliedFullScreenMode = PreparePanelForCapture(panel, request, setup);
                 GRoot.inst.AddChild(panel);
+
+                // 控制器在上舞台之后才切：控制器动作里的 play_transition 只有 onStage 的组件才会播。
+                ApplyDisplayOverrides(panel, request.overrides);
+                ApplyControllers(panel, request.controllers, result.appliedControllers);
+
+                // 入场动效（autoPlay transition）和控制器触发的补间都按帧推进，截图时机取决于当帧预算，
+                // 同一个请求会拍到不同的中间态。静态截图默认取终态：补间直接完成，正在播的过渡跳到最后一帧。
+                result.transitionMode = GetTransitionModeName(request.transitionMode);
+                result.settledTransitions = SettleVisualState(panel, request.transitionMode);
+                result.availableControllers = CollectControllers(panel);
             }
             catch (Exception ex)
             {
@@ -655,6 +667,27 @@ namespace FguiRenderServer
                 request.fullScreen = fullScreenMode;
             }
 
+            if (args.TryGetValue("transition-mode", out string transitionMode))
+            {
+                request.transitionMode = transitionMode;
+            }
+
+            // --controllers "StateFilter=1;BloodMax=满级"，分号分隔，name 后不带 =page 时保持当前页。
+            if (args.TryGetValue("controllers", out string controllersSpec) && !string.IsNullOrWhiteSpace(controllersSpec))
+            {
+                request.controllers = new List<ControllerSelection>();
+                foreach (string entry in controllersSpec.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    int separator = entry.IndexOf('=');
+                    ControllerSelection selection = new ControllerSelection
+                    {
+                        name = separator < 0 ? entry.Trim() : entry.Substring(0, separator).Trim(),
+                        page = separator < 0 ? string.Empty : entry.Substring(separator + 1).Trim(),
+                    };
+                    request.controllers.Add(selection);
+                }
+            }
+
             if (!TryReadInt(args, "window-height", out request.windowHeight))
             {
                 request.windowHeight = 0;
@@ -809,6 +842,23 @@ namespace FguiRenderServer
             if (!IsKnownFullScreenValue(request.fullScreen))
             {
                 return "fullScreen must be one of: auto, none, full, verticalCenter";
+            }
+
+            if (!IsKnownTransitionMode(request.transitionMode))
+            {
+                return "transitionMode must be one of: settle, raw";
+            }
+
+            if (request.controllers != null)
+            {
+                for (int i = 0; i < request.controllers.Count; i++)
+                {
+                    ControllerSelection selection = request.controllers[i];
+                    if (selection == null || string.IsNullOrWhiteSpace(selection.name))
+                    {
+                        return "controllers[" + i + "].name is required";
+                    }
+                }
             }
 
             int effectiveScreenWidth = request.screenWidth > 0
@@ -1374,6 +1424,58 @@ namespace FguiRenderServer
 
             public int timeoutSec = 120;
             public List<DisplayOverride> overrides;
+
+            /// <summary>
+            /// 渲染前要切换的控制器。path 为空 = 面板根组件，否则按名字逐级找子组件；
+            /// page 填页面索引或页面名，空 = 保持当前页。
+            /// </summary>
+            public List<ControllerSelection> controllers;
+
+            /// <summary>
+            /// 过渡处理方式：
+            /// settle（默认）= 正在播的过渡跳到终态、动画补间直接完成；
+            /// raw = 不干预，截到第几帧就是第几帧。
+            /// </summary>
+            public string transitionMode;
+        }
+
+        /// <summary>
+        /// 一次控制器切换：把组件上某个控制器切到指定页面。
+        /// </summary>
+        [Serializable]
+        public sealed class ControllerSelection
+        {
+            /// <summary>从面板根组件开始的child名字链；空 = 面板根本身。</summary>
+            public List<string> path;
+            /// <summary>控制器名（组件上 &lt;controller name="..."&gt;）。</summary>
+            public string name;
+            /// <summary>页面索引（"1"）或页面名（"可升星"）；空 = 保持当前页。</summary>
+            public string page;
+        }
+
+        /// <summary>
+        /// 结果里回显的控制器切换记录：切换后的真实状态，便于确认请求是否按预期生效。
+        /// </summary>
+        [Serializable]
+        public sealed class AppliedController
+        {
+            public List<string> path;
+            public string name;
+            public int pageCount;
+            public int selectedIndex;
+            public string selectedPage;
+        }
+
+        /// <summary>
+        /// 面板根组件上的控制器清单，供调用方在不读 XML 的情况下逐个换页试样式。
+        /// </summary>
+        [Serializable]
+        public sealed class ControllerState
+        {
+            public string name;
+            public int selectedIndex;
+            public string selectedPage;
+            public List<string> pages;
         }
 
         [Serializable]
@@ -1451,6 +1553,255 @@ namespace FguiRenderServer
                 }
             }
         }
+        /// <summary>
+        /// 按请求切换控制器。名字或页面不存在时整体失败并报出具体名字，
+        /// 避免拼错一个控制器名却静默渲染出没切换的画面。
+        /// </summary>
+        static void ApplyControllers(GObject panel, List<ControllerSelection> selections, List<AppliedController> applied)
+        {
+            if (panel == null || selections == null || selections.Count == 0)
+            {
+                return;
+            }
+
+            foreach (ControllerSelection selection in selections)
+            {
+                if (selection == null || string.IsNullOrWhiteSpace(selection.name))
+                {
+                    continue;
+                }
+
+                string name = selection.name.Trim();
+                List<string> path = selection.path ?? new List<string>();
+                GComponent target = ResolveComponent(panel, path);
+                if (target == null)
+                {
+                    throw new InvalidOperationException("controller target not found: " + FormatControllerPath(path));
+                }
+
+                Controller controller = target.GetController(name);
+                if (controller == null)
+                {
+                    throw new InvalidOperationException("controller not found: " + name + " on " + FormatControllerPath(path));
+                }
+
+                int page = ResolveControllerPage(controller, selection.page, name);
+                if (page >= 0)
+                {
+                    controller.selectedIndex = page;
+                    SyncSelectionControllers(target, controller, page);
+                }
+
+                applied.Add(new AppliedController
+                {
+                    path = path,
+                    name = name,
+                    pageCount = controller.pageCount,
+                    selectedIndex = controller.selectedIndex,
+                    selectedPage = controller.selectedPage,
+                });
+            }
+        }
+
+        /// <summary>
+        /// 把绑定了该控制器的列表一起切到同一页。GList 的 selectionController 只在列表 -> 控制器方向同步
+        /// （ApplyController 期间控制器处于 changing，列表会跳过反向同步），游戏里点的是页签本身，
+        /// 所以程序化换页时页签高亮默认不会跟；这里补一次控制器 -> 列表，让页签和内容对得上。
+        /// </summary>
+        static void SyncSelectionControllers(GComponent owner, Controller controller, int page)
+        {
+            if (owner == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < owner.numChildren; i++)
+            {
+                GList list = owner.GetChildAt(i) as GList;
+                if (list == null || list.selectionController != controller)
+                {
+                    continue;
+                }
+
+                if (page < list.numItems)
+                {
+                    list.selectedIndex = page;
+                }
+            }
+        }
+
+        static GComponent ResolveComponent(GObject root, List<string> path)
+        {
+            GComponent component = root as GComponent;
+            for (int i = 0; component != null && i < path.Count; i++)
+            {
+                component = component.GetChild(path[i]) as GComponent;
+            }
+
+            return component;
+        }
+
+        /// <summary>
+        /// 解析 page 参数：空 = 保持当前页（返回 -1）；纯数字 = 页面索引；其余按页面名匹配。
+        /// </summary>
+        static int ResolveControllerPage(Controller controller, string page, string controllerName)
+        {
+            if (string.IsNullOrWhiteSpace(page))
+            {
+                return -1;
+            }
+
+            string value = page.Trim();
+            if (int.TryParse(value, out int index))
+            {
+                if (index >= 0 && index < controller.pageCount)
+                {
+                    return index;
+                }
+
+                throw new InvalidOperationException(string.Format(
+                    "controller page index out of range: {0} page={1} pageCount={2}",
+                    controllerName, value, controller.pageCount));
+            }
+
+            for (int i = 0; i < controller.pageCount; i++)
+            {
+                if (string.Equals(controller.GetPageName(i), value, StringComparison.Ordinal))
+                {
+                    return i;
+                }
+            }
+
+            throw new InvalidOperationException("controller page name not found: " + controllerName + " page=" + value);
+        }
+
+        static string FormatControllerPath(List<string> path)
+        {
+            return path == null || path.Count == 0 ? "<root>" : string.Join("/", path.ToArray());
+        }
+
+        static List<ControllerState> CollectControllers(GObject panel)
+        {
+            List<ControllerState> states = new List<ControllerState>();
+            GComponent component = panel as GComponent;
+            if (component == null)
+            {
+                return states;
+            }
+
+            List<Controller> controllers = component.Controllers;
+            for (int i = 0; i < controllers.Count; i++)
+            {
+                Controller controller = controllers[i];
+                ControllerState state = new ControllerState
+                {
+                    name = controller.name,
+                    selectedIndex = controller.selectedIndex,
+                    selectedPage = controller.selectedPage,
+                    pages = new List<string>(),
+                };
+
+                for (int page = 0; page < controller.pageCount; page++)
+                {
+                    state.pages.Add(controller.GetPageName(page));
+                }
+
+                states.Add(state);
+            }
+
+            return states;
+        }
+
+        /// <summary>
+        /// 把画面归位到各段动效的终值：正在播的过渡（含 autoPlay 入场动效）跳到最后一帧，
+        /// 再把控制器切换留下的 gear 补间直接完成。这样截图不会停在入场动画的中间态。
+        /// 顺序不能反：过渡里的延时项也是 DOTween 的 DelayedCall，先 CompleteAll 会把它们提前触发成新的
+        /// 淡入补间，过渡自身反而被判定成播完，随后的 Stop 不再改任何值，画面就停在新补间的起始值上。
+        /// 组件里自播的 movieclip 动画（循环光效等）不在这里处理，仍按帧推进。
+        /// </summary>
+        static int SettleVisualState(GObject panel, string transitionMode)
+        {
+            if (!IsTransitionSettleEnabled(transitionMode))
+            {
+                return 0;
+            }
+
+            int settled = SettleTransitions(panel);
+            DOTween.CompleteAll();
+            return settled;
+        }
+
+        static int SettleTransitions(GObject obj)
+        {
+            GComponent component = obj as GComponent;
+            if (component == null)
+            {
+                return 0;
+            }
+
+            int settled = 0;
+            for (int i = 0; i < component.numTransitions; i++)
+            {
+                Transition transition = component.GetTransitionAt(i);
+                if (transition.playing)
+                {
+                    transition.Stop(true, false);
+                    settled += 1;
+                }
+            }
+
+            for (int i = 0; i < component.numChildren; i++)
+            {
+                settled += SettleTransitions(component.GetChildAt(i));
+            }
+
+            return settled;
+        }
+
+        static bool IsTransitionSettleEnabled(string raw)
+        {
+            return !string.Equals(GetTransitionModeName(raw), "raw", StringComparison.Ordinal);
+        }
+
+        static string GetTransitionModeName(string raw)
+        {
+            string value = string.IsNullOrWhiteSpace(raw) ? string.Empty : raw.Trim().ToLowerInvariant();
+            switch (value)
+            {
+                case "raw":
+                case "none":
+                case "off":
+                case "false":
+                case "0":
+                    return "raw";
+                default:
+                    return "settle";
+            }
+        }
+
+        static bool IsKnownTransitionMode(string raw)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+            {
+                return true;
+            }
+
+            switch (raw.Trim().ToLowerInvariant())
+            {
+                case "settle":
+                case "end":
+                case "complete":
+                case "raw":
+                case "none":
+                case "off":
+                case "false":
+                case "0":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         static GObject CreatePanelFromRequest(RenderRequest request)
         {
             if (!string.IsNullOrWhiteSpace(request.componentId))
@@ -1531,6 +1882,18 @@ namespace FguiRenderServer
             /// <summary>策略应用后的面板逻辑尺寸，便于核对自适应/关系是否按预期生效。</summary>
             public int panelWidth;
             public int panelHeight;
+
+            /// <summary>面板根组件上的控制器清单（切换之后的状态）。</summary>
+            public List<ControllerState> availableControllers;
+
+            /// <summary>本次请求实际切换过的控制器，含切换后的页面索引与页面名。</summary>
+            public List<AppliedController> appliedControllers;
+
+            /// <summary>本次生效的过渡处理方式（settle / raw）。</summary>
+            public string transitionMode;
+
+            /// <summary>本次归位到终态的过渡数量；raw 模式下恒为 0。</summary>
+            public int settledTransitions;
         }
 
         [Serializable]

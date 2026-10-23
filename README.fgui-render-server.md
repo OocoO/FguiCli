@@ -48,6 +48,10 @@ Unity 内置常驻渲染服务，程序启动后监听本地端口并响应渲�
   "screenWidth": 2560,
   "screenHeight": 1080,
   "fullScreen": "verticalCenter",
+  "controllers": [
+    { "name": "StateFilter", "page": "1" }
+  ],
+  "transitionMode": "settle",
   "timeoutSec": 120
 }
 ```
@@ -73,7 +77,26 @@ Unity 内置常驻渲染服务，程序启动后监听本地端口并响应渲�
   "screenMatchMode": "MatchWidthOrHeight",
   "fullScreen": "verticalCenter",
   "panelWidth": 2560,
-  "panelHeight": 1080
+  "panelHeight": 1080,
+  "transitionMode": "settle",
+  "settledTransitions": 1,
+  "availableControllers": [
+    {
+      "name": "StateFilter",
+      "selectedIndex": 1,
+      "selectedPage": "可升星",
+      "pages": ["全部", "可升星", "可升级"]
+    }
+  ],
+  "appliedControllers": [
+    {
+      "path": [],
+      "name": "StateFilter",
+      "pageCount": 3,
+      "selectedIndex": 1,
+      "selectedPage": "可升星"
+    }
+  ]
 }
 ```
 
@@ -115,6 +138,8 @@ Unity 内置常驻渲染服务，程序启动后监听本地端口并响应渲�
 | `keepWindowSize` | `false` | `true` = 完全不动窗口，保持启动尺寸 |
 | `keepFullFrame` | `false` | `true` = 不裁掉四周透明像素 |
 | `fullScreen` | `""`（= `auto`） | 面板尺寸策略，见下节 |
+| `controllers` | `[]` | 抓图前要切换的控制器，见「控制器切换」 |
+| `transitionMode` | `""`（= `settle`） | 过渡处理方式，见「过渡与动画」 |
 
 ### 模拟屏幕 vs 面板尺寸（`fullScreen`）
 
@@ -136,6 +161,73 @@ Unity 内置常驻渲染服务，程序启动后监听本地端口并响应渲�
 响应里的 `fullScreen` 是**实际生效**的策略（`auto` 会解析成 `full` 或 `none`），
 `panelWidth` / `panelHeight` 是定尺寸之后面板的逻辑尺寸，用来核对自适应结果。
 想看“关系有没有把内容带偏”，同一分辨率分别用 `none` 和 `verticalCenter` 各渲一张对比即可。
+
+### 控制器切换（同一组件的其它状态）
+
+按钮选中态、页签、空态/满级、列表筛选……在 FGUI 里都是控制器 + `gearDisplay` 驱动的，
+固定按设计态渲染只能看到默认那一页。`controllers` 用来在抓图前把控制器切到指定页面。
+
+请求里的每一项：
+
+```json
+{ "name": "StateFilter", "page": "1", "path": ["main", "talentList"] }
+```
+
+| 字段 | 说明 |
+|------|------|
+| `name` | 控制器名（组件 XML 里的 `<controller name="...">`），必填 |
+| `page` | 页面索引（`"1"`）或页面名（`"可升星"`）；空 = 保持当前页 |
+| `path` | 从面板根开始逐级往下找子组件的名字链；空 = 面板根本身 |
+
+控制器在面板上舞台之后才切换，所以 `onChanged`、控制器动作里的 `play_transition` 都会照常触发。
+绑定了该控制器的列表（`selectionController`，页签列表就是这种）会一起切到同一页，
+页签高亮和页面内容对得上。
+名字或页面找不到时整个请求失败（`ok=false`，`message` 里带具体名字和路径）——
+拼错一个控制器名不会静默渲染出一张没切换的图。
+
+响应里顺带回两份清单，方便不读 XML 也能换页：
+
+- `availableControllers`：面板根组件上的控制器清单（名字、当前页、全部页面名）。
+  先渲一张拿到页面名，再按页面名逐张换。
+- `appliedControllers`：本次实际切换过的记录（path / name / pageCount / 切换后索引 / 切换后页面名）。
+
+```powershell
+$body = @{
+  projectRootDir = 'D:/ProjectGit/AirLegion/fgui_airLegion'
+  packageName = 'DarkLord'
+  componentName = 'DarkLordTalentPanel.xml'
+  outPng = 'D:/render/talent-starable.png'
+  fullScreen = 'verticalCenter'
+  controllers = @(@{ name = 'StateFilter'; page = '可升星' })
+} | ConvertTo-Json
+
+Invoke-RestMethod -Method Post -Uri 'http://127.0.0.1:18765/render_page' -ContentType 'application/json' -Body $body
+```
+
+### 过渡与动画（`transitionMode`）
+
+FairyGUI 的 transition 是**按帧推进**的：`autoPlay` 的入场动效、控制器动作里的
+`play_transition`（页签切换那一段淡入/位移）都在组件上舞台后开始播，每帧走一点。
+
+原来的渲染器在上舞台后固定等两帧再抓图，抓到的就是“当前播到第几帧”。
+帧预算一变（首帧要编译 shader、加载纹理），同一份请求就会产出不同的图——
+带入场动效的面板连渲两次都可能一张全空、一张半透明。
+
+`transitionMode` 决定抓图前怎么处理这些动效：
+
+| 取值 | 行为 |
+|------|------|
+| `settle`（默认） | 正在播的 transition 全部跳到最后一帧（`Transition.Stop(true, false)`），控制器 gear 的补间随后直接完成（`DOTween.CompleteAll`） |
+| `raw` | 不干预，抓图时播到第几帧就是第几帧（旧行为，用来复现/对比抖动） |
+
+响应里的 `transitionMode` 是实际生效的方式，`settledTransitions` 是被归位到终态的 transition 数量
+（`raw` 时恒为 0）。
+
+`settle` 之后，入场动效、页签切换的淡入/位移都停在终态，同一份请求的静态部分每次一致。
+组件内自播的 movieclip 动画（等级徽章的循环光效之类）不受影响，仍按帧推进，
+两张截图之间会有这一小块区域的细微差别。
+
+只做“跳到终态”，不做按帧采样：一次请求产出一张静止图，看不到动画的中间过程。
 
 ### 自适应链路说明
 
@@ -192,6 +284,8 @@ Set-Location -LiteralPath 'D:\Project\FguiCli'
 一次性模式可用参数：`--width` / `--height`（输出尺寸）、`--screen-width` / `--screen-height`（模拟屏幕）、
 `--design-width` / `--design-height`、`--match`、`--scale-mode`、`--ignore-orientation`、
 `--full-screen <auto|none|full|vertical-center>`（不带值等于 `full`）、
+`--controllers "StateFilter=1;BloodMax=满级"`（分号分隔，`name=页面索引或页面名`）、
+`--transition-mode <settle|raw>`、
 `--keep-full-frame`、`--window-height` / `--window-width` / `--keep-window-size`（窗口尺寸，默认按比例自适应）。
 
 > 玩家设置里 `forceSingleInstance = 1`，所以 `--render-once` 只能在**没有常驻渲染服务在跑**的时候使用，
